@@ -1,0 +1,57 @@
+@Metadata.layer: #CORE
+@UI: {
+      headerInfo:{ typeName: 'Payment Method',
+                   typeNamePlural: 'Payment Method',
+                   title: { type: #STANDARD, label: 'Payment Method', value: 'Zlsch' }
+                  },
+      presentationVariant: [{ sortOrder: [{ by: 'Companycode', direction: #ASC },
+                                          { by: 'Zlsch', direction: #ASC }] }]
+}
+annotate view ZJP_C_HD_PAYMENT with
+{
+  @UI.facet: [
+  {
+      id: 'Global',
+      purpose: #STANDARD,
+      type: #IDENTIFICATION_REFERENCE,
+      label: 'Config Value',
+      position: 10
+  }]
+
+  @UI.identification: [{ position: 10 }]
+  @UI.lineItem: [{ position: 10 }]
+  @UI.selectionField: [{ position: 10 }]
+
+  Companycode;
+
+  @UI.identification: [{ position: 20 }]
+  @UI.lineItem: [{ position: 20 }]
+  @UI.selectionField: [{ position: 20 }]
+  Zlsch;
+
+  @UI.identification: [{ position: 30 }]
+  @UI.lineItem: [{ position: 30 }]
+  @UI.selectionField: [{ position: 30 }]
+  Paymtext;
+
+  @UI.identification: [{ position: 40 }]
+  @UI.lineItem: [{ position: 40 }]
+  @UI.selectionField: [{ position: 40 }]
+  Createdbyuser;
+
+  @UI.identification: [{ position: 50 }]
+  @UI.lineItem: [{ position: 50 }]
+  @UI.selectionField: [{ position: 50 }]
+  Createddate;
+
+  @UI.identification: [{ position: 60 }]
+  @UI.lineItem: [{ position: 60 }]
+  @UI.selectionField: [{ position: 60 }]
+  Changedbyuser;
+
+  @UI.identification: [{ position: 70 }]
+  @UI.lineItem: [{ position: 70 }]
+  @UI.selectionField: [{ position: 70 }]
+  Changeddate;
+
+}

@@ -1,0 +1,4 @@
+@EndUserText.label: 'Service Definition Sổ chi tiết tiền gửi ngân hàng'
+define service Zjp_sd_scttgnh {
+  expose ZJP_C_SCTTGNH as SOCTTGNH;
+}

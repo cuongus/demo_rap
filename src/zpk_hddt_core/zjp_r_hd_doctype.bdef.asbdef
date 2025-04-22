@@ -1,0 +1,25 @@
+managed implementation in class zbp_jp_r_hd_doctype unique;
+//strict ( 2 );
+
+define behavior for ZJP_R_HD_DOCTYPE alias hddoctype
+persistent table zjp_hd_doctype
+lock master
+authorization master ( instance )
+etag master Changeddate
+{
+  create;
+  update;
+  delete;
+  field ( readonly : update ) Companycode, Accountingdocumenttype;
+  field ( readonly ) Createdbyuser, Createddate, Changedbyuser, Changeddate;
+
+  mapping for zjp_hd_doctype
+    {
+      Companycode            = companycode;
+      Accountingdocumenttype = accountingdocumenttype;
+      Createdbyuser          = createdbyuser;
+      Createddate            = createddate;
+      Changedbyuser          = changedbyuser;
+      Changeddate            = changeddate;
+    }
+}

@@ -1,0 +1,9 @@
+projection;
+//strict ( 2 );
+
+define behavior for ZJP_C_HD_SERIAL alias hdserial
+{
+  use create;
+  use update;
+  use delete;
+}

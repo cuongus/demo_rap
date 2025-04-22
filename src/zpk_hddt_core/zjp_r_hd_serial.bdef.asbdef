@@ -1,0 +1,28 @@
+managed implementation in class zbp_jp_r_hd_serial unique;
+//strict ( 2 );
+
+define behavior for ZJP_R_HD_SERIAL alias hdserial
+persistent table zjp_hd_serial
+lock master
+authorization master ( instance )
+etag master Changeddate
+{
+  create;
+  update;
+  delete;
+  field ( readonly : update ) Companycode, Fiscalyear, EinvoiceType;
+  field ( readonly ) Createdbyuser, Createddate, Changedbyuser, Changeddate;
+
+  mapping for zjp_hd_serial
+    {
+      Companycode    = companycode;
+      Fiscalyear     = fiscalyear;
+      EinvoiceType   = einvoicetype;
+      EinvoiceSerial = einvoiceserial;
+      EinvoiceForm   = einvoiceform;
+      Createdbyuser  = createdbyuser;
+      Createddate    = createddate;
+      Changedbyuser  = changedbyuser;
+      Changeddate    = changeddate;
+    }
+}

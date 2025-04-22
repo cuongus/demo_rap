@@ -1,0 +1,26 @@
+managed implementation in class zbp_jp_r_hd_glacc unique;
+//strict ( 2 );
+
+define behavior for ZJP_R_HD_GLACC alias hdglacc
+persistent table zjp_hd_glacc
+lock master
+authorization master ( instance )
+etag master Changeddate
+{
+  create;
+  update;
+  delete;
+  field ( readonly : update ) Companycode, Glaccount;
+  field ( readonly ) Createdbyuser, Createddate, Changedbyuser, Changeddate;
+
+  mapping for zjp_hd_glacc
+    {
+      Companycode   = companycode;
+      Glaccount     = glaccount;
+      Glacctype     = glacctype;
+      Createdbyuser = createdbyuser;
+      Createddate   = createddate;
+      Changedbyuser = changedbyuser;
+      Changeddate   = changeddate;
+    }
+}

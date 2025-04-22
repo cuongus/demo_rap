@@ -1,0 +1,162 @@
+@Metadata.layer: #CORE
+@UI: {
+  headerInfo: { typeName: 'Sổ chi tiết tiền gửi ngân hàng',
+                typeNamePlural: 'Sổ chi tiết tiền gửi ngân hàng',
+                title: { type: #STANDARD, label: 'Document', value: 'AccountingDocument' } }
+              }
+annotate entity ZJP_C_SCTTGNH with
+{
+  @UI.facet: [ { id:              'Global',
+                 purpose:         #STANDARD,
+                 type:            #IDENTIFICATION_REFERENCE,
+                 label:           'Globals',
+                 position:        10 } ]
+
+ @UI: {  lineItem:       [ { position: 10 } ],
+         identification: [ { position: 10 } ],
+         selectionField: [ { position: 10 } ] }           
+  CompanyCode;
+  
+ @UI: {  lineItem:       [ { position: 20 } ],
+         identification: [ { position: 20 } ],
+         selectionField: [ { position: 20 } ] }  
+  AccountingDocument;
+  
+ @UI: {  lineItem:       [ { position: 30 } ],
+         identification: [ { position: 30 } ],
+         selectionField: [ { position: 30 } ] }  
+  FiscalYear;
+  
+ @UI: {  lineItem:       [ { position: 40 } ],
+         identification: [ { position: 40 } ],
+         selectionField: [ { position: 40 } ] }  
+  AccountingDocumentItem;
+  
+ @UI: {  lineItem:       [ { position: 50 } ],
+         identification: [ { position: 50 } ],
+         selectionField: [ { position: 50 } ] }  
+  AccountingDocumentItemType;
+  
+ @UI: {  lineItem:       [ { position: 60 } ],
+         identification: [ { position: 60 } ],
+         selectionField: [ { position: 60 } ] }  
+  AccountingDocumentType;
+  
+ @UI: {  lineItem:       [ { position: 70 } ],
+         identification: [ { position: 70 } ],
+         selectionField: [ { position: 70 } ] }  
+  PostingDate;
+  
+ @UI: {  lineItem:       [ { position: 80 } ],
+         identification: [ { position: 80 } ],
+         selectionField: [ { position: 80 } ] }  
+  DocumentDate;
+  
+ @UI: {  lineItem:       [ { position: 90 } ],
+         identification: [ { position: 90 } ],
+         selectionField: [ { position: 90 } ] }  
+  DocumentReferenceID;
+  
+ @UI: {  lineItem:       [ { position: 110 } ],
+         identification: [ { position: 110 } ],
+         selectionField: [ { position: 110 } ] }  
+  ExchangeRate;
+  
+ @UI: {  lineItem:       [ { position: 120 } ],
+         identification: [ { position: 120 } ],
+         selectionField: [ { position: 120 } ] }  
+  AccountingDocumentHeaderText;
+  
+ @UI: {  lineItem:       [ { position: 130 } ],
+         identification: [ { position: 130 } ],
+         selectionField: [ { position: 130 } ] }  
+  CashAccounting;
+  
+ @UI: {  lineItem:       [ { position: 140 } ],
+         identification: [ { position: 140 } ],
+         selectionField: [ { position: 140 } ] }  
+  DebitCreditCode;
+  
+ @UI: {  lineItem:       [ { position: 150 } ],
+         identification: [ { position: 150 } ],
+         selectionField: [ { position: 150 } ] }  
+  CompanyCodeCurrency;
+  
+ @UI: {  lineItem:       [ { position: 160 } ],
+         identification: [ { position: 160 } ],
+         selectionField: [ { position: 160 } ] }  
+  AbsoluteAmountInCoCodeCrcy;
+  
+ @UI: {  lineItem:       [ { position: 170 } ],
+         identification: [ { position: 170 } ],
+         selectionField: [ { position: 170 } ] }  
+  TransactionCurrency;
+  
+ @UI: {  lineItem:       [ { position: 180 } ],
+         identification: [ { position: 180 } ],
+         selectionField: [ { position: 180 } ] }  
+  AbsoluteAmountInTransacCrcy;
+  
+ @UI: {  lineItem:       [ { position: 190 } ],
+         identification: [ { position: 190 } ],
+         selectionField: [ { position: 190 } ] }  
+  AssignmentReference;
+  
+ @UI: {  lineItem:       [ { position: 200 } ],
+         identification: [ { position: 200 } ],
+         selectionField: [ { position: 200 } ] }  
+  DocumentItemText;
+  
+ @UI: {  lineItem:       [ { position: 210 } ],
+         identification: [ { position: 210 } ],
+         selectionField: [ { position: 210 } ] }  
+  ProfitCenter;
+
+ @UI: {  lineItem:       [ { position: 220 } ],
+         identification: [ { position: 220 } ],
+         selectionField: [ { position: 220 } ] }
+  BusinessPartner;
+  
+ @UI: {  lineItem:       [ { position: 230 } ],
+         identification: [ { position: 230 } ],
+         selectionField: [ { position: 230 } ] }
+  BusinessPartnerName;
+  
+ @UI: {  lineItem:       [ { position: 240 } ],
+         identification: [ { position: 240 } ],
+         selectionField: [ { position: 240 } ] }
+  BusinessPartnerAddress;
+  
+ @UI: {  lineItem:       [ { position: 250 } ],
+         identification: [ { position: 250 } ],
+         selectionField: [ { position: 250 } ] }
+  NegativePosting;
+  
+ @UI: {  lineItem:       [ { position: 260 } ],
+         identification: [ { position: 260 } ],
+         selectionField: [ { position: 260 } ] }
+  CreationUser;
+  
+ @UI: {  lineItem:       [ { position: 270 } ],
+         identification: [ { position: 270 } ],
+         selectionField: [ { position: 270 } ] }
+  CreationDate;
+  
+ @UI: {  lineItem:       [ { position: 280 } ],
+         identification: [ { position: 280 } ],
+         selectionField: [ { position: 280 } ] }
+  CreationTime;
+  
+ @UI: {  lineItem:       [ { position: 290 } ],
+         identification: [ { position: 290 } ],
+         selectionField: [ { position: 290 } ] }
+  ControllingArea;
+//  /* Associations */
+//  _CompanyCode;
+//  _ControllingArea;
+//  _ControllingAreaText;
+//  _JournalEntryItemOneTimeData;
+//  _ProfitCenter;
+//  _ProfitCenterText;
+
+}

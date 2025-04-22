@@ -1,0 +1,10 @@
+@EndUserText.label: 'Service Config HDDT'
+define service Zjp_sd_hd_config {
+  expose ZJP_C_HD_CONFIG   as hdconfigs;
+  expose ZJP_C_HD_USERPASS as hduserpass;
+  expose ZJP_C_HD_SERIAL   as hdserial;
+  expose ZJP_C_HD_PAYMENT  as hdpayment;
+  expose ZJP_C_HD_DOCTYPE  as hddoctype;
+  expose ZJP_C_HD_GLACC    as hdglacc;
+  expose ZJP_C_HD_DATE     as hddate;
+}

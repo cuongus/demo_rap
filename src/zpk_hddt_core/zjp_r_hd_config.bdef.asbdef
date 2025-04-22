@@ -1,0 +1,35 @@
+managed implementation in class zbp_jp_r_hd_config unique;
+//strict ( 2 );
+
+//with draft;
+define behavior for ZJP_R_HD_CONFIG alias hdconfigs
+persistent table zjp_hd_config
+//draft table zjp_d_hd_config
+lock master //total etag Changeddate
+authorization master ( instance )
+etag master Changeddate
+{
+  create;
+  update;
+  delete;
+
+  field ( readonly : update ) IdSys, IdDomain, Value;
+  field ( readonly ) Createdbyuser, Createddate, Changedbyuser, Changeddate;
+
+//  draft action Edit;
+//  draft action Activate;
+//  draft action Discard;
+//  draft action Resume;
+
+  mapping for zjp_hd_config
+    {
+      IdSys         = id_sys;
+      IdDomain      = id_domain;
+      Value         = value;
+      Description   = description;
+      Createdbyuser = createdbyuser;
+      Createddate   = createddate;
+      Changedbyuser = changedbyuser;
+      Changeddate   = changeddate;
+    }
+}

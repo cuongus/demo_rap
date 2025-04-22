@@ -1,0 +1,57 @@
+@Metadata.layer: #CORE
+@UI: {
+      headerInfo:{ typeName: 'GLaccount',
+                   typeNamePlural: 'GLaccount',
+                   title: { type: #STANDARD, label: 'GLaccount', value: 'Glaccount' }
+                  },
+      presentationVariant: [{ sortOrder: [{ by: 'Companycode', direction: #ASC },
+                                          { by: 'Glaccount', direction: #ASC }] }]
+}
+annotate view ZJP_C_HD_GLACC with
+{
+  @UI.facet: [
+  {
+      id: 'Global',
+      purpose: #STANDARD,
+      type: #IDENTIFICATION_REFERENCE,
+      label: 'Config Value',
+      position: 10
+  }]
+
+  @UI.identification: [{ position: 10 }]
+  @UI.lineItem: [{ position: 10 }]
+  @UI.selectionField: [{ position: 10 }]
+
+  Companycode;
+
+  @UI.identification: [{ position: 20 }]
+  @UI.lineItem: [{ position: 20 }]
+  @UI.selectionField: [{ position: 20 }]
+  Glaccount;
+
+  @UI.identification: [{ position: 30 }]
+  @UI.lineItem: [{ position: 30 }]
+  @UI.selectionField: [{ position: 30 }]
+  Glacctype;
+
+  @UI.identification: [{ position: 40 }]
+  @UI.lineItem: [{ position: 40 }]
+  @UI.selectionField: [{ position: 40 }]
+  Createdbyuser;
+
+  @UI.identification: [{ position: 40 }]
+  @UI.lineItem: [{ position: 40 }]
+  @UI.selectionField: [{ position: 40 }]
+  Createddate;
+
+  @UI.identification: [{ position: 40 }]
+  @UI.lineItem: [{ position: 40 }]
+  @UI.selectionField: [{ position: 40 }]
+  Changedbyuser;
+
+  @UI.identification: [{ position: 40 }]
+  @UI.lineItem: [{ position: 40 }]
+  @UI.selectionField: [{ position: 40 }]
+  Changeddate;
+
+}

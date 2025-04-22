@@ -1,0 +1,5 @@
+CLASS zbp_jp_r_hd_config DEFINITION PUBLIC ABSTRACT FINAL FOR BEHAVIOR OF zjp_r_hd_config.
+ENDCLASS.
+
+CLASS zbp_jp_r_hd_config IMPLEMENTATION.
+ENDCLASS.

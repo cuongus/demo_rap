@@ -1,0 +1,76 @@
+@Metadata.layer: #CORE
+@UI: {
+      headerInfo:{ typeName: 'Config Domains Value',
+                   typeNamePlural: 'Config Domains Value',
+                   title: { type: #STANDARD, label: 'Domains', value: 'IdDomain' }
+                  },
+      presentationVariant: [{ sortOrder: [{ by: 'IdDomain', direction: #ASC },
+                                          { by: 'Value', direction: #ASC }] }]
+}
+annotate entity ZJP_C_hd_CONFIG
+    with 
+{
+  @UI.facet: [
+  {
+      id: 'Global',
+      purpose: #STANDARD,
+      type: #IDENTIFICATION_REFERENCE,
+      label: 'Config Value',
+      position: 10
+  }]
+  
+  @UI.identification: [{ position: 10 }]
+  @UI.lineItem: [{ position: 10 }]
+  @UI.selectionField: [{ position: 10 }]
+  @EndUserText.label: 'ID System'
+    IdSys;
+    
+  @UI.identification: [{ position: 20 }]
+  @UI.lineItem: [{ position: 20 }]
+  @UI.selectionField: [{ position: 20 }]
+  @EndUserText.label: 'ID Domain'
+    IdDomain;
+    
+  @UI.identification: [{ position: 30 }]
+  @UI.lineItem: [{ position: 30 }]
+  @UI.selectionField: [{ position: 30 }]
+  @EndUserText.label: 'Value'
+    Value;
+    
+  @UI.identification: [{ position: 30 }]
+  @UI.lineItem: [{ position: 30 }]
+  @UI.selectionField: [{ position: 30 }]
+  @EndUserText.label: 'Description'
+    Description;
+    
+  @UI.identification: [{ position: 40 }]
+  @UI.lineItem: [{ position: 40 }]
+  @UI.selectionField: [{ position: 40 }]
+    Createdbyuser;
+    
+  @UI.identification: [{ position: 50 }]
+  @UI.lineItem: [{ position: 50 }]
+  @UI.selectionField: [{ position: 50 }]
+    Createddate;
+    
+  @UI.identification: [{ position: 60 }]
+  @UI.lineItem: [{ position: 60 }]
+  @UI.selectionField: [{ position: 60 }]
+    Createdtime;
+    
+  @UI.identification: [{ position: 70 }]
+  @UI.lineItem: [{ position: 70 }]
+  @UI.selectionField: [{ position: 70 }]
+    Changedbyuser;
+    
+  @UI.identification: [{ position: 80 }]
+  @UI.lineItem: [{ position: 80 }]
+  @UI.selectionField: [{ position: 80 }]
+    Changeddate;
+    
+  @UI.identification: [{ position: 90 }]
+  @UI.lineItem: [{ position: 90 }]
+  @UI.selectionField: [{ position: 90 }]
+    Changedtime;
+    
+}

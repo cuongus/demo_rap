@@ -1,0 +1,28 @@
+managed implementation in class zbp_jp_r_hd_userpass unique;
+//strict ( 2 );
+
+define behavior for zjp_r_HD_USERPASS alias hduserpass
+persistent table zjp_hd_userpass
+lock master
+authorization master ( instance )
+etag master Changeddate
+{
+  create;
+  update;
+  delete;
+  field ( readonly : update ) Companycode, Usertype;
+  field ( readonly ) Createdbyuser, Createddate, Changedbyuser, Changeddate;
+
+  mapping for zjp_hd_userpass
+    {
+      Companycode   = companycode;
+      Usertype      = usertype;
+      Username      = username;
+      Password      = password;
+      Suppliertax   = suppliertax;
+      Createdbyuser = createdbyuser;
+      Createddate   = createddate;
+      Changedbyuser = changedbyuser;
+      Changeddate   = changeddate;
+    }
+}
