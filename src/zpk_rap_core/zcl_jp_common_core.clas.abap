@@ -48,12 +48,24 @@ CLASS zcl_jp_common_core DEFINITION
       "Get fillter app
       get_fillter_app IMPORTING io_request            TYPE REF TO if_rap_query_request
                                 io_response           TYPE REF TO if_rap_query_response
+
                       EXPORTING ir_companycode        TYPE tt_ranges
                                 ir_accountingdocument TYPE tt_ranges
                                 ir_glaccount          TYPE tt_ranges
                                 ir_fiscalyear         TYPE tt_ranges
                                 ir_postingdate        TYPE tt_ranges
                                 ir_documentdate       TYPE tt_ranges
+
+                                ir_statussap          TYPE tt_ranges
+                                ir_einvoicenumber     TYPE tt_ranges
+                                ir_einvoicetype       TYPE tt_ranges
+                                ir_currencytype       TYPE tt_ranges
+                                ir_usertype           TYPE tt_ranges
+                                ir_TypeOfDate         TYPE tt_ranges
+
+                                ir_createdbyuser      TYPE tt_ranges
+                                ir_enduser            TYPE tt_ranges
+                                ir_testrun            TYPE tt_ranges
 
                                 wa_page_info          TYPE st_page_info
                       ,
@@ -85,6 +97,72 @@ ENDCLASS.
 
 
 CLASS zcl_jp_common_core IMPLEMENTATION.
+
+
+  METHOD get_address_id_details.
+
+    "Customer Address
+    SELECT SINGLE AddresseeFullName,
+                  HouseNumber,
+                  StreetName,             "Street
+                  StreetPrefixName1,      "str_suppl1 - Street 2
+                  StreetPrefixName2,      "str_suppl2 - Street 3
+                  StreetSuffixName1,      "str_suppl3 - Street 4
+                  StreetSuffixName2,      "location - Street 5
+                  DistrictName,
+                  CityName,
+                  Country
+    FROM i_address_2
+    WITH PRIVILEGED ACCESS
+    WHERE AddressID = @wa_addressid_details-addressid
+      AND AddressRepresentationCode = 'R'
+    INTO @DATA(ls_address_2)
+    .
+
+    wa_addressid_details-addressname = ls_address_2-AddresseeFullName.
+    wa_addressid_details-address =
+    |{ ls_address_2-StreetName }, { ls_address_2-StreetPrefixName1 }, { ls_address_2-StreetPrefixName2 }, { ls_address_2-StreetSuffixName1 }, { ls_address_2-DistrictName }, { ls_address_2-CityName }|.
+
+    REPLACE ALL OCCURRENCES OF |, , , , , ,| IN wa_addressid_details-address WITH |,|.
+    REPLACE ALL OCCURRENCES OF |, , , , ,| IN wa_addressid_details-address WITH |,|.
+    REPLACE ALL OCCURRENCES OF |, , , ,| IN wa_addressid_details-address WITH |,|.
+    REPLACE ALL OCCURRENCES OF |, , ,| IN wa_addressid_details-address WITH |,|.
+    REPLACE ALL OCCURRENCES OF |, ,| IN wa_addressid_details-address WITH |,|.
+
+    "Customer Email
+    SELECT SINGLE EmailAddress FROM I_AddressEmailAddress_2
+    WITH PRIVILEGED ACCESS
+    WHERE AddressID = @wa_addressid_details-addressid
+    INTO @wa_addressid_details-emailaddress
+    .
+
+    "Customer Telephone
+    SELECT SINGLE PhoneExtensionNumber FROM I_AddressPhoneNumber_2
+    WITH PRIVILEGED ACCESS
+    WHERE AddressID = @wa_addressid_details-addressid
+    INTO @wa_addressid_details-telephonenumber
+    .
+
+  ENDMETHOD.
+
+
+  METHOD get_companycode_details.
+
+    SELECT SINGLE
+              companycode,
+              addressid,
+              vatregistration,
+              Currency
+*              createdbyuser,
+*              creationdate,
+*              creationtime
+    FROM I_CompanyCode
+    WHERE CompanyCode = @iv_companycode
+    INTO CORRESPONDING FIELDS OF @wa_companycode_details
+    .
+
+  ENDMETHOD.
+
 
   METHOD get_customer_details.
 
@@ -168,11 +246,6 @@ CLASS zcl_jp_common_core IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD get_instance.
-    mo_instance = ro_instance = COND #( WHEN mo_instance IS BOUND
-                                           THEN mo_instance
-                                           ELSE NEW #( ) ).
-  ENDMETHOD.
 
   METHOD get_fillter_app.
 
@@ -210,74 +283,30 @@ CLASS zcl_jp_common_core IMPLEMENTATION.
           MOVE-CORRESPONDING ls_ranges-range TO ir_postingdate.
         WHEN 'DOCUMENTDATE'.
           MOVE-CORRESPONDING ls_ranges-range TO ir_documentdate.
+        WHEN 'EINVOICENUMBER'.
+          MOVE-CORRESPONDING ls_ranges-range TO ir_einvoicenumber.
+        WHEN 'EINVOICETYPE'.
+          MOVE-CORRESPONDING ls_ranges-range TO ir_einvoicetype.
+        WHEN 'CURRENCYTYPE'.
+          MOVE-CORRESPONDING ls_ranges-range TO ir_currencytype.
+        WHEN 'STATUSSAP'.
+          MOVE-CORRESPONDING ls_ranges-range TO ir_statussap.
+        WHEN 'TYPEOFDATE'.
+          MOVE-CORRESPONDING ls_ranges-range TO ir_typeofdate.
+        WHEN 'USERTYPE'.
+          MOVE-CORRESPONDING ls_ranges-range TO ir_usertype.
+        WHEN 'CREATEDBYUSER'.
+          MOVE-CORRESPONDING ls_ranges-range TO ir_createdbyuser.
+        WHEN 'ENDUSER'.
+          MOVE-CORRESPONDING ls_ranges-range TO ir_enduser.
+        WHEN 'TESTRUN'.
+          MOVE-CORRESPONDING ls_ranges-range TO ir_testrun.
         WHEN OTHERS.
       ENDCASE.
     ENDLOOP.
 
   ENDMETHOD.
 
-  METHOD get_companycode_details.
-
-    SELECT SINGLE
-              companycode,
-              addressid,
-              vatregistration,
-              Currency
-*              createdbyuser,
-*              creationdate,
-*              creationtime
-    FROM I_CompanyCode
-    WHERE CompanyCode = @iv_companycode
-    INTO CORRESPONDING FIELDS OF @wa_companycode_details
-    .
-
-  ENDMETHOD.
-
-  METHOD get_address_id_details.
-
-    "Customer Address
-    SELECT SINGLE AddresseeFullName,
-                  HouseNumber,
-                  StreetName,             "Street
-                  StreetPrefixName1,      "str_suppl1 - Street 2
-                  StreetPrefixName2,      "str_suppl2 - Street 3
-                  StreetSuffixName1,      "str_suppl3 - Street 4
-                  StreetSuffixName2,      "location - Street 5
-                  DistrictName,
-                  CityName,
-                  Country
-    FROM i_address_2
-    WITH PRIVILEGED ACCESS
-    WHERE AddressID = @wa_addressid_details-addressid
-      AND AddressRepresentationCode = 'R'
-    INTO @DATA(ls_address_2)
-    .
-
-    wa_addressid_details-addressname = ls_address_2-AddresseeFullName.
-    wa_addressid_details-address =
-    |{ ls_address_2-StreetName }, { ls_address_2-StreetPrefixName1 }, { ls_address_2-StreetPrefixName2 }, { ls_address_2-StreetSuffixName1 }, { ls_address_2-DistrictName }, { ls_address_2-CityName }|.
-
-    REPLACE ALL OCCURRENCES OF |, , , , , ,| IN wa_addressid_details-address WITH |,|.
-    REPLACE ALL OCCURRENCES OF |, , , , ,| IN wa_addressid_details-address WITH |,|.
-    REPLACE ALL OCCURRENCES OF |, , , ,| IN wa_addressid_details-address WITH |,|.
-    REPLACE ALL OCCURRENCES OF |, , ,| IN wa_addressid_details-address WITH |,|.
-    REPLACE ALL OCCURRENCES OF |, ,| IN wa_addressid_details-address WITH |,|.
-
-    "Customer Email
-    SELECT SINGLE EmailAddress FROM I_AddressEmailAddress_2
-    WITH PRIVILEGED ACCESS
-    WHERE AddressID = @wa_addressid_details-addressid
-    INTO @wa_addressid_details-emailaddress
-    .
-
-    "Customer Telephone
-    SELECT SINGLE PhoneExtensionNumber FROM I_AddressPhoneNumber_2
-    WITH PRIVILEGED ACCESS
-    WHERE AddressID = @wa_addressid_details-addressid
-    INTO @wa_addressid_details-telephonenumber
-    .
-
-  ENDMETHOD.
 
   METHOD get_glaccount_sodu.
     DATA: lv_date_dk TYPE budat VALUE IS INITIAL,
@@ -345,4 +374,10 @@ CLASS zcl_jp_common_core IMPLEMENTATION.
     ENDIF.
   ENDMETHOD.
 
+
+  METHOD get_instance.
+    mo_instance = ro_instance = COND #( WHEN mo_instance IS BOUND
+                                           THEN mo_instance
+                                           ELSE NEW #( ) ).
+  ENDMETHOD.
 ENDCLASS.

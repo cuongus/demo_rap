@@ -86,16 +86,15 @@ CLASS zcl_jp_get_data_scttgnh IMPLEMENTATION.
                 wa_page_info          = ls_page_info
         ).
 
-*        AUTHORITY-CHECK OBJECT 'ZOBJREGION'
+*        AUTHORITY-CHECK OBJECT 'ZOBJECT**'
 *          ID 'ACTVT' FIELD '03'
-*          ID 'ZUSERTYPE' FIELD lv_usertype.
+*          ID 'LV_FIELD' FIELD lv_field.
 *        IF sy-subrc NE 0.
-*          lv_error_authorization = 'X'.
-*          RAISE EXCEPTION TYPE zcl_rap_inv_generate
-*          MESSAGE ID 'ZEINV'
+*          RAISE EXCEPTION TYPE zcl_jp_get_data_scttgnh
+*          MESSAGE ID ''
 *          TYPE 'E'
-*          NUMBER '777'
-*          WITH |You aren't authority CoCd 6710 - Region { lv_usertype }|.
+*          NUMBER ''
+*          WITH |Message Error!|.
 *           RETURN.
 *        ENDIF.
 

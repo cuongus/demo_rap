@@ -3,18 +3,18 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <DD04V>
-    <ROLLNAME>ZDE_PAYMENT</ROLLNAME>
+    <ROLLNAME>ZDE_PAYMENTMETHOD</ROLLNAME>
     <DDLANGUAGE>E</DDLANGUAGE>
     <DOMNAME>ZDO_TXT25</DOMNAME>
     <HEADLEN>55</HEADLEN>
     <SCRLEN1>10</SCRLEN1>
     <SCRLEN2>20</SCRLEN2>
     <SCRLEN3>40</SCRLEN3>
-    <DDTEXT>Payment Method</DDTEXT>
-    <REPTEXT>Payment method</REPTEXT>
-    <SCRTEXT_S>Payment</SCRTEXT_S>
-    <SCRTEXT_M>Payment method</SCRTEXT_M>
-    <SCRTEXT_L>Payment method</SCRTEXT_L>
+    <DDTEXT>Payment Method Text</DDTEXT>
+    <REPTEXT>Payment Text</REPTEXT>
+    <SCRTEXT_S>Paym Text</SCRTEXT_S>
+    <SCRTEXT_M>Payment Text</SCRTEXT_M>
+    <SCRTEXT_L>Payment Method Text</SCRTEXT_L>
     <DTELMASTER>E</DTELMASTER>
     <REFKIND>D</REFKIND>
     <ABAP_LANGUAGE_VERSION>5</ABAP_LANGUAGE_VERSION>
