@@ -1,12 +1,14 @@
 CLASS zcl_einvoice_data DEFINITION
   PUBLIC
   INHERITING FROM cx_rap_query_provider
-  FINAL
+*  FINAL
   CREATE PUBLIC .
 
   PUBLIC SECTION.
     "Custom Entities
     INTERFACES if_rap_query_provider.
+
+    "Read Entities
 
     TYPES: BEGIN OF ty_range_option,
              sign   TYPE c LENGTH 1,
@@ -18,6 +20,8 @@ CLASS zcl_einvoice_data DEFINITION
            tt_ranges          TYPE TABLE OF ty_range_option,
 
            tt_returns         TYPE TABLE OF bapiret2,
+
+           wa_document        TYPE zjp_a_hddt_h,
 
            tt_einvoice_header TYPE TABLE OF zjp_a_hddt_h,
            tt_einvoice_item   TYPE TABLE OF zjp_a_hddt_i.
@@ -81,6 +85,12 @@ CLASS zcl_einvoice_data DEFINITION
                                   cx_abap_context_info_error
                         ,
 
+      getdate_EInvoice IMPORTING i_document TYPE wa_document
+                       EXPORTING e_document TYPE wa_document
+                                 o_date     TYPE zde_einv_date
+                                 o_time     TYPE zde_einv_time
+                       RAISING
+                                 cx_abap_context_info_error,
       "Read ranges index 1.
       read_ranges IMPORTING it_ranges TYPE tt_ranges
                   EXPORTING o_value   TYPE string
@@ -286,7 +296,8 @@ CLASS zcl_einvoice_data IMPLEMENTATION.
           lv_einvoicetype TYPE string,
           lv_testrun      TYPE string.
 
-    DATA: lv_FiscalYear TYPE gjahr VALUE IS INITIAL.
+    DATA: lv_FiscalYear TYPE gjahr VALUE IS INITIAL,
+          lv_taxcode    TYPE zde_taxcode VALUE IS INITIAL.
 
     DATA: lo_einvoice_data TYPE REF TO zcl_einvoice_data.
 
@@ -508,7 +519,7 @@ CLASS zcl_einvoice_data IMPLEMENTATION.
 
 **--PRocess Data
     LOOP AT lt_bkpf INTO DATA(ls_bkpf).
-      CLEAR: lv_count.
+      CLEAR: lv_count, lv_taxcode.
 
       READ TABLE lt_a_hddt_h INTO DATA(ls_a_hddt_h)
       WITH KEY companycode        = ls_bkpf-CompanyCode
@@ -678,7 +689,6 @@ CLASS zcl_einvoice_data IMPLEMENTATION.
 
 **--Payment Method
           IF lv_PaymentMethod IS INITIAL.
-
             SELECT SINGLE PaymentMethod FROM i_operationalacctgdocitem
             WHERE CompanyCode        = @ls_bkpf-CompanyCode
               AND AccountingDocument = @ls_bkpf-AccountingDocument
@@ -687,6 +697,18 @@ CLASS zcl_einvoice_data IMPLEMENTATION.
             INTO @lv_PaymentMethod
                 .
           ENDIF.
+**--Taxcode
+          IF lv_taxcode IS INITIAL.
+            lv_taxcode = ls_bseg-TaxCode.
+          ELSE.
+          ENDIF.
+
+          IF lv_taxcode NE ls_bseg-TaxCode.
+            ls_einvoice_header-taxcode = 'Nhiều loại'.
+          ELSE.
+            ls_einvoice_header-taxcode = lv_taxcode.
+          ENDIF.
+
 **--Profit Center
           IF ls_einvoice_header-profitcenter IS INITIAL.
             ls_einvoice_header-profitcenter = ls_bseg-ProfitCenter.
@@ -715,6 +737,9 @@ CLASS zcl_einvoice_data IMPLEMENTATION.
       ls_einvoice_header-accountingdocumenttype         = ls_bkpf-AccountingDocumentType.
       ls_einvoice_header-accountingdocumentcreationdate = ls_bkpf-AccountingDocumentCreationDate.
       ls_einvoice_header-accountingdocumentheadertext   = ls_bkpf-AccountingDocumentCreationDate.
+
+      ls_einvoice_header-xreversed  = ls_bkpf-IsReversed.
+      ls_einvoice_header-xreversing = ls_bkpf-IsReversal.
 
 **--Payment Method Text
       SELECT SINGLE paymtext FROM zjp_hd_payment WHERE zlsch       = @lv_paymentmethod
@@ -751,35 +776,14 @@ CLASS zcl_einvoice_data IMPLEMENTATION.
       ls_einvoice_header-typeofdate     = lv_typeofdate.
 
 **--Time CREATE
+      go_einvoice_data->getdate_einvoice(
+          EXPORTING
+          i_document = ls_einvoice_header
+          IMPORTING
+          e_document = ls_einvoice_header
+      ).
 
-      CASE lv_typeofdate.
-        WHEN '01'. "Posting Date
-          lv_FiscalYear = ls_einvoice_header-postingdate+0(4).
-
-          ls_einvoice_header-einvoicedatecreate = ls_einvoice_header-postingdate.
-          ls_einvoice_header-einvoicetimecreate   = '090000'.
-        WHEN '02'. "Document Date
-          lv_FiscalYear = ls_einvoice_header-documentdate+0(4).
-
-          ls_einvoice_header-einvoicedatecreate = ls_einvoice_header-documentdate.
-          ls_einvoice_header-einvoicetimecreate   = '090000'.
-        WHEN '03'. "Entry Date
-          lv_FiscalYear = ls_einvoice_header-accountingdocumentcreationdate+0(4).
-
-          ls_einvoice_header-einvoicedatecreate = ls_einvoice_header-accountingdocumentcreationdate.
-          ls_einvoice_header-einvoicetimecreate   = '090000'.
-        WHEN '04'. "System Date
-
-          DATA(time_zone) = cl_abap_context_info=>get_user_time_zone(  ).
-
-          DATA(lv_datlo) = xco_cp=>sy->date( )->as( xco_cp_time=>format->abap )->value.
-          DATA(lv_timlo) = xco_cp=>sy->time( )->as( xco_cp_time=>format->abap )->value.
-
-          lv_FiscalYear = lv_datlo+0(4).
-
-          ls_einvoice_header-einvoicedatecreate = lv_datlo.
-          ls_einvoice_header-einvoicetimecreate = lv_timlo.
-      ENDCASE.
+      lv_fiscalyear = ls_einvoice_header-einvoicedatecreate+0(4).
 
       IF lv_einvoicetype IS NOT INITIAL.
         SELECT SINGLE * FROM zjp_hd_serial
@@ -966,6 +970,34 @@ CLASS zcl_einvoice_data IMPLEMENTATION.
     ELSE.
       CLEAR: o_value.
     ENDIF.
+  ENDMETHOD.
+
+  METHOD getdate_einvoice.
+    MOVE-CORRESPONDING i_document TO e_document.
+
+    CASE e_document-typeofdate.
+      WHEN '01'. "Posting Date
+        e_document-einvoicedatecreate = e_document-postingdate.
+        e_document-einvoicetimecreate   = '090000'.
+      WHEN '02'. "Document Date
+        e_document-einvoicedatecreate = e_document-documentdate.
+        e_document-einvoicetimecreate = '090000'.
+      WHEN '03'. "Entry Date
+        e_document-einvoicedatecreate = e_document-accountingdocumentcreationdate.
+        e_document-einvoicetimecreate   = '090000'.
+      WHEN '04'. "System Date
+        DATA(time_zone) = cl_abap_context_info=>get_user_time_zone(  ).
+
+        DATA(lv_datlo) = xco_cp=>sy->date( )->as( xco_cp_time=>format->abap )->value.
+        DATA(lv_timlo) = xco_cp=>sy->time( )->as( xco_cp_time=>format->abap )->value.
+
+        e_document-einvoicedatecreate = lv_datlo.
+        e_document-einvoicetimecreate = lv_timlo.
+    ENDCASE.
+
+    o_date = e_document-einvoicedatecreate.
+    o_time = e_document-einvoicetimecreate.
+
   ENDMETHOD.
 
 ENDCLASS.

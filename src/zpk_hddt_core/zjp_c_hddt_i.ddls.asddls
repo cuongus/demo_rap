@@ -8,6 +8,7 @@
 define custom entity ZJP_C_HDDT_I
   // with parameters parameter_name : parameter_type
 {
+      @Search.defaultSearchElement   : true
   key CompanyCode              : bukrs;
   key AccountingDocument       : belnr_d;
   key FiscalYear               : gjahr;
@@ -31,5 +32,10 @@ define custom entity ZJP_C_HDDT_I
       AmountInTransacCrcy      : zde_dmbtr;
       VatAmountInTransacCrcy   : zde_dmbtr;
       TotalAmountInTransacCrcy : zde_dmbtr;
+
+      _EInvoicesHeaders        : association to parent ZJP_C_HDDT_H on  $projection.CompanyCode        = _EInvoicesHeaders.CompanyCode
+                                                                    and $projection.AccountingDocument = _EInvoicesHeaders.AccountingDocument
+                                                                    and $projection.FiscalYear         = _EInvoicesHeaders.FiscalYear;
+
 
 }

@@ -1,0 +1,362 @@
+@Metadata.layer: #CORE
+@UI:{
+    headerInfo: { typeName: 'General',
+                  typeNamePlural: 'EInvoices General',
+                  title: { value: 'accountingdocument' }
+    },
+    presentationVariant: [{ sortOrder: [{ by: 'accountingdocument', direction: #ASC }] }]
+}
+annotate entity ZJP_C_HDDT_H with
+// parameters IdSys
+{
+  @UI.facet          : [
+   {
+   id                 : 'General',
+   purpose            : #STANDARD,
+   position           : 10,
+   isPartOfPreview    : true,
+   label              : 'General',
+   type               : #COLLECTION,
+   targetQualifier    : 'General'
+   },
+   {
+   id                 : 'BasicInfo',
+   purpose            : #STANDARD,
+   parentId           : 'General',
+   position           : 10,
+   isPartOfPreview    : true,
+   label              : 'Basic Info',
+   type               : #FIELDGROUP_REFERENCE,
+   targetQualifier    : 'QFBasicInfo'
+   },
+   {
+   id                 : 'Items',
+   purpose            : #STANDARD,
+   type               : #LINEITEM_REFERENCE,
+   label              : 'Items',
+   position           : 20,
+   targetElement      : '_EInvoiceItems'
+   }
+   ]
+
+  @UI.selectionField : [{ position: 10 }]
+  @UI.lineItem       : [{ position: 10  },{ label: 'Integration Invoices', dataAction: 'Integr', type: #FOR_ACTION }
+                                           ,{ label: 'Status Invoices', dataAction: 'Search', type: #FOR_ACTION }
+                                           ,{ label: 'Replace Invoices', dataAction: 'Replace', type: #FOR_ACTION }
+                                           ,{ label: 'Adjust Invoices', dataAction: 'Adjust', type: #FOR_ACTION }
+                                           ,{ label: 'Cancel Invoices', dataAction: 'Cancel', type: #FOR_ACTION }
+                                            ]
+  @UI.identification : [{ position: 10  },{ label: 'Integration Invoices', dataAction: 'Integr', type: #FOR_ACTION }
+                                           ,{ label: 'Status Invoices', dataAction: 'Search', type: #FOR_ACTION }
+                                           ,{ label: 'Replace Invoices', dataAction: 'Replace', type: #FOR_ACTION }
+                                           ,{ label: 'Adjust Invoices', dataAction: 'Adjust', type: #FOR_ACTION }
+                                           ,{ label: 'Cancel Invoices', dataAction: 'Cancel', type: #FOR_ACTION }
+                                            ]
+  @UI.fieldGroup     : [ { type: #STANDARD,  position: 10 ,  qualifier: 'QFBasicInfo'  }]
+  @Search.defaultSearchElement: true
+  CompanyCode;
+
+  @UI.selectionField : [{ position: 20 }]
+  @UI.lineItem       : [{ position: 20  }]
+  @UI.identification : [{ position: 20  }]
+  @UI.fieldGroup     : [ { type: #STANDARD,  position: 20 ,  qualifier: 'QFBasicInfo'  }]
+  @Search.defaultSearchElement: true
+  AccountingDocument;
+
+  @UI.selectionField : [{ position: 30 }]
+  @UI.lineItem       : [{ position: 30  }]
+  @UI.identification : [{ position: 30  }]
+  @UI.fieldGroup     : [ { type: #STANDARD,  position: 30 ,  qualifier: 'QFBasicInfo'  }]
+  @Search.defaultSearchElement: true
+  FiscalYear;
+
+  @UI.selectionField : [{ position: 40 }]
+  @UI.lineItem       : [{ position: 40  }]
+  @UI.identification : [{ position: 40  }]
+  @UI.fieldGroup     : [ { type: #STANDARD,  position: 40 ,  qualifier: 'QFBasicInfo'  }]
+  @EndUserText.label: 'ID System EInvoice'
+  @Search.defaultSearchElement: true
+  IDSys;
+
+  @UI.selectionField : [{ position: 50 }]
+  @UI.lineItem       : [{ position: 50  }]
+  @UI.identification : [{ position: 50  }]
+  @UI.fieldGroup     : [ { type: #STANDARD,  position: 50 ,  qualifier: 'QFBasicInfo'  }]
+  @EndUserText.label: 'Test Run Status'
+  @Search.defaultSearchElement: true
+  testrun;
+
+  @UI.lineItem       : [{ position: 60  }]
+  @UI.identification : [{ position: 60  }]
+  @UI.fieldGroup     : [ { type: #STANDARD,  position: 60 ,  qualifier: 'QFBasicInfo'  }]
+  @EndUserText.label: 'Icon'
+  IconSAP;
+
+  @UI.selectionField : [{ position: 70 }]
+  @UI.lineItem       : [{ position: 70  }]
+  @UI.identification : [{ position: 70  }]
+  @UI.fieldGroup     : [ { type: #STANDARD,  position: 70 ,  qualifier: 'QFBasicInfo'  }]
+  AccountingDocumentType;
+
+  @UI.selectionField : [{ position: 80 }]
+  @UI.lineItem       : [{ position: 80  }]
+  @UI.identification : [{ position: 80  }]
+  @UI.fieldGroup     : [ { type: #STANDARD,  position: 80 ,  qualifier: 'QFBasicInfo'  }]
+  FiscalPeriod;
+
+  @UI.selectionField : [{ position: 90 }]
+  @UI.lineItem       : [{ position: 90  }]
+  @UI.identification : [{ position: 90  }]
+  @UI.fieldGroup     : [ { type: #STANDARD,  position: 90 ,  qualifier: 'QFBasicInfo'  }]
+  PostingDate;
+
+  @UI.selectionField : [{ position: 100 }]
+  @UI.lineItem       : [{ position: 100  }]
+  @UI.identification : [{ position: 100  }]
+  @UI.fieldGroup     : [ { type: #STANDARD,  position: 100 ,  qualifier: 'QFBasicInfo'  }]
+  DocumentDate;
+
+  @UI.selectionField : [{ position: 110 }]
+  @UI.lineItem       : [{ position: 110  }]
+  @UI.identification : [{ position: 110  }]
+  @UI.fieldGroup     : [ { type: #STANDARD,  position: 110 ,  qualifier: 'QFBasicInfo'  }]
+  AccountingDocumentCreationDate;
+
+  @UI.lineItem       : [{ position: 110  }]
+  @UI.identification : [{ position: 110  }]
+  @UI.fieldGroup     : [ { type: #STANDARD,  position: 110 ,  qualifier: 'QFBasicInfo'  }]
+  AbsoluteExChangeRate;
+
+  @UI.lineItem       : [{ position: 120  }]
+  @UI.identification : [{ position: 120  }]
+  SupplierTax;
+
+  @UI.selectionField : [{ position: 130 }]
+  @UI.lineItem       : [{ position: 130  }]
+  @UI.identification : [{ position: 130  }]
+  Customer;
+
+  @UI.lineItem       : [{ position: 140  }]
+  @UI.identification : [{ position: 140  }]
+  CustomerName;
+
+  @UI.lineItem       : [{ position: 150  }]
+  @UI.identification : [{ position: 150  }]
+  CustomerAddress;
+
+  @UI.lineItem       : [{ position: 160  }]
+  @UI.identification : [{ position: 160  }]
+  IdentificationNumber;
+
+  @UI.lineItem       : [{ position: 170  }]
+  @UI.identification : [{ position: 170  }]
+  EmailAddress;
+
+  @UI.lineItem       : [{ position: 180  }]
+  @UI.identification : [{ position: 180  }]
+  TelephoneNumber;
+
+  @UI.lineItem       : [{ position: 190  }]
+  @UI.identification : [{ position: 190  }]
+  PaymentMethod;
+
+  @UI.lineItem       : [{ position: 200  }]
+  @UI.identification : [{ position: 200  }]
+  ProfitCenter;
+
+  @UI.selectionField : [{ position: 210 }]
+  @UI.lineItem       : [{ position: 210  }]
+  @UI.identification : [{ position: 210  }]
+  @EndUserText.label: 'Adjust Type'
+  AdjustType;
+
+  @UI.selectionField : [{ position: 220 }]
+  @UI.lineItem       : [{ position: 220  }]
+  @UI.identification : [{ position: 220  }]
+  @EndUserText.label: 'Accounting Document Source'
+  AccountingDocumentSource;
+
+  @UI.selectionField : [{ position: 230 }]
+  @UI.lineItem       : [{ position: 230  }]
+  @UI.identification : [{ position: 230  }]
+  @EndUserText.label: 'Fiscal Year Source'
+  FiscalYearSource;
+
+
+  @UI.lineItem       : [{ position: 240  }]
+  @UI.identification : [{ position: 240  }]
+  AccountingDocumentHeaderText;
+
+  @UI.selectionField : [{ position: 250 }]
+  @UI.lineItem       : [{ position: 250  }]
+  @UI.identification : [{ position: 250  }]
+  @EndUserText.label: 'Currency Type'
+  CurrencyType;
+
+  @UI.lineItem       : [{ position: 260  }]
+  @UI.identification : [{ position: 260  }]
+  taxcode;
+
+  @UI.selectionField : [{ position: 270 }]
+  @UI.lineItem       : [{ position: 270  }]
+  @UI.identification : [{ position: 270  }]
+  @EndUserText.label: 'Companycode Currency'
+  CompanycodeCurrency;
+
+  @UI.lineItem       : [{ position: 280  }]
+  @UI.identification : [{ position: 280  }]
+  @EndUserText.label: 'Amount In CoCode Crcy'
+  AmountInCoCodeCrcy;
+
+  @UI.lineItem       : [{ position: 290  }]
+  @UI.identification : [{ position: 290  }]
+  @EndUserText.label: 'VAT Amount In CoCode Crcy'
+  VatAmountInCoCodeCrcy;
+
+  @UI.lineItem       : [{ position: 300  }]
+  @UI.identification : [{ position: 300  }]
+  @EndUserText.label: 'Total Amount In CoCode Crcy'
+  TotalAmountInCoCodeCrcy;
+
+  @UI.selectionField : [{ position: 310 }]
+  @UI.lineItem       : [{ position: 310  }]
+  @UI.identification : [{ position: 310  }]
+  @EndUserText.label: 'Transaction Currency'
+  TransactionCurrency;
+
+  @UI.lineItem       : [{ position: 320  }]
+  @UI.identification : [{ position: 320  }]
+  @EndUserText.label: 'Amount In Transac Crcy'
+  AmountInTransacCrcy;
+
+  @UI.lineItem       : [{ position: 330  }]
+  @UI.identification : [{ position: 330  }]
+  @EndUserText.label: 'VAT Amount In Transac Crcy'
+  VatAmountInTransacCrcy;
+
+  @UI.lineItem       : [{ position: 340  }]
+  @UI.identification : [{ position: 340  }]
+  @EndUserText.label: 'Total Amount In Transac Crcy'
+  TotalAmountInTransacCrcy;
+
+  @UI.selectionField : [{ position: 350 }]
+  @UI.lineItem       : [{ position: 350  }]
+  @UI.identification : [{ position: 350  }]
+  @EndUserText.label: 'User Type'
+  Usertype;
+
+  @UI.selectionField : [{ position: 360 }]
+  @UI.lineItem       : [{ position: 360  }]
+  @UI.identification : [{ position: 360  }]
+  TypeOfDate;
+
+  @UI.lineItem       : [{ position: 370  }]
+  @UI.identification : [{ position: 370  }]
+  EinvoiceForm;
+
+  @UI.lineItem       : [{ position: 380  }]
+  @UI.identification : [{ position: 380  }]
+  EinvoiceSerial;
+
+  @UI.selectionField : [{ position: 390 }]
+  @UI.lineItem       : [{ position: 390  }]
+  @UI.identification : [{ position: 390  }]
+  EinvoiceType;
+
+  @UI.selectionField : [{ position: 400 }]
+  @UI.lineItem       : [{ position: 400  }]
+  @UI.identification : [{ position: 400  }]
+  EinvoiceNumber;
+
+  @UI.lineItem       : [{ position: 410  }]
+  @UI.identification : [{ position: 410  }]
+  SID;
+
+  @UI.selectionField : [{ position: 420 }]
+  @UI.lineItem       : [{ position: 420  }]
+  @UI.identification : [{ position: 420  }]
+  EinvoiceTimeCreate;
+
+  @UI.selectionField : [{ position: 430 }]
+  @UI.lineItem       : [{ position: 430  }]
+  @UI.identification : [{ position: 430  }]
+  EinvoiceDateCreate;
+
+  @UI.selectionField : [{ position: 440 }]
+  @UI.lineItem       : [{ position: 440  }]
+  @UI.identification : [{ position: 440  }]
+  EinvoiceDateCancel;
+
+  @UI.lineItem       : [{ position: 450  }]
+  @UI.identification : [{ position: 450  }]
+  Link;
+
+  @UI.lineItem       : [{ position: 460  }]
+  @UI.identification : [{ position: 460  }]
+  MSCQT;
+
+  @UI.selectionField : [{ position: 470 }]
+  @UI.lineItem       : [{ position: 470  }]
+  @UI.identification : [{ position: 470  }]
+  StatusSAP;
+
+  @UI.selectionField : [{ position: 480 }]
+  @UI.lineItem       : [{ position: 480  }]
+  @UI.identification : [{ position: 480  }]
+  StatusInvRes;
+
+  @UI.selectionField : [{ position: 490 }]
+  @UI.lineItem       : [{ position: 490  }]
+  @UI.identification : [{ position: 490  }]
+  StatusCQTRes;
+
+  @UI.lineItem       : [{ position: 500  }]
+  @UI.identification : [{ position: 500  }]
+  MessageType;
+
+  @UI.lineItem       : [{ position: 510  }]
+  @UI.identification : [{ position: 510  }]
+  MessageText;
+
+  @UI.selectionField : [{ position: 520 }]
+  @UI.lineItem       : [{ position: 520  }]
+  @UI.identification : [{ position: 520  }]
+  CreatedByUser;
+
+  @UI.selectionField : [{ position: 530 }]
+  @UI.lineItem       : [{ position: 530  }]
+  @UI.identification : [{ position: 530  }]
+  CreatedDate;
+
+  @UI.selectionField : [{ position: 540 }]
+  @UI.lineItem       : [{ position: 540  }]
+  @UI.identification : [{ position: 540  }]
+  CreatedTime;
+
+  @UI.selectionField : [{ position: 550 }]
+  @UI.lineItem       : [{ position: 550  }]
+  @UI.identification : [{ position: 550  }]
+  ChangedByUser;
+
+  @UI.selectionField : [{ position: 560 }]
+  @UI.lineItem       : [{ position: 560  }]
+  @UI.identification : [{ position: 560  }]
+  ChangedDate;
+
+  @UI.selectionField : [{ position: 570 }]
+  @UI.lineItem       : [{ position: 570  }]
+  @UI.identification : [{ position: 570  }]
+  ChangedTime;
+  //    /* Associations */
+  //    _Companycode;
+  //    _ConfigAdjType;
+  //    _ConfigEInvoiceType;
+  //    _ConfigStatusCQT;
+  //    _ConfigStatusINVRES;
+  //    _ConfigStatusSAP;
+  //    _ConfigTypeOfDate;
+  //    _ConfigUsertype;
+  //    _Customer;
+  //    _EInvoiceItems;
+
+}
