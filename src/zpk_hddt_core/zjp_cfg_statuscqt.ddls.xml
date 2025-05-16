@@ -3,9 +3,9 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <DDLS>
-    <DDLNAME>ZJP_R_HD_DATE</DDLNAME>
+    <DDLNAME>ZJP_CFG_STATUSCQT</DDLNAME>
     <DDLANGUAGE>E</DDLANGUAGE>
-    <DDTEXT>Base CDS for HDDT Date</DDTEXT>
+    <DDTEXT>Status CQT Response Text</DDTEXT>
     <SOURCE_TYPE>W</SOURCE_TYPE>
    </DDLS>
   </asx:values>

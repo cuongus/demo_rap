@@ -14,14 +14,20 @@ ENDCLASS.
 CLASS zcl_get_domain_fix_values IMPLEMENTATION.
 
   METHOD if_rap_query_provider~select.
+
     DATA business_data TYPE TABLE OF zjp_c_domain_fix_val .
+
     DATA business_data_line TYPE zjp_c_domain_fix_val .
+
     DATA(top)     = io_request->get_paging( )->get_page_size( ).
     DATA(skip)    = io_request->get_paging( )->get_offset( ).
+
     DATA(requested_fields)  = io_request->get_requested_elements( ).
+
     DATA(sort_order)    = io_request->get_sort_elements( ).
 
     DATA domain_name  TYPE sxco_ad_object_name  .
+
     DATA pos TYPE i.
 
     TRY.
@@ -41,36 +47,49 @@ CLASS zcl_get_domain_fix_values IMPLEMENTATION.
 
         ENDIF.
 
-        business_data_line-domain_name = domain_name .
-
-        CAST cl_abap_elemdescr( cl_abap_typedescr=>describe_by_name( domain_name ) )->get_ddic_fixed_values(
-          EXPORTING
-            p_langu        = sy-langu
-          RECEIVING
-            p_fixed_values = DATA(fixed_values)
-          EXCEPTIONS
-            not_found      = 1
-            no_ddic_type   = 2
-            OTHERS         = 3 ).
-
-        IF sy-subrc > 0.
-          "do some exception handling
-          io_response->set_total_number_of_records( lines( business_data ) ).
-          io_response->set_data( business_data ).
-          EXIT.
-        ENDIF.
-
-        LOOP AT fixed_values INTO DATA(fixed_value).
-          pos += 1.
-          business_data_line-pos = pos.
-          business_data_line-low = fixed_value-low .
-          business_data_line-high = fixed_value-high.
-          business_data_line-description = fixed_value-ddtext.
-*          IF domain_name = 'ZDE_EADJTYPE' AND fixed_value-low = '3' AND fixed_value-ddtext = 'Replace'.
-*            CONTINUE.
+        SELECT * FROM zjp_hd_config
+        WHERE id_sys IN ( '000', 'FPT' )
+          AND id_domain = @domain_name
+          INTO TABLE @DATA(lt_hd_config).
+        IF sy-subrc EQ 0.
+          LOOP AT lt_hd_config INTO DATA(fs_hd_config).
+            pos += 1.
+            business_data_line-domain_name = domain_name .
+            business_data_line-pos         = pos.
+            business_data_line-low         = fs_hd_config-value .
+            business_data_line-description = fs_hd_config-description.
+            APPEND business_data_line TO business_data.
+            CLEAR: business_data_line.
+          ENDLOOP.
+        ELSE.
+*          *
+*          CAST cl_abap_elemdescr( cl_abap_typedescr=>describe_by_name( domain_name ) )->get_ddic_fixed_values(
+*            EXPORTING
+*              p_langu        = sy-langu
+*            RECEIVING
+*              p_fixed_values = DATA(fixed_values)
+*            EXCEPTIONS
+*              not_found      = 1
+*              no_ddic_type   = 2
+*              OTHERS         = 3 ).
+*
+*          IF sy-subrc > 0.
+*            "do some exception handling
+*            io_response->set_total_number_of_records( lines( business_data ) ).
+*            io_response->set_data( business_data ).
+*            EXIT.
 *          ENDIF.
-          APPEND business_data_line TO business_data.
-        ENDLOOP.
+*
+*          LOOP AT fixed_values INTO DATA(fixed_value).
+*            pos += 1.
+*            business_data_line-pos         = pos.
+*            business_data_line-low         = fixed_value-low .
+*            business_data_line-high        = fixed_value-high .
+*            business_data_line-description = fixed_value-ddtext.
+*            APPEND business_data_line TO business_data.
+*            CLEAR: business_data_line.
+*          ENDLOOP.
+        ENDIF.
 
         IF top IS NOT INITIAL.
           DATA(max_index) = top + skip.
@@ -78,14 +97,14 @@ CLASS zcl_get_domain_fix_values IMPLEMENTATION.
           max_index = 0.
         ENDIF.
 
-        SELECT * FROM @business_data AS data_source_fields
-           WHERE (filter_condition_string)
-           INTO TABLE @business_data
-           UP TO @max_index ROWS.
-
-        IF skip IS NOT INITIAL.
-          DELETE business_data TO skip.
-        ENDIF.
+*        SELECT * FROM @business_data AS data_source_fields
+*           WHERE (filter_condition_string)
+*           INTO TABLE @business_data
+*           UP TO @max_index ROWS.
+*
+*        IF skip IS NOT INITIAL.
+*          DELETE business_data TO skip.
+*        ENDIF.
 
         io_response->set_total_number_of_records( lines( business_data ) ).
         io_response->set_data( business_data ).

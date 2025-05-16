@@ -379,7 +379,6 @@ CLASS zcl_einvoice_process IMPLEMENTATION.
             EXPORTING
             i_action    = gv_action
             i_einvoice  = gs_document
-            i_testrun   = gv_testrun
             i_param     = ls_param
             i_userpass  = gs_userpass
             IMPORTING
@@ -682,7 +681,7 @@ CLASS zcl_einvoice_process IMPLEMENTATION.
     DATA: it_headers TYPE tt_headers,
           it_items   TYPE tt_items.
 
-    DATA: ls_result        LIKE LINE OF result,
+    DATA: ls_result         LIKE LINE OF result,
           ls_mapped_headers LIKE LINE OF mapped-hddt_headers.
 
     FREE: ir_companycode, ir_accountingdocument, ir_fiscalyear.
@@ -821,7 +820,6 @@ CLASS zcl_einvoice_process IMPLEMENTATION.
             i_action      = gv_action
             i_einvoice    = gs_document
             i_userpass    = gs_userpass
-            i_testrun     = gv_testrun
             IMPORTING
             e_return      = gs_return
             e_status      = gs_status
@@ -930,7 +928,12 @@ CLASS zcl_einvoice_process IMPLEMENTATION.
 
               <fs_headers>-AccountingDocumentSource = i_param-AccountingDocumentSource.
               <fs_headers>-FiscalYearSource         = i_param-FiscalYearSource.
-              <fs_headers>-AdjustType               = i_param-AdjustType.
+              IF gv_action EQ 'ADJUST_INVOICE'.
+                <fs_headers>-AdjustType               = i_param-AdjustType.
+              ELSE.
+                <fs_headers>-AdjustType               = '3'. "Replace HĐ
+              ENDIF.
+
 
               go_einvoice_process->check_adjust_document(
                  EXPORTING
@@ -978,7 +981,6 @@ CLASS zcl_einvoice_process IMPLEMENTATION.
                       i_einvoice  = gs_document
                       i_items     = it_items
                       i_userpass  = gs_userpass
-                      i_testrun   = gv_testrun
                       IMPORTING
                       e_status    = gs_status
                       e_docsrc    = gs_docsrc
@@ -1015,7 +1017,6 @@ CLASS zcl_einvoice_process IMPLEMENTATION.
                   i_einvoice  = gs_document
                   i_items     = it_items
                   i_userpass  = gs_userpass
-                  i_testrun   = gv_testrun
                   IMPORTING
                   e_status    = gs_status
                   e_docsrc    = gs_docsrc

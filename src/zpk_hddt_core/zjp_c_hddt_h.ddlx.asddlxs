@@ -2,12 +2,12 @@
 @UI:{
     headerInfo: { typeName: 'General',
                   typeNamePlural: 'EInvoices General',
-                  title: { value: 'accountingdocument' }
+                  title: { value: 'AccountingDocument' }
     },
-    presentationVariant: [{ sortOrder: [{ by: 'accountingdocument', direction: #ASC }] }]
+    presentationVariant: [{ sortOrder: [{ by: 'AccountingDocument', direction: #ASC }] }]
 }
 annotate entity ZJP_C_HDDT_H with
-// parameters IdSys
+
 {
   @UI.facet          : [
    {

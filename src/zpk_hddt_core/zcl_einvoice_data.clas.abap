@@ -978,13 +978,13 @@ CLASS zcl_einvoice_data IMPLEMENTATION.
     CASE e_document-typeofdate.
       WHEN '01'. "Posting Date
         e_document-einvoicedatecreate = e_document-postingdate.
-        e_document-einvoicetimecreate   = '090000'.
+        e_document-einvoicetimecreate = '090000'.
       WHEN '02'. "Document Date
         e_document-einvoicedatecreate = e_document-documentdate.
         e_document-einvoicetimecreate = '090000'.
       WHEN '03'. "Entry Date
         e_document-einvoicedatecreate = e_document-accountingdocumentcreationdate.
-        e_document-einvoicetimecreate   = '090000'.
+        e_document-einvoicetimecreate = '090000'.
       WHEN '04'. "System Date
         DATA(time_zone) = cl_abap_context_info=>get_user_time_zone(  ).
 
