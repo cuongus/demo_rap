@@ -103,121 +103,8 @@ ENDCLASS.
 
 
 
-CLASS zcl_manage_fpt_einvoices IMPLEMENTATION.
+CLASS ZCL_MANAGE_FPT_EINVOICES IMPLEMENTATION.
 
-  METHOD contructor.
-    CREATE OBJECT go_fpt_einvoice.
-  ENDMETHOD.
-
-  METHOD get_instance.
-    go_fpt_einvoice = ro_instance = COND #( WHEN go_fpt_einvoice IS BOUND
-                                               THEN go_fpt_einvoice
-                                               ELSE NEW #( ) ).
-  ENDMETHOD.
-
-  METHOD get_einvoices.
-    DATA: i_prefix TYPE string.
-    i_prefix = |?stax={ i_context-stax }&sid={ i_context-sid }&type=json|.
-*-- Create HTTP client ->
-    TRY.
-        DATA(lo_destination) = cl_http_destination_provider=>create_by_comm_arrangement(
-                                 comm_scenario  = |Z_API_FPT_EINVOICE_CSCEN|
-                                 service_id     = |Z_API_FPT_EINVOICE_OB_REST|
-                               ).
-
-        DATA(lo_http_client) = cl_web_http_client_manager=>create_by_http_destination( i_destination = lo_destination ).
-*-- Add path ->
-*        lo_http_client->get_http_request( )->set_uri_path( |{ i_prefix }| ).
-        lo_http_client->get_http_request( )->set_header_field( i_name = |~request_uri| i_value = |{ i_url }{ i_prefix }| ).
-*-- SET HTTP Header Fields
-        lo_http_client->get_http_request( )->set_header_field( i_name = |Content-Type| i_value = |application/json| ).
-
-        lo_http_client->get_http_request( )->set_header_field( i_name = |Accept| i_value = |*/*| ).
-
-        DATA: lv_username TYPE string,
-              lv_password TYPE string.
-
-        lv_username = i_context-username.
-        lv_password = i_context-password.
-*-- Passing the Accept value in header which is a mandatory field
-        lo_http_client->get_http_request( )->set_header_field( i_name = |username| i_value = lv_username ).
-        lo_http_client->get_http_request( )->set_header_field( i_name = |password| i_value = lv_password ).
-*-- Authorization
-        lo_http_client->get_http_request( )->set_authorization_basic( i_username = lv_username i_password = lv_password ).
-*-- GET
-        lo_http_client->execute( i_method = if_web_http_client=>get
-                                 i_timeout = 60 ).
-
-        lo_http_client->get_http_request( )->set_content_type( |application/json| ).
-
-*-- Response ->
-        DATA(lo_response) = lo_http_client->execute( i_method = if_web_http_client=>get
-                                                     i_timeout = 60 ).
-*-- Get the status of the response ->
-        e_context = lo_response->get_text( ).
-        IF lo_response->get_status( )-code NE 200.
-          e_return-type = 'E'.
-          e_return-message = lo_response->get_status( )-code && ` ` && lo_response->get_status( )-reason
-          && ` - ` && e_context.
-        ENDIF.
-        IF e_context = 'Không tìm thấy hóa đơn. Vui lòng kiểm tra điều kiện tìm kiếm'.
-          e_return-type = 'E'.
-          e_return-message = 'Không tìm thấy hóa đơn. Vui lòng kiểm tra điều kiện tìm kiếm'.
-        ENDIF.
-      CATCH cx_root INTO DATA(lx_exception).
-
-    ENDTRY.
-  ENDMETHOD.
-
-  METHOD post_einvoices.
-    IF i_context IS INITIAL. RETURN. ENDIF.
-*-- Create HTTP client ->
-    TRY.
-        DATA(lo_destination) = cl_http_destination_provider=>create_by_comm_arrangement(
-                                 comm_scenario  = |Z_API_FPT_EINVOICE_CSCEN|
-                                 service_id     = |Z_API_FPT_EINVOICE_OB_REST|
-                               ).
-
-        DATA(lo_http_client) = cl_web_http_client_manager=>create_by_http_destination( i_destination = lo_destination ).
-*-- Add path ->
-*        lo_http_client->get_http_request( )->set_uri_path( |{ i_prefix }| ).
-        lo_http_client->get_http_request( )->set_header_field( i_name = |~request_uri| i_value = |{ i_prefix }| ).
-*-- SET HTTP Header Fields
-        lo_http_client->get_http_request( )->set_header_field( i_name = |Content-Type| i_value = |application/json| ).
-
-        lo_http_client->get_http_request( )->set_header_field( i_name = |Accept| i_value = |*/*| ).
-
-        DATA: lv_username TYPE string,
-              lv_password TYPE string.
-
-        lv_username = i_userpass-username.
-        lv_password = i_userpass-password.
-*-- Passing the Accept value in header which is a mandatory field
-        lo_http_client->get_http_request( )->set_header_field( i_name = |username| i_value = lv_username ).
-        lo_http_client->get_http_request( )->set_header_field( i_name = |password| i_value = lv_password ).
-*-- Authorization
-        lo_http_client->get_http_request( )->set_authorization_basic( i_username = lv_username i_password = lv_password ).
-
-        lo_http_client->get_http_request( )->set_content_type( |application/json| ).
-*-- POST
-        lo_http_client->execute( i_method = if_web_http_client=>post
-                                 i_timeout = 60 ).
-*-- Send request ->
-        lo_http_client->get_http_request( )->set_text( i_context ).
-*-- Response ->
-        DATA(lo_response) = lo_http_client->execute( i_method = if_web_http_client=>post
-                                                     i_timeout = 60 ).
-*-- Get the status of the response ->
-        e_context = lo_response->get_text( ).
-        IF lo_response->get_status( )-code NE 200.
-          e_return-type = 'E'.
-          e_return-message = lo_response->get_status( )-code && ` ` && lo_response->get_status( )-reason
-          && ` - ` && e_context.
-        ENDIF.
-      CATCH cx_root INTO DATA(lx_exception).
-
-    ENDTRY.
-  ENDMETHOD.
 
   METHOD adjust_einvoices.
 
@@ -279,6 +166,7 @@ CLASS zcl_manage_fpt_einvoices IMPLEMENTATION.
         ).
 
   ENDMETHOD.
+
 
   METHOD cancel_einvoices.
     DATA: ls_einvoice  TYPE zst_fpt_cancel,
@@ -368,6 +256,12 @@ CLASS zcl_manage_fpt_einvoices IMPLEMENTATION.
 
   ENDMETHOD.
 
+
+  METHOD contructor.
+    CREATE OBJECT go_fpt_einvoice.
+  ENDMETHOD.
+
+
   METHOD create_einvoices.
 
     DATA:
@@ -429,6 +323,311 @@ CLASS zcl_manage_fpt_einvoices IMPLEMENTATION.
         ).
 
   ENDMETHOD.
+
+
+  METHOD get_einvoices.
+    DATA: i_prefix TYPE string.
+    i_prefix = |?stax={ i_context-stax }&sid={ i_context-sid }&type=json|.
+*-- Create HTTP client ->
+    TRY.
+        DATA(lo_destination) = cl_http_destination_provider=>create_by_comm_arrangement(
+                                 comm_scenario  = |Z_API_FPT_EINVOICE_CSCEN|
+                                 service_id     = |Z_API_FPT_EINVOICE_OB_REST|
+                               ).
+
+        DATA(lo_http_client) = cl_web_http_client_manager=>create_by_http_destination( i_destination = lo_destination ).
+*-- Add path ->
+*        lo_http_client->get_http_request( )->set_uri_path( |{ i_prefix }| ).
+        lo_http_client->get_http_request( )->set_header_field( i_name = |~request_uri| i_value = |{ i_url }{ i_prefix }| ).
+*-- SET HTTP Header Fields
+        lo_http_client->get_http_request( )->set_header_field( i_name = |Content-Type| i_value = |application/json| ).
+
+        lo_http_client->get_http_request( )->set_header_field( i_name = |Accept| i_value = |*/*| ).
+
+        DATA: lv_username TYPE string,
+              lv_password TYPE string.
+
+        lv_username = i_context-username.
+        lv_password = i_context-password.
+*-- Passing the Accept value in header which is a mandatory field
+        lo_http_client->get_http_request( )->set_header_field( i_name = |username| i_value = lv_username ).
+        lo_http_client->get_http_request( )->set_header_field( i_name = |password| i_value = lv_password ).
+*-- Authorization
+        lo_http_client->get_http_request( )->set_authorization_basic( i_username = lv_username i_password = lv_password ).
+*-- GET
+        lo_http_client->execute( i_method = if_web_http_client=>get
+                                 i_timeout = 60 ).
+
+        lo_http_client->get_http_request( )->set_content_type( |application/json| ).
+
+*-- Response ->
+        DATA(lo_response) = lo_http_client->execute( i_method = if_web_http_client=>get
+                                                     i_timeout = 60 ).
+*-- Get the status of the response ->
+        e_context = lo_response->get_text( ).
+        IF lo_response->get_status( )-code NE 200.
+          e_return-type = 'E'.
+          e_return-message = lo_response->get_status( )-code && ` ` && lo_response->get_status( )-reason
+          && ` - ` && e_context.
+        ENDIF.
+        IF e_context = 'Không tìm thấy hóa đơn. Vui lòng kiểm tra điều kiện tìm kiếm'.
+          e_return-type = 'E'.
+          e_return-message = 'Không tìm thấy hóa đơn. Vui lòng kiểm tra điều kiện tìm kiếm'.
+        ENDIF.
+      CATCH cx_root INTO DATA(lx_exception).
+
+    ENDTRY.
+  ENDMETHOD.
+
+
+  METHOD get_general.
+    DATA: ls_einvoice TYPE zst_fpt_adjust.
+
+    DATA: lv_date TYPE zde_einv_date,
+          lv_time TYPE zde_einv_time,
+          lv_url  TYPE zde_txt255.
+
+    DATA: lt_items TYPE tt_items.
+
+    lt_items = i_items[].
+
+* Username - Password *
+    ls_einvoice-user-username = i_userpass-username.
+    ls_einvoice-user-password = i_userpass-password.
+*----------------------------------------------------------*
+* Key - Form - Serial Invoices
+*    IF i_einvoice-zsearch IS NOT INITIAL.
+*      ls_einvoice-inv-sid     = i_einvoice-zsearch.
+*    ELSE.
+    ls_einvoice-inv-sid     = i_einvoice-sid.
+*    ENDIF.
+
+    lv_date = i_einvoice-einvoicedatecreate.
+    lv_time = i_einvoice-einvoicetimecreate.
+
+    ls_einvoice-inv-idt     = |{ lv_date+0(4) }-{ lv_date+4(2) }-{ lv_date+6(2) } { lv_time+0(2) }:{ lv_time+2(2) }:{ lv_time+4(2) }|.
+    ls_einvoice-inv-type    = i_einvoice-einvoicetype.
+    ls_einvoice-inv-form    = i_einvoice-einvoiceform.
+    ls_einvoice-inv-serial  = i_einvoice-einvoiceserial.
+
+    IF i_type = 'ADJUST'.
+* Adjust Tag *
+      ls_einvoice-inv-adj-rdt = |{ lv_date+0(4) }-{ lv_date+4(2) }-{ lv_date+6(2) } { lv_time+0(2) }:{ lv_time+2(2) }:{ lv_time+4(2) }|.
+      ls_einvoice-inv-adj-ref = i_einvoice-sid.
+*
+      SELECT SINGLE * FROM zjp_a_hddt_h
+      WHERE Companycode        = @i_einvoice-Companycode
+        AND Accountingdocument = @i_einvoice-accountingdocumentsource
+        AND Fiscalyear         = @i_einvoice-fiscalyearsource
+        INTO @DATA(ls_document_source).
+      IF sy-subrc EQ 0.
+        ls_einvoice-inv-adj-seq = |1-{ ls_document_source-einvoiceserial }-{ ls_document_source-einvoicenumber }|.
+        IF i_einvoice-adjusttype = '3'. "Thay thế Hóa đơn
+          ls_einvoice-inv-adj-rea = |Thay thế cho hóa đơn { ls_document_source-einvoiceserial }{ ls_document_source-einvoicenumber }|
+          && | ngày { ls_document_source-einvoicedatecreate+6(2) }/{ ls_document_source-einvoicedatecreate+4(2) }/{ ls_document_source-einvoicedatecreate+0(4) }|.
+        ELSE. "Điều chỉnh hóa đơn - tăng/giảm tiền
+          ls_einvoice-inv-adj-rea = |Điều chỉnh cho hóa đơn { ls_document_source-einvoiceserial }{ ls_document_source-einvoicenumber }|
+          && | ngày { ls_document_source-einvoicedatecreate+6(2) }/{ ls_document_source-einvoicedatecreate+4(2) }/{ ls_document_source-einvoicedatecreate+0(4) }|.
+        ENDIF.
+      ENDIF.
+
+* Xác định loại điều chỉnh
+      IF i_einvoice-Adjusttype = 1. "Điều chỉnh tăng
+        ls_einvoice-inv-ud = '1'.
+      ELSEIF i_einvoice-Adjusttype = 2. "Điều chỉnh giảm
+        ls_einvoice-inv-ud = '0'.
+      ELSE. "Thay thế
+
+      ENDIF.
+* Thẻ đánh dấu điều chỉnh kiểu mới:
+      ls_einvoice-inv-adj_only_add = '1'.
+
+    ENDIF.
+*----------------------------------------------------------*
+* Buyer Details *
+    ls_einvoice-inv-bcode   = i_einvoice-Customer.
+    ls_einvoice-inv-bname   = i_einvoice-customername.
+*    ls_einvoice-inv-buyer =
+    ls_einvoice-inv-btax    = i_einvoice-identificationnumber.
+    ls_einvoice-inv-baddr   = i_einvoice-customeraddress.
+    ls_einvoice-inv-btel    = i_einvoice-telephonenumber.
+    ls_einvoice-inv-bmail   = i_einvoice-emailaddress.
+
+*    ls_einvoice-inv-bacc    = i_einvoice.
+*    ls_einvoice-inv-bbank   = i_einvoice.
+*----------------------------------------------------------*
+    ls_einvoice-inv-paym    = i_einvoice-paymentmethod.
+    CASE i_einvoice-currencytype.
+      WHEN '1'. "Transaction Currency
+        ls_einvoice-inv-curr    = i_einvoice-transactioncurrency.
+        ls_einvoice-inv-exrt    = i_einvoice-absoluteexchangerate.
+* Amount *
+        ls_einvoice-inv-sum     = i_einvoice-amountintransaccrcy.
+        ls_einvoice-inv-vat     = i_einvoice-vatamountintransaccrcy.
+        ls_einvoice-inv-total   = i_einvoice-totalamountintransaccrcy.
+
+        ls_einvoice-inv-sumv    = i_einvoice-amountincocodecrcy.
+        ls_einvoice-inv-vatv    = i_einvoice-vatamountincocodecrcy.
+        ls_einvoice-inv-totalv  = i_einvoice-totalamountincocodecrcy.
+      WHEN '2'. "Local Currency
+        ls_einvoice-inv-curr    = i_einvoice-companycodecurrency.
+        ls_einvoice-inv-exrt    = i_einvoice-absoluteexchangerate.
+* Amount *
+        ls_einvoice-inv-sum     = i_einvoice-amountincocodecrcy.
+        ls_einvoice-inv-vat     = i_einvoice-vatamountincocodecrcy.
+        ls_einvoice-inv-total   = i_einvoice-totalamountincocodecrcy.
+
+        ls_einvoice-inv-sumv    = i_einvoice-amountincocodecrcy.
+        ls_einvoice-inv-vatv    = i_einvoice-vatamountincocodecrcy.
+        ls_einvoice-inv-totalv  = i_einvoice-totalamountincocodecrcy.
+      WHEN OTHERS.
+    ENDCASE.
+*----------------------------------------------------------*
+* Loại hóa đơn sử dụng mặc định theo thông tư 78
+    ls_einvoice-inv-type_ref = 1.
+* Supplier Taxcode
+    ls_einvoice-inv-stax = i_einvoice-suppliertax.
+* INV Items *
+    DATA: ls_items LIKE LINE OF ls_einvoice-inv-items.
+    LOOP AT lt_items INTO DATA(ls_einv_line).
+
+      ls_items-line     = ls_einv_line-itemeinvoice.
+      ls_items-type     = ''.
+
+      IF ls_einv_line-taxcode = 'ON'.
+        ls_items-vrt      = '-2'.
+      ELSEIF ls_einv_line-taxcode = 'OX'.
+        ls_items-vrt      = '-1'.
+      ELSE.
+        ls_items-vrt      = ls_einv_line-Taxpercentage.
+      ENDIF.
+
+      ls_items-code     = ls_einv_line-product.
+
+      IF ls_einv_line-longtext IS NOT INITIAL.
+        ls_items-name     = ls_einv_line-longtext.
+      ELSE.
+        ls_items-name     = ls_einv_line-documentitemtext.
+      ENDIF.
+
+      ls_items-unit     = ls_einv_line-unitofmeasurelongname.
+      ls_items-quantity = ls_einv_line-Quantity.
+
+      CASE i_einvoice-currencytype .
+        WHEN '1'. "Transaction Currency
+          ls_items-price    = ls_einv_line-priceintransaccrcy.
+          ls_items-amount   = ls_einv_line-amountintransaccrcy.
+          ls_items-vat      = ls_einv_line-vatamountintransaccrcy.
+          ls_items-total    = ls_einv_line-totalamountintransaccrcy.
+
+          ls_items-pricev   = ls_einv_line-priceincocodecrcy.
+          ls_items-amountv  = ls_einv_line-amountincocodecrcy.
+          ls_items-vatv     = ls_einv_line-vatamountincocodecrcy.
+          ls_items-totalv   = ls_einv_line-totalamountincocodecrcy.
+        WHEN '2'. "Local Currency
+          ls_items-price    = ls_einv_line-priceincocodecrcy.
+          ls_items-amount   = ls_einv_line-amountincocodecrcy.
+          ls_items-vat      = ls_einv_line-vatamountincocodecrcy.
+          ls_items-total    = ls_einv_line-totalamountincocodecrcy.
+
+          ls_items-pricev   = ls_einv_line-priceincocodecrcy.
+          ls_items-amountv  = ls_einv_line-amountincocodecrcy.
+          ls_items-vatv     = ls_einv_line-vatamountincocodecrcy.
+          ls_items-totalv   = ls_einv_line-totalamountincocodecrcy.
+        WHEN OTHERS.
+      ENDCASE.
+
+      IF i_type = 'CREATE'.
+        IF ls_items-amount < 0.
+          ls_items-type = 'CK'.
+          ls_items-amount = abs( ls_items-amount ).
+          ls_items-vat    = abs( ls_items-vat ).
+          ls_items-total  = abs( ls_items-total ).
+
+          ls_items-amountv = abs( ls_items-amountv ).
+          ls_items-vatv    = abs( ls_items-vatv ).
+          ls_items-totalv  = abs( ls_items-totalv ).
+        ENDIF.
+      ENDIF.
+
+      APPEND ls_items TO ls_einvoice-inv-items.
+      CLEAR: ls_items.
+    ENDLOOP.
+
+    MOVE-CORRESPONDING ls_einvoice TO e_adjust.
+    MOVE-CORRESPONDING ls_einvoice TO e_create.
+  ENDMETHOD.
+
+
+  METHOD get_instance.
+    go_fpt_einvoice = ro_instance = COND #( WHEN go_fpt_einvoice IS BOUND
+                                               THEN go_fpt_einvoice
+                                               ELSE NEW #( ) ).
+  ENDMETHOD.
+
+
+  METHOD post_einvoices.
+    IF i_context IS INITIAL. RETURN. ENDIF.
+*-- Create HTTP client ->
+    TRY.
+        DATA(lo_destination) = cl_http_destination_provider=>create_by_comm_arrangement(
+                                 comm_scenario  = |Z_API_FPT_EINVOICE_CSCEN|
+                                 service_id     = |Z_API_FPT_EINVOICE_OB_REST|
+                               ).
+
+        DATA(lo_http_client) = cl_web_http_client_manager=>create_by_http_destination( i_destination = lo_destination ).
+*-- Add path ->
+*        lo_http_client->get_http_request( )->set_uri_path( |{ i_prefix }| ).
+        lo_http_client->get_http_request( )->set_header_field( i_name = |~request_uri| i_value = |{ i_prefix }| ).
+*-- SET HTTP Header Fields
+        lo_http_client->get_http_request( )->set_header_field( i_name = |Content-Type| i_value = |application/json| ).
+
+        lo_http_client->get_http_request( )->set_header_field( i_name = |Accept| i_value = |*/*| ).
+
+        DATA: lv_username TYPE string,
+              lv_password TYPE string.
+
+        lv_username = i_userpass-username.
+        lv_password = i_userpass-password.
+*-- Passing the Accept value in header which is a mandatory field
+        lo_http_client->get_http_request( )->set_header_field( i_name = |username| i_value = lv_username ).
+        lo_http_client->get_http_request( )->set_header_field( i_name = |password| i_value = lv_password ).
+*-- Authorization
+        lo_http_client->get_http_request( )->set_authorization_basic( i_username = lv_username i_password = lv_password ).
+
+        lo_http_client->get_http_request( )->set_content_type( |application/json| ).
+*-- POST
+        lo_http_client->execute( i_method = if_web_http_client=>post
+                                 i_timeout = 60 ).
+*-- Send request ->
+        lo_http_client->get_http_request( )->set_text( i_context ).
+*-- Response ->
+        DATA(lo_response) = lo_http_client->execute( i_method = if_web_http_client=>post
+                                                     i_timeout = 60 ).
+*-- Get the status of the response ->
+        e_context = lo_response->get_text( ).
+        IF lo_response->get_status( )-code NE 200.
+          e_return-type = 'E'.
+          e_return-message = lo_response->get_status( )-code && ` ` && lo_response->get_status( )-reason
+          && ` - ` && e_context.
+        ENDIF.
+      CATCH cx_root INTO DATA(lx_exception).
+
+    ENDTRY.
+  ENDMETHOD.
+
+
+  METHOD process_message.
+
+    MOVE-CORRESPONDING i_document TO e_header.
+
+    e_header-Iconsap = icon_sap.
+    e_header-StatusSap = status_sap.
+    e_header-messagetype = message_type.
+    e_header-messagetext = message_text.
+
+  ENDMETHOD.
+
 
   METHOD process_status.
     TYPES: BEGIN OF lty_cancel_response,
@@ -745,6 +944,7 @@ CLASS zcl_manage_fpt_einvoices IMPLEMENTATION.
     ENDIF.
   ENDMETHOD.
 
+
   METHOD search_einvoices.
 
     DATA: ls_einvoice TYPE zst_fpt_info.
@@ -819,194 +1019,4 @@ CLASS zcl_manage_fpt_einvoices IMPLEMENTATION.
         ).
 
   ENDMETHOD.
-
-  METHOD get_general.
-    DATA: ls_einvoice TYPE zst_fpt_adjust.
-
-    DATA: lv_date TYPE zde_einv_date,
-          lv_time TYPE zde_einv_time,
-          lv_url  TYPE zde_txt255.
-
-    DATA: lt_items TYPE tt_items.
-
-    lt_items = i_items[].
-
-* Username - Password *
-    ls_einvoice-user-username = i_userpass-username.
-    ls_einvoice-user-password = i_userpass-password.
-*----------------------------------------------------------*
-* Key - Form - Serial Invoices
-*    IF i_einvoice-zsearch IS NOT INITIAL.
-*      ls_einvoice-inv-sid     = i_einvoice-zsearch.
-*    ELSE.
-    ls_einvoice-inv-sid     = i_einvoice-sid.
-*    ENDIF.
-
-    lv_date = i_einvoice-einvoicedatecreate.
-    lv_time = i_einvoice-einvoicetimecreate.
-
-    ls_einvoice-inv-idt     = |{ lv_date+0(4) }-{ lv_date+4(2) }-{ lv_date+6(2) } { lv_time+0(2) }:{ lv_time+2(2) }:{ lv_time+4(2) }|.
-    ls_einvoice-inv-type    = i_einvoice-einvoicetype.
-    ls_einvoice-inv-form    = i_einvoice-einvoiceform.
-    ls_einvoice-inv-serial  = i_einvoice-einvoiceserial.
-
-    IF i_type = 'ADJUST'.
-* Adjust Tag *
-      ls_einvoice-inv-adj-rdt = |{ lv_date+0(4) }-{ lv_date+4(2) }-{ lv_date+6(2) } { lv_time+0(2) }:{ lv_time+2(2) }:{ lv_time+4(2) }|.
-      ls_einvoice-inv-adj-ref = i_einvoice-sid.
-*
-      SELECT SINGLE * FROM zjp_a_hddt_h
-      WHERE Companycode        = @i_einvoice-Companycode
-        AND Accountingdocument = @i_einvoice-accountingdocumentsource
-        AND Fiscalyear         = @i_einvoice-fiscalyearsource
-        INTO @DATA(ls_document_source).
-      IF sy-subrc EQ 0.
-        ls_einvoice-inv-adj-seq = |1-{ ls_document_source-einvoiceserial }-{ ls_document_source-einvoicenumber }|.
-        IF i_einvoice-adjusttype = '3'. "Thay thế Hóa đơn
-          ls_einvoice-inv-adj-rea = |Thay thế cho hóa đơn { ls_document_source-einvoiceserial }{ ls_document_source-einvoicenumber }|
-          && | ngày { ls_document_source-einvoicedatecreate+6(2) }/{ ls_document_source-einvoicedatecreate+4(2) }/{ ls_document_source-einvoicedatecreate+0(4) }|.
-        ELSE. "Điều chỉnh hóa đơn - tăng/giảm tiền
-          ls_einvoice-inv-adj-rea = |Điều chỉnh cho hóa đơn { ls_document_source-einvoiceserial }{ ls_document_source-einvoicenumber }|
-          && | ngày { ls_document_source-einvoicedatecreate+6(2) }/{ ls_document_source-einvoicedatecreate+4(2) }/{ ls_document_source-einvoicedatecreate+0(4) }|.
-        ENDIF.
-      ENDIF.
-
-* Xác định loại điều chỉnh
-      IF i_einvoice-Adjusttype = 1. "Điều chỉnh tăng
-        ls_einvoice-inv-ud = '1'.
-      ELSEIF i_einvoice-Adjusttype = 2. "Điều chỉnh giảm
-        ls_einvoice-inv-ud = '0'.
-      ELSE. "Thay thế
-
-      ENDIF.
-* Thẻ đánh dấu điều chỉnh kiểu mới:
-      ls_einvoice-inv-adj_only_add = '1'.
-
-    ENDIF.
-*----------------------------------------------------------*
-* Buyer Details *
-    ls_einvoice-inv-bcode   = i_einvoice-Customer.
-    ls_einvoice-inv-bname   = i_einvoice-customername.
-*    ls_einvoice-inv-buyer =
-    ls_einvoice-inv-btax    = i_einvoice-identificationnumber.
-    ls_einvoice-inv-baddr   = i_einvoice-customeraddress.
-    ls_einvoice-inv-btel    = i_einvoice-telephonenumber.
-    ls_einvoice-inv-bmail   = i_einvoice-emailaddress.
-
-*    ls_einvoice-inv-bacc    = i_einvoice.
-*    ls_einvoice-inv-bbank   = i_einvoice.
-*----------------------------------------------------------*
-    ls_einvoice-inv-paym    = i_einvoice-paymentmethod.
-    CASE i_einvoice-currencytype.
-      WHEN '1'. "Transaction Currency
-        ls_einvoice-inv-curr    = i_einvoice-transactioncurrency.
-        ls_einvoice-inv-exrt    = i_einvoice-absoluteexchangerate.
-* Amount *
-        ls_einvoice-inv-sum     = i_einvoice-amountintransaccrcy.
-        ls_einvoice-inv-vat     = i_einvoice-vatamountintransaccrcy.
-        ls_einvoice-inv-total   = i_einvoice-totalamountintransaccrcy.
-
-        ls_einvoice-inv-sumv    = i_einvoice-amountincocodecrcy.
-        ls_einvoice-inv-vatv    = i_einvoice-vatamountincocodecrcy.
-        ls_einvoice-inv-totalv  = i_einvoice-totalamountincocodecrcy.
-      WHEN '2'. "Local Currency
-        ls_einvoice-inv-curr    = i_einvoice-companycodecurrency.
-        ls_einvoice-inv-exrt    = i_einvoice-absoluteexchangerate.
-* Amount *
-        ls_einvoice-inv-sum     = i_einvoice-amountincocodecrcy.
-        ls_einvoice-inv-vat     = i_einvoice-vatamountincocodecrcy.
-        ls_einvoice-inv-total   = i_einvoice-totalamountincocodecrcy.
-
-        ls_einvoice-inv-sumv    = i_einvoice-amountincocodecrcy.
-        ls_einvoice-inv-vatv    = i_einvoice-vatamountincocodecrcy.
-        ls_einvoice-inv-totalv  = i_einvoice-totalamountincocodecrcy.
-      WHEN OTHERS.
-    ENDCASE.
-*----------------------------------------------------------*
-* Loại hóa đơn sử dụng mặc định theo thông tư 78
-    ls_einvoice-inv-type_ref = 1.
-* Supplier Taxcode
-    ls_einvoice-inv-stax = i_einvoice-suppliertax.
-* INV Items *
-    DATA: ls_items LIKE LINE OF ls_einvoice-inv-items.
-    LOOP AT lt_items INTO DATA(ls_einv_line).
-
-      ls_items-line     = ls_einv_line-itemeinvoice.
-      ls_items-type     = ''.
-
-      IF ls_einv_line-taxcode = 'ON'.
-        ls_items-vrt      = '-2'.
-      ELSEIF ls_einv_line-taxcode = 'OX'.
-        ls_items-vrt      = '-1'.
-      ELSE.
-        ls_items-vrt      = ls_einv_line-Taxpercentage.
-      ENDIF.
-
-      ls_items-code     = ls_einv_line-product.
-
-      IF ls_einv_line-longtext IS NOT INITIAL.
-        ls_items-name     = ls_einv_line-longtext.
-      ELSE.
-        ls_items-name     = ls_einv_line-documentitemtext.
-      ENDIF.
-
-      ls_items-unit     = ls_einv_line-unitofmeasurelongname.
-      ls_items-quantity = ls_einv_line-Quantity.
-
-      CASE i_einvoice-currencytype .
-        WHEN '1'. "Transaction Currency
-          ls_items-price    = ls_einv_line-priceintransaccrcy.
-          ls_items-amount   = ls_einv_line-amountintransaccrcy.
-          ls_items-vat      = ls_einv_line-vatamountintransaccrcy.
-          ls_items-total    = ls_einv_line-totalamountintransaccrcy.
-
-          ls_items-pricev   = ls_einv_line-priceincocodecrcy.
-          ls_items-amountv  = ls_einv_line-amountincocodecrcy.
-          ls_items-vatv     = ls_einv_line-vatamountincocodecrcy.
-          ls_items-totalv   = ls_einv_line-totalamountincocodecrcy.
-        WHEN '2'. "Local Currency
-          ls_items-price    = ls_einv_line-priceincocodecrcy.
-          ls_items-amount   = ls_einv_line-amountincocodecrcy.
-          ls_items-vat      = ls_einv_line-vatamountincocodecrcy.
-          ls_items-total    = ls_einv_line-totalamountincocodecrcy.
-
-          ls_items-pricev   = ls_einv_line-priceincocodecrcy.
-          ls_items-amountv  = ls_einv_line-amountincocodecrcy.
-          ls_items-vatv     = ls_einv_line-vatamountincocodecrcy.
-          ls_items-totalv   = ls_einv_line-totalamountincocodecrcy.
-        WHEN OTHERS.
-      ENDCASE.
-
-      IF i_type = 'CREATE'.
-        IF ls_items-amount < 0.
-          ls_items-type = 'CK'.
-          ls_items-amount = abs( ls_items-amount ).
-          ls_items-vat    = abs( ls_items-vat ).
-          ls_items-total  = abs( ls_items-total ).
-
-          ls_items-amountv = abs( ls_items-amountv ).
-          ls_items-vatv    = abs( ls_items-vatv ).
-          ls_items-totalv  = abs( ls_items-totalv ).
-        ENDIF.
-      ENDIF.
-
-      APPEND ls_items TO ls_einvoice-inv-items.
-      CLEAR: ls_items.
-    ENDLOOP.
-
-    MOVE-CORRESPONDING ls_einvoice TO e_adjust.
-    MOVE-CORRESPONDING ls_einvoice TO e_create.
-  ENDMETHOD.
-
-  METHOD process_message.
-
-    MOVE-CORRESPONDING i_document TO e_header.
-
-    e_header-Iconsap = icon_sap.
-    e_header-StatusSap = status_sap.
-    e_header-messagetype = message_type.
-    e_header-messagetext = message_text.
-
-  ENDMETHOD.
-
 ENDCLASS.

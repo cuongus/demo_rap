@@ -1,7 +1,7 @@
 CLASS zcl_jp_get_data_scttgnh DEFINITION
   PUBLIC
   INHERITING FROM cx_rap_query_provider
-  FINAL
+*  FINAL
   CREATE PUBLIC .
 
   PUBLIC SECTION.
@@ -37,6 +37,7 @@ CLASS zcl_jp_get_data_scttgnh DEFINITION
       "Method Get Data From journal entry
       get_so_cttgnh IMPORTING ir_companycode        TYPE tt_ranges
                               ir_accountingdocument TYPE tt_ranges OPTIONAL
+                              ir_buzei              TYPE tt_ranges OPTIONAL
                               ir_fiscalyear         TYPE tt_ranges
                               ir_glaccount          TYPE tt_ranges
                               ir_postingdate        TYPE tt_ranges OPTIONAL
@@ -58,6 +59,7 @@ CLASS zcl_jp_get_data_scttgnh IMPLEMENTATION.
 
           ir_companycode        TYPE tt_ranges,
           ir_accountingdocument TYPE tt_ranges,
+          ir_buzei              TYPE tt_ranges,
           ir_glaccount          TYPE tt_ranges,
           ir_fiscalyear         TYPE tt_ranges,
           ir_postingdate        TYPE tt_ranges,
@@ -79,6 +81,7 @@ CLASS zcl_jp_get_data_scttgnh IMPLEMENTATION.
             IMPORTING
                 ir_companycode        = ir_companycode
                 ir_accountingdocument = ir_accountingdocument
+                ir_buzei              = ir_buzei
                 ir_fiscalyear         = ir_fiscalyear
                 ir_glaccount          = ir_glaccount
                 ir_postingdate        = ir_postingdate
@@ -102,6 +105,7 @@ CLASS zcl_jp_get_data_scttgnh IMPLEMENTATION.
             EXPORTING
                 ir_companycode        = ir_companycode
                 ir_accountingdocument = ir_accountingdocument
+                ir_buzei              = ir_buzei
                 ir_glaccount          = ir_glaccount
                 ir_fiscalyear         = ir_fiscalyear
                 ir_postingdate        = ir_postingdate
@@ -191,7 +195,7 @@ CLASS zcl_jp_get_data_scttgnh IMPLEMENTATION.
            CASE
                WHEN headers~TransactionCurrency NE 'VND'
                THEN items~AbsoluteAmountInTransacCrcy
-               ELSE 0
+               ELSE 1
            END AS AbsoluteAmountInTransacCrcy,
 
            items~AssignmentReference,
@@ -218,11 +222,12 @@ CLASS zcl_jp_get_data_scttgnh IMPLEMENTATION.
                                              AND items~AccountingDocument = headers~AccountingDocument
                                              AND items~FiscalYear         = headers~FiscalYear
 
-         WHERE headers~CompanyCode        IN @ir_companycode
-           AND headers~AccountingDocument IN @ir_accountingdocument
-           AND headers~FiscalYear         IN @ir_fiscalyear
-           AND headers~PostingDate        IN @ir_postingdate
-           AND headers~DocumentDate       IN @ir_documentdate
+         WHERE headers~CompanyCode          IN @ir_companycode
+           AND headers~AccountingDocument   IN @ir_accountingdocument
+           AND items~AccountingDocumentItem IN @ir_buzei
+           AND headers~FiscalYear           IN @ir_fiscalyear
+           AND headers~PostingDate          IN @ir_postingdate
+           AND headers~DocumentDate         IN @ir_documentdate
 
          INTO CORRESPONDING FIELDS OF TABLE @lt_data.
 
@@ -306,9 +311,10 @@ CLASS zcl_jp_get_data_scttgnh IMPLEMENTATION.
       ENDIF.
 
       CLEAR: ls_customer, ls_document.
-      UNASSIGN: <fs_data>, <fs_sodudk>.
+
     ENDLOOP.
 
+    APPEND LINES OF lt_data TO gt_data.
   ENDMETHOD.
 
 ENDCLASS.

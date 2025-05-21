@@ -101,177 +101,37 @@ ENDCLASS.
 
 
 
-CLASS zcl_einvoice_data IMPLEMENTATION.
+CLASS ZCL_EINVOICE_DATA IMPLEMENTATION.
 
-  METHOD if_rap_query_provider~select.
-**--- Custom Entities ---**
-    DATA: ls_page_info          TYPE zcl_jp_common_core=>st_page_info,
 
-          ir_companycode        TYPE zcl_jp_common_core=>tt_ranges,
-          ir_accountingdocument TYPE zcl_jp_common_core=>tt_ranges,
-          ir_glaccount          TYPE zcl_jp_common_core=>tt_ranges,
-          ir_fiscalyear         TYPE zcl_jp_common_core=>tt_ranges,
-          ir_postingdate        TYPE zcl_jp_common_core=>tt_ranges,
-          ir_documentdate       TYPE zcl_jp_common_core=>tt_ranges,
-          ir_statussap          TYPE zcl_jp_common_core=>tt_ranges,
-          ir_einvoicenumber     TYPE zcl_jp_common_core=>tt_ranges,
-          ir_einvoicetype       TYPE zcl_jp_common_core=>tt_ranges,
-          ir_currencytype       TYPE zcl_jp_common_core=>tt_ranges,
-          ir_usertype           TYPE zcl_jp_common_core=>tt_ranges,
-          ir_typeofdate         TYPE zcl_jp_common_core=>tt_ranges,
-          ir_createdbyuser      TYPE zcl_jp_common_core=>tt_ranges,
-          ir_enduser            TYPE zcl_jp_common_core=>tt_ranges,
-          ir_testrun            TYPE zcl_jp_common_core=>tt_ranges
-          .
+  METHOD getdate_einvoice.
+    MOVE-CORRESPONDING i_document TO e_document.
 
-    DATA: lt_einvoice_header TYPE tt_einvoice_header,
-          lt_einvoice_item   TYPE tt_einvoice_item.
+    CASE e_document-typeofdate.
+      WHEN '01'. "Posting Date
+        e_document-einvoicedatecreate = e_document-postingdate.
+        e_document-einvoicetimecreate = '090000'.
+      WHEN '02'. "Document Date
+        e_document-einvoicedatecreate = e_document-documentdate.
+        e_document-einvoicetimecreate = '090000'.
+      WHEN '03'. "Entry Date
+        e_document-einvoicedatecreate = e_document-accountingdocumentcreationdate.
+        e_document-einvoicetimecreate = '090000'.
+      WHEN '04'. "System Date
+        DATA(time_zone) = cl_abap_context_info=>get_user_time_zone(  ).
 
-    DATA: lt_returns TYPE tt_returns.
+        DATA(lv_datlo) = xco_cp=>sy->date( )->as( xco_cp_time=>format->abap )->value.
+        DATA(lv_timlo) = xco_cp=>sy->time( )->as( xco_cp_time=>format->abap )->value.
 
-    FREE: lt_einvoice_header, lt_einvoice_item, lt_returns.
+        e_document-einvoicedatecreate = lv_datlo.
+        e_document-einvoicetimecreate = lv_timlo.
+    ENDCASE.
 
-    DATA(lv_entity_id) = io_request->get_entity_id( ).
+    o_date = e_document-einvoicedatecreate.
+    o_time = e_document-einvoicetimecreate.
 
-    TRY.
-        go_einvoice_data  = zcl_einvoice_data=>get_instance( ).
-
-        DATA(lo_common_app) = zcl_jp_common_core=>get_instance( ).
-
-        lo_common_app->get_fillter_app(
-            EXPORTING
-                io_request  = io_request
-                io_response = io_response
-            IMPORTING
-                ir_companycode        = ir_companycode
-                ir_accountingdocument = ir_accountingdocument
-                ir_fiscalyear         = ir_fiscalyear
-*                ir_glaccount          = ir_glaccount
-                ir_postingdate        = ir_postingdate
-                ir_documentdate       = ir_documentdate
-
-                ir_statussap          = ir_statussap
-                ir_einvoicenumber     = ir_einvoicenumber
-                ir_einvoicetype       = ir_einvoicetype
-                ir_currencytype       = ir_currencytype
-                ir_usertype           = ir_usertype
-                ir_typeofdate         = ir_typeofdate
-                ir_createdbyuser      = ir_createdbyuser
-                ir_enduser            = ir_enduser
-                ir_testrun            = ir_testrun
-
-                wa_page_info          = ls_page_info
-        ).
-
-*        AUTHORITY-CHECK OBJECT 'ZOBJECT***'
-*          ID 'ACTVT' FIELD '03'
-*          ID 'LV_FIELD' FIELD lv_field.
-*        IF sy-subrc NE 0.
-
-*        ENDIF.
-
-        go_einvoice_data->get_einvoice_data(
-            EXPORTING
-                ir_companycode        = ir_companycode
-                ir_accountingdocument = ir_accountingdocument
-                ir_fiscalyear         = ir_fiscalyear
-                ir_postingdate        = ir_postingdate
-                ir_documentdate       = ir_documentdate
-
-                ir_statussap          = ir_statussap
-                ir_einvoicenumber     = ir_einvoicenumber
-                ir_einvoicetype       = ir_einvoicetype
-                ir_currencytype       = ir_currencytype
-                ir_usertype           = ir_usertype
-                ir_typeofdate         = ir_typeofdate
-                ir_createdbyuser      = ir_createdbyuser
-                ir_enduser            = ir_enduser
-                ir_testrun            = ir_testrun
-
-            IMPORTING
-                it_einvoice_header    = gt_einvoice_headers
-                it_einvoice_item      = gt_einvoice_items
-                it_returns            = lt_returns
-        ).
-
-        IF lt_returns IS NOT INITIAL.
-          READ TABLE lt_returns INTO DATA(ls_returns) INDEX 1.
-
-          RAISE EXCEPTION TYPE zcl_einvoice_data
-              MESSAGE ID ''
-              TYPE ls_returns-type
-              NUMBER ''
-              WITH |{ ls_returns-message }|.
-          RETURN.
-
-        ENDIF.
-
-        IF ls_page_info-page_size < 0.
-          ls_page_info-page_size = 50.
-        ENDIF.
-
-        DATA(max_rows) = COND #( WHEN ls_page_info-page_size = if_rap_query_paging=>page_size_unlimited THEN 0
-                   ELSE ls_page_info-page_size ).
-
-        max_rows = ls_page_info-page_size + ls_page_info-offset.
-
-        CASE lv_entity_id.
-          WHEN 'ZJP_C_HDDT_H' OR 'EINVOICE_HEADERS'. ""---EInvoice Headers
-            LOOP AT gt_einvoice_headers INTO DATA(ls_einvoice_h).
-              IF sy-tabix > ls_page_info-offset.
-                IF sy-tabix > max_rows.
-                  EXIT.
-                ELSE.
-                  APPEND ls_einvoice_h TO lt_einvoice_header.
-                ENDIF.
-              ENDIF.
-            ENDLOOP.
-
-            IF io_request->is_total_numb_of_rec_requested( ).
-              io_response->set_total_number_of_records( lines( gt_einvoice_headers ) ).
-            ENDIF.
-
-            IF io_request->is_data_requested( ).
-              io_response->set_data( lt_einvoice_header ).
-            ENDIF.
-          WHEN 'ZJP_C_HDDT_I' OR 'EINVOICE_ITEMS'. ""---EInvoice Items
-            LOOP AT gt_einvoice_items INTO DATA(ls_einvoice_i).
-              IF sy-tabix > ls_page_info-offset.
-                IF sy-tabix > max_rows.
-                  EXIT.
-                ELSE.
-                  APPEND ls_einvoice_i TO lt_einvoice_item.
-                ENDIF.
-              ENDIF.
-            ENDLOOP.
-
-            IF io_request->is_total_numb_of_rec_requested( ).
-              io_response->set_total_number_of_records( lines( gt_einvoice_items ) ).
-            ENDIF.
-
-            IF io_request->is_data_requested( ).
-              io_response->set_data( lt_einvoice_item ).
-            ENDIF.
-        ENDCASE.
-
-      CATCH cx_root INTO DATA(exception).
-
-        DATA(exception_message) = cl_message_helper=>get_latest_t100_exception( exception )->if_message~get_longtext( ).
-
-        DATA(exception_t100_key) = cl_message_helper=>get_latest_t100_exception( exception )->t100key.
-
-        RAISE EXCEPTION TYPE zcl_jp_get_data_scttgnh
-          EXPORTING
-            textid   = VALUE scx_t100key(
-            msgid = exception_t100_key-msgid
-            msgno = exception_t100_key-msgno
-            attr1 = exception_t100_key-attr1
-            attr2 = exception_t100_key-attr2
-            attr3 = exception_t100_key-attr3
-            attr4 = exception_t100_key-attr4 )
-            previous = exception.
-    ENDTRY.
   ENDMETHOD.
+
 
   METHOD get_einvoice_data.
     DATA:
@@ -957,11 +817,184 @@ CLASS zcl_einvoice_data IMPLEMENTATION.
 
   ENDMETHOD.
 
+
   METHOD get_instance.
     mo_instance = ro_instance = COND #( WHEN mo_instance IS BOUND
                                                THEN mo_instance
                                                ELSE NEW #( ) ).
   ENDMETHOD.
+
+
+  METHOD if_rap_query_provider~select.
+**--- Custom Entities ---**
+    DATA: ls_page_info          TYPE zcl_jp_common_core=>st_page_info,
+
+          ir_companycode        TYPE zcl_jp_common_core=>tt_ranges,
+          ir_accountingdocument TYPE zcl_jp_common_core=>tt_ranges,
+          ir_glaccount          TYPE zcl_jp_common_core=>tt_ranges,
+          ir_fiscalyear         TYPE zcl_jp_common_core=>tt_ranges,
+          ir_postingdate        TYPE zcl_jp_common_core=>tt_ranges,
+          ir_documentdate       TYPE zcl_jp_common_core=>tt_ranges,
+          ir_statussap          TYPE zcl_jp_common_core=>tt_ranges,
+          ir_einvoicenumber     TYPE zcl_jp_common_core=>tt_ranges,
+          ir_einvoicetype       TYPE zcl_jp_common_core=>tt_ranges,
+          ir_currencytype       TYPE zcl_jp_common_core=>tt_ranges,
+          ir_usertype           TYPE zcl_jp_common_core=>tt_ranges,
+          ir_typeofdate         TYPE zcl_jp_common_core=>tt_ranges,
+          ir_createdbyuser      TYPE zcl_jp_common_core=>tt_ranges,
+          ir_enduser            TYPE zcl_jp_common_core=>tt_ranges,
+          ir_testrun            TYPE zcl_jp_common_core=>tt_ranges
+          .
+
+    DATA: lt_einvoice_header TYPE tt_einvoice_header,
+          lt_einvoice_item   TYPE tt_einvoice_item.
+
+    DATA: lt_returns TYPE tt_returns.
+
+    FREE: lt_einvoice_header, lt_einvoice_item, lt_returns.
+
+    DATA(lv_entity_id) = io_request->get_entity_id( ).
+
+    TRY.
+        go_einvoice_data  = zcl_einvoice_data=>get_instance( ).
+
+        DATA(lo_common_app) = zcl_jp_common_core=>get_instance( ).
+
+        lo_common_app->get_fillter_app(
+            EXPORTING
+                io_request  = io_request
+                io_response = io_response
+            IMPORTING
+                ir_companycode        = ir_companycode
+                ir_accountingdocument = ir_accountingdocument
+                ir_fiscalyear         = ir_fiscalyear
+*                ir_glaccount          = ir_glaccount
+                ir_postingdate        = ir_postingdate
+                ir_documentdate       = ir_documentdate
+
+                ir_statussap          = ir_statussap
+                ir_einvoicenumber     = ir_einvoicenumber
+                ir_einvoicetype       = ir_einvoicetype
+                ir_currencytype       = ir_currencytype
+                ir_usertype           = ir_usertype
+                ir_typeofdate         = ir_typeofdate
+                ir_createdbyuser      = ir_createdbyuser
+                ir_enduser            = ir_enduser
+                ir_testrun            = ir_testrun
+
+                wa_page_info          = ls_page_info
+        ).
+
+*        AUTHORITY-CHECK OBJECT 'ZOBJECT***'
+*          ID 'ACTVT' FIELD '03'
+*          ID 'LV_FIELD' FIELD lv_field.
+*        IF sy-subrc NE 0.
+
+*        ENDIF.
+
+        go_einvoice_data->get_einvoice_data(
+            EXPORTING
+                ir_companycode        = ir_companycode
+                ir_accountingdocument = ir_accountingdocument
+                ir_fiscalyear         = ir_fiscalyear
+                ir_postingdate        = ir_postingdate
+                ir_documentdate       = ir_documentdate
+
+                ir_statussap          = ir_statussap
+                ir_einvoicenumber     = ir_einvoicenumber
+                ir_einvoicetype       = ir_einvoicetype
+                ir_currencytype       = ir_currencytype
+                ir_usertype           = ir_usertype
+                ir_typeofdate         = ir_typeofdate
+                ir_createdbyuser      = ir_createdbyuser
+                ir_enduser            = ir_enduser
+                ir_testrun            = ir_testrun
+
+            IMPORTING
+                it_einvoice_header    = gt_einvoice_headers
+                it_einvoice_item      = gt_einvoice_items
+                it_returns            = lt_returns
+        ).
+
+        IF lt_returns IS NOT INITIAL.
+          READ TABLE lt_returns INTO DATA(ls_returns) INDEX 1.
+
+          RAISE EXCEPTION TYPE zcl_einvoice_data
+              MESSAGE ID ''
+              TYPE ls_returns-type
+              NUMBER ''
+              WITH |{ ls_returns-message }|.
+          RETURN.
+
+        ENDIF.
+
+        IF ls_page_info-page_size < 0.
+          ls_page_info-page_size = 50.
+        ENDIF.
+
+        DATA(max_rows) = COND #( WHEN ls_page_info-page_size = if_rap_query_paging=>page_size_unlimited THEN 0
+                   ELSE ls_page_info-page_size ).
+
+        max_rows = ls_page_info-page_size + ls_page_info-offset.
+
+        CASE lv_entity_id.
+          WHEN 'ZJP_C_HDDT_H' OR 'EINVOICE_HEADERS'. ""---EInvoice Headers
+            LOOP AT gt_einvoice_headers INTO DATA(ls_einvoice_h).
+              IF sy-tabix > ls_page_info-offset.
+                IF sy-tabix > max_rows.
+                  EXIT.
+                ELSE.
+                  APPEND ls_einvoice_h TO lt_einvoice_header.
+                ENDIF.
+              ENDIF.
+            ENDLOOP.
+
+            IF io_request->is_total_numb_of_rec_requested( ).
+              io_response->set_total_number_of_records( lines( gt_einvoice_headers ) ).
+            ENDIF.
+
+            IF io_request->is_data_requested( ).
+              io_response->set_data( lt_einvoice_header ).
+            ENDIF.
+          WHEN 'ZJP_C_HDDT_I' OR 'EINVOICE_ITEMS'. ""---EInvoice Items
+            LOOP AT gt_einvoice_items INTO DATA(ls_einvoice_i).
+              IF sy-tabix > ls_page_info-offset.
+                IF sy-tabix > max_rows.
+                  EXIT.
+                ELSE.
+                  APPEND ls_einvoice_i TO lt_einvoice_item.
+                ENDIF.
+              ENDIF.
+            ENDLOOP.
+
+            IF io_request->is_total_numb_of_rec_requested( ).
+              io_response->set_total_number_of_records( lines( gt_einvoice_items ) ).
+            ENDIF.
+
+            IF io_request->is_data_requested( ).
+              io_response->set_data( lt_einvoice_item ).
+            ENDIF.
+        ENDCASE.
+
+      CATCH cx_root INTO DATA(exception).
+
+        DATA(exception_message) = cl_message_helper=>get_latest_t100_exception( exception )->if_message~get_longtext( ).
+
+        DATA(exception_t100_key) = cl_message_helper=>get_latest_t100_exception( exception )->t100key.
+
+        RAISE EXCEPTION TYPE zcl_jp_get_data_scttgnh
+          EXPORTING
+            textid   = VALUE scx_t100key(
+            msgid = exception_t100_key-msgid
+            msgno = exception_t100_key-msgno
+            attr1 = exception_t100_key-attr1
+            attr2 = exception_t100_key-attr2
+            attr3 = exception_t100_key-attr3
+            attr4 = exception_t100_key-attr4 )
+            previous = exception.
+    ENDTRY.
+  ENDMETHOD.
+
 
   METHOD read_ranges.
     READ TABLE it_ranges INTO DATA(wa_ranges) INDEX 1.
@@ -971,33 +1004,4 @@ CLASS zcl_einvoice_data IMPLEMENTATION.
       CLEAR: o_value.
     ENDIF.
   ENDMETHOD.
-
-  METHOD getdate_einvoice.
-    MOVE-CORRESPONDING i_document TO e_document.
-
-    CASE e_document-typeofdate.
-      WHEN '01'. "Posting Date
-        e_document-einvoicedatecreate = e_document-postingdate.
-        e_document-einvoicetimecreate = '090000'.
-      WHEN '02'. "Document Date
-        e_document-einvoicedatecreate = e_document-documentdate.
-        e_document-einvoicetimecreate = '090000'.
-      WHEN '03'. "Entry Date
-        e_document-einvoicedatecreate = e_document-accountingdocumentcreationdate.
-        e_document-einvoicetimecreate = '090000'.
-      WHEN '04'. "System Date
-        DATA(time_zone) = cl_abap_context_info=>get_user_time_zone(  ).
-
-        DATA(lv_datlo) = xco_cp=>sy->date( )->as( xco_cp_time=>format->abap )->value.
-        DATA(lv_timlo) = xco_cp=>sy->time( )->as( xco_cp_time=>format->abap )->value.
-
-        e_document-einvoicedatecreate = lv_datlo.
-        e_document-einvoicetimecreate = lv_timlo.
-    ENDCASE.
-
-    o_date = e_document-einvoicedatecreate.
-    o_time = e_document-einvoicetimecreate.
-
-  ENDMETHOD.
-
 ENDCLASS.

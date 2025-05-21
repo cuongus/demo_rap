@@ -233,22 +233,8 @@ ENDCLASS.
 
 
 
-CLASS zcl_einvoice_process IMPLEMENTATION.
+CLASS ZCL_EINVOICE_PROCESS IMPLEMENTATION.
 
-
-  METHOD constructor ##ADT_SUPPRESS_GENERATION.
-    CALL METHOD super->constructor.
-
-    CLEAR me->textid.
-
-    IF textid IS INITIAL.
-      if_t100_message~t100key = if_t100_message=>default_textid.
-    ELSE.
-*      if_t100_message~t100key = textid.
-    ENDIF.
-
-    CREATE OBJECT go_einvoice_process.
-  ENDMETHOD.
 
   METHOD adjust_einvoice.
     TYPES: BEGIN OF lty_adjust,
@@ -320,6 +306,7 @@ CLASS zcl_einvoice_process IMPLEMENTATION.
     ENDLOOP.
 
   ENDMETHOD.
+
 
   METHOD cancel_einvoice.
     DATA: ls_param  TYPE zpr_cancel_einvoice,
@@ -431,9 +418,11 @@ CLASS zcl_einvoice_process IMPLEMENTATION.
     MOVE-CORRESPONDING it_headers TO gt_headers_save.
   ENDMETHOD.
 
+
   METHOD cba_einvoiceitems.
 
   ENDMETHOD.
+
 
   METHOD check_adjust_document.
     DATA: lv_count TYPE int4.
@@ -539,21 +528,48 @@ CLASS zcl_einvoice_process IMPLEMENTATION.
     ENDIF.
   ENDMETHOD.
 
+
   METHOD cleanup.
 
   ENDMETHOD.
+
 
   METHOD cleanup_finalize.
 
   ENDMETHOD.
 
+
+  METHOD clear_variables.
+    CLEAR: gv_action, gs_document, gs_userpass, gs_formserial, gs_status, gs_json, gs_docsrc,
+    gs_return, gv_testrun.
+
+  ENDMETHOD.
+
+
+  METHOD constructor ##ADT_SUPPRESS_GENERATION.
+    CALL METHOD super->constructor.
+
+    CLEAR me->textid.
+
+    IF textid IS INITIAL.
+      if_t100_message~t100key = if_t100_message=>default_textid.
+    ELSE.
+*      if_t100_message~t100key = textid.
+    ENDIF.
+
+    CREATE OBJECT go_einvoice_process.
+  ENDMETHOD.
+
+
   METHOD delete_header.
 
   ENDMETHOD.
 
+
   METHOD get_document.
 
   ENDMETHOD.
+
 
   METHOD get_password.
 
@@ -587,307 +603,6 @@ CLASS zcl_einvoice_process IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD integr_einvoice.
-
-    DATA: ls_mapped_header   LIKE LINE OF mapped-hddt_headers,
-          ls_mapped_item     LIKE LINE OF mapped-hddt_items,
-
-          ls_reported_header LIKE LINE OF reported-hddt_headers,
-          ls_reported_items  LIKE LINE OF reported-hddt_items.
-
-    DATA: ls_result LIKE LINE OF result.
-
-    DATA: it_headers TYPE TABLE OF wa_document,
-          it_items   TYPE TABLE OF wa_items.
-
-    FREE: ir_companycode, ir_accountingdocument, ir_fiscalyear.
-
-    go_einvoice_process->clear_variables( ).
-
-    go_einvoice_process->integration_einvoice(
-        EXPORTING
-        i_action                = 'CREATE_INVOICE'
-        ir_companycode          = ir_companycode
-        ir_accountingdocument   = ir_accountingdocument
-        ir_fiscalyear           = ir_fiscalyear
-        IMPORTING
-        e_headers               = gt_headers_save
-        e_items                 = it_items
-        e_docsrc                = gt_docsrc_save
-        e_return                = e_return
-    ).
-
-    LOOP AT gt_headers_save ASSIGNING FIELD-SYMBOL(<fs_headers>).
-      ls_result-%tky-Companycode        = <fs_headers>-Companycode.
-      ls_result-%tky-Accountingdocument = <fs_headers>-Accountingdocument.
-      ls_result-%tky-Fiscalyear         = <fs_headers>-Fiscalyear.
-
-      ls_result-%key-Companycode        = <fs_headers>-Companycode.
-      ls_result-%key-Accountingdocument = <fs_headers>-Accountingdocument.
-      ls_result-%key-Fiscalyear         = <fs_headers>-Fiscalyear.
-
-      ls_result-Companycode             = <fs_headers>-Companycode.
-      ls_result-Accountingdocument      = <fs_headers>-Accountingdocument.
-      ls_result-Fiscalyear              = <fs_headers>-Fiscalyear.
-
-      ls_mapped_header-%tky                 = ls_result-%tky.
-      ls_mapped_header-Companycode          = <fs_headers>-Companycode.
-      ls_mapped_header-Accountingdocument   = <fs_headers>-Accountingdocument.
-      ls_mapped_header-Fiscalyear           = <fs_headers>-Fiscalyear.
-
-      MOVE-CORRESPONDING <fs_headers> TO ls_result-%param.
-
-      IF gs_docsrc IS NOT INITIAL.
-        APPEND gs_docsrc TO gt_docsrc_save.
-      ENDIF.
-
-      INSERT CORRESPONDING #( ls_result ) INTO TABLE result.
-      INSERT CORRESPONDING #( ls_mapped_header ) INTO TABLE mapped-hddt_headers.
-
-    ENDLOOP.
-
-  ENDMETHOD.
-
-  METHOD move_log.
-    o_output-einvoicenumber        = i_input-einvoicenumber .
-    o_output-einvoiceserial        = i_input-einvoiceSerial .
-    o_output-einvoiceform          = i_input-einvoiceForm .
-    o_output-einvoiceType          = i_input-einvoiceType .
-    o_output-mscqt                 = i_input-Mscqt .
-    o_output-link                  = i_input-link .
-    o_output-einvoicedatecancel    = i_input-einvoicedatecreate .
-    o_output-einvoicetimecreate    = i_input-einvoicetimecreate .
-    o_output-einvoicedatecancel    = i_input-einvoicedatecancel .
-    o_output-statussap             = i_input-StatusSap .
-    o_output-statusinvres          = i_input-statusinvres .
-    o_output-statuscqtres          = i_input-statuscqtres .
-    o_output-messagetype           = i_input-messagetype .
-    o_output-messagetext           = i_input-messagetext .
-    o_output-createdbyuser         = i_input-createdbyuser.
-    o_output-createddate           = i_input-createddate.
-    o_output-createdtime           = i_input-createdtime.
-  ENDMETHOD.
-
-  METHOD read_header.
-
-  ENDMETHOD.
-
-  METHOD read_items.
-
-  ENDMETHOD.
-
-  METHOD replace_einvoice.
-    DATA: ls_param TYPE wa_param.
-    DATA: it_headers TYPE tt_headers,
-          it_items   TYPE tt_items.
-
-    DATA: ls_result         LIKE LINE OF result,
-          ls_mapped_headers LIKE LINE OF mapped-hddt_headers.
-
-    FREE: ir_companycode, ir_accountingdocument, ir_fiscalyear.
-
-    go_einvoice_process->clear_variables( ).
-
-    go_einvoice_process->integration_einvoice(
-        EXPORTING
-        i_action                = 'REPLACE_INVOICE'
-        i_param                 = ls_param
-        ir_companycode          = ir_companycode
-        ir_accountingdocument   = ir_accountingdocument
-        ir_fiscalyear           = ir_fiscalyear
-        IMPORTING
-        e_headers               = gt_headers_save
-        e_items                 = it_items
-        e_docsrc                = gt_docsrc_save
-        e_return                = e_return
-    ).
-
-    LOOP AT gt_headers_save ASSIGNING FIELD-SYMBOL(<fs_headers>).
-
-      ls_result-%tky-Companycode            = <fs_headers>-Companycode.
-      ls_result-%tky-Accountingdocument     = <fs_headers>-Accountingdocument.
-      ls_result-%tky-Fiscalyear             = <fs_headers>-Fiscalyear.
-
-      ls_result-%key-Companycode            = <fs_headers>-Companycode.
-      ls_result-%key-Accountingdocument     = <fs_headers>-Accountingdocument.
-      ls_result-%key-Fiscalyear             = <fs_headers>-Fiscalyear.
-
-      ls_result-Companycode                 = <fs_headers>-Companycode.
-      ls_result-Accountingdocument          = <fs_headers>-Accountingdocument.
-      ls_result-Fiscalyear                  = <fs_headers>-Fiscalyear.
-
-      ls_mapped_headers-%tky                = ls_result-%tky.
-      ls_mapped_headers-Companycode         = <fs_headers>-Companycode.
-      ls_mapped_headers-Accountingdocument  = <fs_headers>-Accountingdocument.
-      ls_mapped_headers-Fiscalyear          = <fs_headers>-Fiscalyear.
-
-      INSERT CORRESPONDING #( ls_result ) INTO TABLE result.
-      INSERT CORRESPONDING #( ls_mapped_headers ) INTO TABLE mapped-hddt_headers.
-
-    ENDLOOP.
-
-  ENDMETHOD.
-
-  METHOD save_einvoice.
-
-    SORT gt_headers_save    BY companycode accountingdocument fiscalyear ASCENDING.
-    SORT gt_docsrc_save     BY companycode accountingdocument fiscalyear ASCENDING.
-
-    LOOP AT gt_headers_save INTO DATA(ls_header).
-
-      READ TABLE gt_docsrc_save TRANSPORTING NO FIELDS WITH KEY
-        companycode         = ls_header-companycode
-        accountingdocument  = ls_header-accountingdocument
-        fiscalyear          = ls_header-fiscalyear BINARY SEARCH.
-      IF sy-subrc EQ 0.
-        CONTINUE.
-      ENDIF.
-
-      SELECT COUNT(*) FROM zjp_a_hddt_h
-      WHERE companycode        = @ls_header-companycode
-        AND accountingdocument = @ls_header-accountingdocument
-        AND fiscalyear         = @ls_header-fiscalyear
-        INTO @DATA(lv_count).
-      IF sy-subrc NE 0.
-        CLEAR: lv_count.
-      ENDIF.
-
-      IF lv_count = 0.
-        MODIFY zjp_a_hddt_h FROM @ls_header.
-      ELSE.
-        UPDATE zjp_a_hddt_h SET CustomerName                = @ls_header-CustomerName ,
-                                CustomerAddress             = @ls_header-CustomerAddress ,
-                                EmailAddress                = @ls_header-EmailAddress ,
-                                identificationnumber        = @ls_header-identificationnumber ,
-                                telephonenumber             = @ls_header-telephonenumber ,
-                                typeofdate                  = @ls_header-typeofdate ,
-                                usertype                    = @ls_header-usertype ,
-                                accountingdocumentsource    = @ls_header-accountingdocumentsource ,
-                                fiscalyearsource            = @ls_header-fiscalyearsource ,
-                                adjusttype                  = @ls_header-adjusttype ,
-                                currencytype                = @ls_header-currencytype ,
-                                paymentmethod               = @ls_header-paymentmethod ,
-                                einvoicenumber              = @ls_header-einvoicenumber ,
-                                einvoiceserial              = @ls_header-einvoiceSerial ,
-                                einvoiceform                = @ls_header-einvoiceForm ,
-                                einvoicetype                = @ls_header-einvoicetype ,
-                                mscqt                       = @ls_header-Mscqt ,
-                                link                        = @ls_header-link ,
-                                einvoicedatecreate          = @ls_header-einvoicedatecreate ,
-                                einvoicetimecreate          = @ls_header-einvoicetimecreate ,
-                                einvoicedatecancel          = @ls_header-einvoicedatecancel ,
-                                statussap                   = @ls_header-StatusSap ,
-                                statusinvres                = @ls_header-statusinvres ,
-                                statuscqtres                = @ls_header-statuscqtres ,
-                                messagetype                 = @ls_header-messagetype ,
-                                messagetext                 = @ls_header-messagetext,
-                                invdat                      = @ls_header-invdat ,
-                                xreversed                   = @ls_header-xreversed,
-                                xreversing                  = @ls_header-xreversing
-      WHERE companycode         = @ls_header-Companycode
-        AND accountingdocument  = @ls_header-Accountingdocument
-        AND fiscalyear          = @ls_header-Fiscalyear.
-      ENDIF.
-
-    ENDLOOP.
-
-    LOOP AT gt_docsrc_save INTO DATA(ls_einv_docsrc).
-      UPDATE zjp_a_hddt_h SET iconsap       = @ls_einv_docsrc-Iconsap ,
-                              statussap     = @ls_einv_docsrc-StatusSap ,
-                              messagetext   = @ls_einv_docsrc-messagetext
-
-      WHERE companycode          = @ls_einv_docsrc-Companycode
-        AND accountingdocument   = @ls_einv_docsrc-Accountingdocument
-        AND fiscalyear           = @ls_einv_docsrc-Fiscalyear.
-    ENDLOOP.
-
-  ENDMETHOD.
-
-  METHOD search_einvoice.
-
-    DATA: ls_result LIKE LINE OF result.
-
-    DATA: it_headers TYPE TABLE OF wa_document,
-          it_items   TYPE TABLE OF wa_items.
-
-    LOOP AT it_headers ASSIGNING FIELD-SYMBOL(<fs_headers>).
-      IF <fs_headers>-usertype IS NOT INITIAL.
-        MOVE-CORRESPONDING <fs_headers> TO gs_document.
-
-        gv_action = 'SEARCH_INVOICE'.
-        go_fpt_einvoice->search_einvoices(
-            EXPORTING
-            i_action      = gv_action
-            i_einvoice    = gs_document
-            i_userpass    = gs_userpass
-            IMPORTING
-            e_return      = gs_return
-            e_status      = gs_status
-            e_docsrc      = gs_docsrc
-        ).
-
-        SELECT SINGLE * FROM zjp_a_hddt_h
-        WHERE Companycode              = @<fs_headers>-Companycode
-          AND accountingdocumentsource = @<fs_headers>-Accountingdocument
-          AND fiscalyearsource         = @<fs_headers>-Fiscalyear
-          AND einvoicenumber    NE ''
-        INTO @DATA(ls_adjust).
-        IF sy-subrc EQ 0 AND ls_adjust-einvoicenumber IS NOT INITIAL
-        AND ( ls_adjust-statussap = '99' OR ls_adjust-statussap = '98' ).
-          CASE ls_adjust-adjusttype.
-            WHEN '3'. "Thay thế
-              <fs_headers>-Iconsap = '@20@'.
-              <fs_headers>-StatusSap = '07'.
-              <fs_headers>-messagetext = 'Hóa đơn đã bị thay thế'.
-            WHEN '1' OR '2'. "Điều chỉnh tiền
-              <fs_headers>-Iconsap = '@4K@'.
-              <fs_headers>-StatusSap = '06'.
-              <fs_headers>-messagetext = 'Hóa đơn đã bị điều chỉnh'.
-            WHEN OTHERS.
-          ENDCASE.
-        ELSE.
-
-          go_einvoice_process->move_log(
-              EXPORTING
-              i_input = gs_status
-              IMPORTING
-              o_output = <fs_headers>
-          ).
-
-        ENDIF.
-
-        IF gs_docsrc IS NOT INITIAL.
-          APPEND gs_docsrc TO gt_docsrc_save.
-        ENDIF.
-
-      ELSE.
-        <fs_headers>-statussap = '01'.
-        <fs_headers>-messagetype = ''.
-        <fs_headers>-messagetext = ''.
-      ENDIF.
-
-      ls_result-%tky-companycode        = <fs_headers>-companycode.
-      ls_result-%tky-accountingdocument = <fs_headers>-accountingdocument.
-      ls_result-%tky-fiscalyear         = <fs_headers>-fiscalyear.
-
-      MOVE-CORRESPONDING <fs_headers> TO ls_result-%param.
-      INSERT CORRESPONDING #( ls_result ) INTO TABLE result.
-
-    ENDLOOP.
-
-    MOVE-CORRESPONDING it_headers TO gt_headers_save.
-
-  ENDMETHOD.
-
-  METHOD update_entry.
-
-  ENDMETHOD.
-
-  METHOD clear_variables.
-    CLEAR: gv_action, gs_document, gs_userpass, gs_formserial, gs_status, gs_json, gs_docsrc,
-    gs_return, gv_testrun.
-
-  ENDMETHOD.
 
   METHOD integration_einvoice.
 
@@ -1082,4 +797,307 @@ CLASS zcl_einvoice_process IMPLEMENTATION.
 
   ENDMETHOD.
 
+
+  METHOD integr_einvoice.
+
+    DATA: ls_mapped_header   LIKE LINE OF mapped-hddt_headers,
+          ls_mapped_item     LIKE LINE OF mapped-hddt_items,
+
+          ls_reported_header LIKE LINE OF reported-hddt_headers,
+          ls_reported_items  LIKE LINE OF reported-hddt_items.
+
+    DATA: ls_result LIKE LINE OF result.
+
+    DATA: it_headers TYPE TABLE OF wa_document,
+          it_items   TYPE TABLE OF wa_items.
+
+    FREE: ir_companycode, ir_accountingdocument, ir_fiscalyear.
+
+    go_einvoice_process->clear_variables( ).
+
+    go_einvoice_process->integration_einvoice(
+        EXPORTING
+        i_action                = 'CREATE_INVOICE'
+        ir_companycode          = ir_companycode
+        ir_accountingdocument   = ir_accountingdocument
+        ir_fiscalyear           = ir_fiscalyear
+        IMPORTING
+        e_headers               = gt_headers_save
+        e_items                 = it_items
+        e_docsrc                = gt_docsrc_save
+        e_return                = e_return
+    ).
+
+    LOOP AT gt_headers_save ASSIGNING FIELD-SYMBOL(<fs_headers>).
+      ls_result-%tky-Companycode        = <fs_headers>-Companycode.
+      ls_result-%tky-Accountingdocument = <fs_headers>-Accountingdocument.
+      ls_result-%tky-Fiscalyear         = <fs_headers>-Fiscalyear.
+
+      ls_result-%key-Companycode        = <fs_headers>-Companycode.
+      ls_result-%key-Accountingdocument = <fs_headers>-Accountingdocument.
+      ls_result-%key-Fiscalyear         = <fs_headers>-Fiscalyear.
+
+      ls_result-Companycode             = <fs_headers>-Companycode.
+      ls_result-Accountingdocument      = <fs_headers>-Accountingdocument.
+      ls_result-Fiscalyear              = <fs_headers>-Fiscalyear.
+
+      ls_mapped_header-%tky                 = ls_result-%tky.
+      ls_mapped_header-Companycode          = <fs_headers>-Companycode.
+      ls_mapped_header-Accountingdocument   = <fs_headers>-Accountingdocument.
+      ls_mapped_header-Fiscalyear           = <fs_headers>-Fiscalyear.
+
+      MOVE-CORRESPONDING <fs_headers> TO ls_result-%param.
+
+      IF gs_docsrc IS NOT INITIAL.
+        APPEND gs_docsrc TO gt_docsrc_save.
+      ENDIF.
+
+      INSERT CORRESPONDING #( ls_result ) INTO TABLE result.
+      INSERT CORRESPONDING #( ls_mapped_header ) INTO TABLE mapped-hddt_headers.
+
+    ENDLOOP.
+
+  ENDMETHOD.
+
+
+  METHOD move_log.
+    o_output-einvoicenumber        = i_input-einvoicenumber .
+    o_output-einvoiceserial        = i_input-einvoiceSerial .
+    o_output-einvoiceform          = i_input-einvoiceForm .
+    o_output-einvoiceType          = i_input-einvoiceType .
+    o_output-mscqt                 = i_input-Mscqt .
+    o_output-link                  = i_input-link .
+    o_output-einvoicedatecancel    = i_input-einvoicedatecreate .
+    o_output-einvoicetimecreate    = i_input-einvoicetimecreate .
+    o_output-einvoicedatecancel    = i_input-einvoicedatecancel .
+    o_output-statussap             = i_input-StatusSap .
+    o_output-statusinvres          = i_input-statusinvres .
+    o_output-statuscqtres          = i_input-statuscqtres .
+    o_output-messagetype           = i_input-messagetype .
+    o_output-messagetext           = i_input-messagetext .
+    o_output-createdbyuser         = i_input-createdbyuser.
+    o_output-createddate           = i_input-createddate.
+    o_output-createdtime           = i_input-createdtime.
+  ENDMETHOD.
+
+
+  METHOD read_header.
+
+  ENDMETHOD.
+
+
+  METHOD read_items.
+
+  ENDMETHOD.
+
+
+  METHOD replace_einvoice.
+    DATA: ls_param TYPE wa_param.
+    DATA: it_headers TYPE tt_headers,
+          it_items   TYPE tt_items.
+
+    DATA: ls_result         LIKE LINE OF result,
+          ls_mapped_headers LIKE LINE OF mapped-hddt_headers.
+
+    FREE: ir_companycode, ir_accountingdocument, ir_fiscalyear.
+
+    go_einvoice_process->clear_variables( ).
+
+    go_einvoice_process->integration_einvoice(
+        EXPORTING
+        i_action                = 'REPLACE_INVOICE'
+        i_param                 = ls_param
+        ir_companycode          = ir_companycode
+        ir_accountingdocument   = ir_accountingdocument
+        ir_fiscalyear           = ir_fiscalyear
+        IMPORTING
+        e_headers               = gt_headers_save
+        e_items                 = it_items
+        e_docsrc                = gt_docsrc_save
+        e_return                = e_return
+    ).
+
+    LOOP AT gt_headers_save ASSIGNING FIELD-SYMBOL(<fs_headers>).
+
+      ls_result-%tky-Companycode            = <fs_headers>-Companycode.
+      ls_result-%tky-Accountingdocument     = <fs_headers>-Accountingdocument.
+      ls_result-%tky-Fiscalyear             = <fs_headers>-Fiscalyear.
+
+      ls_result-%key-Companycode            = <fs_headers>-Companycode.
+      ls_result-%key-Accountingdocument     = <fs_headers>-Accountingdocument.
+      ls_result-%key-Fiscalyear             = <fs_headers>-Fiscalyear.
+
+      ls_result-Companycode                 = <fs_headers>-Companycode.
+      ls_result-Accountingdocument          = <fs_headers>-Accountingdocument.
+      ls_result-Fiscalyear                  = <fs_headers>-Fiscalyear.
+
+      ls_mapped_headers-%tky                = ls_result-%tky.
+      ls_mapped_headers-Companycode         = <fs_headers>-Companycode.
+      ls_mapped_headers-Accountingdocument  = <fs_headers>-Accountingdocument.
+      ls_mapped_headers-Fiscalyear          = <fs_headers>-Fiscalyear.
+
+      INSERT CORRESPONDING #( ls_result ) INTO TABLE result.
+      INSERT CORRESPONDING #( ls_mapped_headers ) INTO TABLE mapped-hddt_headers.
+
+    ENDLOOP.
+
+  ENDMETHOD.
+
+
+  METHOD save_einvoice.
+
+    SORT gt_headers_save    BY companycode accountingdocument fiscalyear ASCENDING.
+    SORT gt_docsrc_save     BY companycode accountingdocument fiscalyear ASCENDING.
+
+    LOOP AT gt_headers_save INTO DATA(ls_header).
+
+      READ TABLE gt_docsrc_save TRANSPORTING NO FIELDS WITH KEY
+        companycode         = ls_header-companycode
+        accountingdocument  = ls_header-accountingdocument
+        fiscalyear          = ls_header-fiscalyear BINARY SEARCH.
+      IF sy-subrc EQ 0.
+        CONTINUE.
+      ENDIF.
+
+      SELECT COUNT(*) FROM zjp_a_hddt_h
+      WHERE companycode        = @ls_header-companycode
+        AND accountingdocument = @ls_header-accountingdocument
+        AND fiscalyear         = @ls_header-fiscalyear
+        INTO @DATA(lv_count).
+      IF sy-subrc NE 0.
+        CLEAR: lv_count.
+      ENDIF.
+
+      IF lv_count = 0.
+        MODIFY zjp_a_hddt_h FROM @ls_header.
+      ELSE.
+        UPDATE zjp_a_hddt_h SET CustomerName                = @ls_header-CustomerName ,
+                                CustomerAddress             = @ls_header-CustomerAddress ,
+                                EmailAddress                = @ls_header-EmailAddress ,
+                                identificationnumber        = @ls_header-identificationnumber ,
+                                telephonenumber             = @ls_header-telephonenumber ,
+                                typeofdate                  = @ls_header-typeofdate ,
+                                usertype                    = @ls_header-usertype ,
+                                accountingdocumentsource    = @ls_header-accountingdocumentsource ,
+                                fiscalyearsource            = @ls_header-fiscalyearsource ,
+                                adjusttype                  = @ls_header-adjusttype ,
+                                currencytype                = @ls_header-currencytype ,
+                                paymentmethod               = @ls_header-paymentmethod ,
+                                einvoicenumber              = @ls_header-einvoicenumber ,
+                                einvoiceserial              = @ls_header-einvoiceSerial ,
+                                einvoiceform                = @ls_header-einvoiceForm ,
+                                einvoicetype                = @ls_header-einvoicetype ,
+                                mscqt                       = @ls_header-Mscqt ,
+                                link                        = @ls_header-link ,
+                                einvoicedatecreate          = @ls_header-einvoicedatecreate ,
+                                einvoicetimecreate          = @ls_header-einvoicetimecreate ,
+                                einvoicedatecancel          = @ls_header-einvoicedatecancel ,
+                                statussap                   = @ls_header-StatusSap ,
+                                statusinvres                = @ls_header-statusinvres ,
+                                statuscqtres                = @ls_header-statuscqtres ,
+                                messagetype                 = @ls_header-messagetype ,
+                                messagetext                 = @ls_header-messagetext,
+                                invdat                      = @ls_header-invdat ,
+                                xreversed                   = @ls_header-xreversed,
+                                xreversing                  = @ls_header-xreversing
+      WHERE companycode         = @ls_header-Companycode
+        AND accountingdocument  = @ls_header-Accountingdocument
+        AND fiscalyear          = @ls_header-Fiscalyear.
+      ENDIF.
+
+    ENDLOOP.
+
+    LOOP AT gt_docsrc_save INTO DATA(ls_einv_docsrc).
+      UPDATE zjp_a_hddt_h SET iconsap       = @ls_einv_docsrc-Iconsap ,
+                              statussap     = @ls_einv_docsrc-StatusSap ,
+                              messagetext   = @ls_einv_docsrc-messagetext
+
+      WHERE companycode          = @ls_einv_docsrc-Companycode
+        AND accountingdocument   = @ls_einv_docsrc-Accountingdocument
+        AND fiscalyear           = @ls_einv_docsrc-Fiscalyear.
+    ENDLOOP.
+
+  ENDMETHOD.
+
+
+  METHOD search_einvoice.
+
+    DATA: ls_result LIKE LINE OF result.
+
+    DATA: it_headers TYPE TABLE OF wa_document,
+          it_items   TYPE TABLE OF wa_items.
+
+    LOOP AT it_headers ASSIGNING FIELD-SYMBOL(<fs_headers>).
+      IF <fs_headers>-usertype IS NOT INITIAL.
+        MOVE-CORRESPONDING <fs_headers> TO gs_document.
+
+        gv_action = 'SEARCH_INVOICE'.
+        go_fpt_einvoice->search_einvoices(
+            EXPORTING
+            i_action      = gv_action
+            i_einvoice    = gs_document
+            i_userpass    = gs_userpass
+            IMPORTING
+            e_return      = gs_return
+            e_status      = gs_status
+            e_docsrc      = gs_docsrc
+        ).
+
+        SELECT SINGLE * FROM zjp_a_hddt_h
+        WHERE Companycode              = @<fs_headers>-Companycode
+          AND accountingdocumentsource = @<fs_headers>-Accountingdocument
+          AND fiscalyearsource         = @<fs_headers>-Fiscalyear
+          AND einvoicenumber    NE ''
+        INTO @DATA(ls_adjust).
+        IF sy-subrc EQ 0 AND ls_adjust-einvoicenumber IS NOT INITIAL
+        AND ( ls_adjust-statussap = '99' OR ls_adjust-statussap = '98' ).
+          CASE ls_adjust-adjusttype.
+            WHEN '3'. "Thay thế
+              <fs_headers>-Iconsap = '@20@'.
+              <fs_headers>-StatusSap = '07'.
+              <fs_headers>-messagetext = 'Hóa đơn đã bị thay thế'.
+            WHEN '1' OR '2'. "Điều chỉnh tiền
+              <fs_headers>-Iconsap = '@4K@'.
+              <fs_headers>-StatusSap = '06'.
+              <fs_headers>-messagetext = 'Hóa đơn đã bị điều chỉnh'.
+            WHEN OTHERS.
+          ENDCASE.
+        ELSE.
+
+          go_einvoice_process->move_log(
+              EXPORTING
+              i_input = gs_status
+              IMPORTING
+              o_output = <fs_headers>
+          ).
+
+        ENDIF.
+
+        IF gs_docsrc IS NOT INITIAL.
+          APPEND gs_docsrc TO gt_docsrc_save.
+        ENDIF.
+
+      ELSE.
+        <fs_headers>-statussap = '01'.
+        <fs_headers>-messagetype = ''.
+        <fs_headers>-messagetext = ''.
+      ENDIF.
+
+      ls_result-%tky-companycode        = <fs_headers>-companycode.
+      ls_result-%tky-accountingdocument = <fs_headers>-accountingdocument.
+      ls_result-%tky-fiscalyear         = <fs_headers>-fiscalyear.
+
+      MOVE-CORRESPONDING <fs_headers> TO ls_result-%param.
+      INSERT CORRESPONDING #( ls_result ) INTO TABLE result.
+
+    ENDLOOP.
+
+    MOVE-CORRESPONDING it_headers TO gt_headers_save.
+
+  ENDMETHOD.
+
+
+  METHOD update_entry.
+
+  ENDMETHOD.
 ENDCLASS.

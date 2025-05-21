@@ -53,6 +53,7 @@ CLASS zcl_jp_common_core DEFINITION
                                 ir_accountingdocument TYPE tt_ranges
                                 ir_glaccount          TYPE tt_ranges
                                 ir_fiscalyear         TYPE tt_ranges
+                                ir_buzei              TYPE tt_ranges
                                 ir_postingdate        TYPE tt_ranges
                                 ir_documentdate       TYPE tt_ranges
 
@@ -277,6 +278,8 @@ CLASS zcl_jp_common_core IMPLEMENTATION.
           MOVE-CORRESPONDING ls_ranges-range TO ir_accountingdocument.
         WHEN 'FISCALYEAR'.
           MOVE-CORRESPONDING ls_ranges-range TO ir_fiscalyear.
+        WHEN 'ACCOUNTINGDOCUMENTITEM'.
+          MOVE-CORRESPONDING ls_ranges-range to ir_buzei.
         WHEN 'CASHACCOUNTING'.
           MOVE-CORRESPONDING ls_ranges-range TO ir_glaccount.
         WHEN 'POSTINGDATE'.
