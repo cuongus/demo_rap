@@ -1,0 +1,52 @@
+@Metadata.layer: #CORE
+@UI: {
+      headerInfo:{ typeName: 'Convert Json',
+                   typeNamePlural: 'Convert Json',
+                   title: { type: #STANDARD, label: 'Tagname', value: 'TagName' }
+                  },
+      presentationVariant: [{ sortOrder: [{ by: 'TagMain', direction: #ASC },
+                                          { by: 'TagName', direction: #ASC }] }]
+}
+annotate view ZJP_C_VIETTEL_JSON with
+{
+  @UI.facet: [
+    {
+        id: 'Global',
+        purpose: #STANDARD,
+        type: #IDENTIFICATION_REFERENCE,
+        label: 'Config Value',
+        position: 10
+    }]
+
+  @UI.identification: [{ position: 10 }]
+  @UI.lineItem: [{ position: 10 },{ label: 'Generate', dataAction: 'Generate', type: #FOR_ACTION }]
+  @UI.selectionField: [{ position: 10 }]
+  TagMain;
+
+  @UI.identification: [{ position: 20 }]
+  @UI.lineItem: [{ position: 20 }]
+  @UI.selectionField: [{ position: 20 }]
+  TagName;
+
+  @UI.identification: [{ position: 30 }]
+  @UI.lineItem: [{ position: 30 }]
+  @UI.selectionField: [{ position: 30 }]
+  Value;
+
+  @UI.identification: [{ position: 40 }]
+  @UI.lineItem: [{ position: 40 }]
+  Createdbyuser;
+
+  @UI.identification: [{ position: 50 }]
+  @UI.lineItem: [{ position: 50 }]
+  Createddate;
+
+  @UI.identification: [{ position: 60 }]
+  @UI.lineItem: [{ position: 60 }]
+  Changedbyuser;
+
+  @UI.identification: [{ position: 70 }]
+  @UI.lineItem: [{ position: 70 }]
+  Changeddate;
+
+}

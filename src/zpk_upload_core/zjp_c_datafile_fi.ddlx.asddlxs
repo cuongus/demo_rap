@@ -1,0 +1,479 @@
+@Metadata.layer: #CORE
+@UI:{
+    headerInfo: { typeName: 'Items',
+                  typeNamePlural: 'Details'
+    },
+    presentationVariant: [{ sortOrder: [{ by: 'DocSeqNo', direction: #ASC },
+                                          { by: 'Uuid', direction: #ASC }
+                                       ] }]
+}
+annotate view ZJP_C_DATAFILE_FI
+    with 
+{
+
+  @UI.facet          : [
+  {id                : 'Items',
+  purpose            : #STANDARD,
+  position           : 10,
+  label              : 'Items',
+  type               : #IDENTIFICATION_REFERENCE
+  }
+  ]
+
+  @UI.lineItem: [{ position: 10 }]
+  @UI.identification: [{ position: 10 }]
+  @EndUserText.label: 'Key Uuid'
+  Uuid;
+
+  @UI.lineItem: [{ position: 20 }]
+  @UI.identification: [{ position: 20 }]
+  @EndUserText.label: 'Key UserUuid'
+  UserUuid;
+  
+  @UI.lineItem: [{ position: 25 }]
+  @UI.identification: [{ position: 25 }]
+  @EndUserText.label: 'End User'
+  EndUser;
+
+  @UI.lineItem: [{ position: 30 }]
+  @UI.identification: [{ position: 30 }]
+  @EndUserText.label: '*Document Sequence No.'
+  DocSeqNo;
+
+  @UI.lineItem: [{ position: 40 }]
+  @UI.identification: [{ position: 40 }]
+  @EndUserText.label: 'Company Code'
+  CompanyCode;
+
+  @UI.lineItem: [{ position: 50 }]
+  @UI.identification: [{ position: 50 }]
+  @EndUserText.label: 'Reference'
+  Reference;
+
+  @UI.lineItem: [{ position: 60 }]
+  @UI.identification: [{ position: 60 }]
+  @EndUserText.label: 'Document Date'
+  DocumentDate;
+
+  @UI.lineItem: [{ position: 70 }]
+  @UI.identification: [{ position: 70 }]
+  @EndUserText.label: 'Posting Date'
+  PostingDate;
+
+  @UI.lineItem: [{ position: 80 }]
+  @UI.identification: [{ position: 80 }]
+  @EndUserText.label: 'Tax Determination Date'
+  TaxDetDate;
+
+  @UI.lineItem: [{ position: 90 }]
+  @UI.identification: [{ position: 90 }]
+  @EndUserText.label: 'Document Type'
+  DocumentType;
+
+  @UI.lineItem: [{ position: 100 }]
+  @UI.identification: [{ position: 100 }]
+  @EndUserText.label: 'Document Header Text'
+  DocHeaderText;
+
+  @UI.lineItem: [{ position: 110 }]
+  @UI.identification: [{ position: 110 }]
+  @EndUserText.label: 'Currency'
+  Currency;
+
+  @UI.lineItem: [{ position: 120 }]
+  @UI.identification: [{ position: 120 }]
+  @EndUserText.label: 'Translation Date'
+  TranslationDate;
+
+  @UI.lineItem: [{ position: 130 }]
+  @UI.identification: [{ position: 130 }]
+  @EndUserText.label: 'Exchange Rate'
+  ExchangeRate;
+
+  @UI.lineItem: [{ position: 140 }]
+  @UI.identification: [{ position: 140 }]
+  @EndUserText.label: 'Customer'
+  Customer;
+
+  @UI.lineItem: [{ position: 150 }]
+  @UI.identification: [{ position: 150 }]
+  @EndUserText.label: 'Vendor'
+  Vendor;
+
+  @UI.lineItem: [{ position: 160 }]
+  @UI.identification: [{ position: 160 }]
+  @EndUserText.label: 'GL Accounting'
+  GlAccount;
+
+  @UI.lineItem: [{ position: 170 }]
+  @UI.identification: [{ position: 170 }]
+  @EndUserText.label: 'Transaction Amount'
+  TransactionAmount;
+
+  @UI.lineItem: [{ position: 180 }]
+  @UI.identification: [{ position: 180 }]
+  @EndUserText.label: 'Local Amount'
+  LocalAmount;
+
+  @UI.lineItem: [{ position: 190 }]
+  @UI.identification: [{ position: 190 }]
+  @EndUserText.label: 'Payment Block'
+  PaymentBlock;
+
+  @UI.lineItem: [{ position: 200 }]
+  @UI.identification: [{ position: 200 }]
+  @EndUserText.label: 'Baseline Date'
+  BaselineDate;
+
+  @UI.lineItem: [{ position: 210 }]
+  @UI.identification: [{ position: 210 }]
+  @EndUserText.label: 'Cash Discount Base'
+  CashDiscBase;
+
+  @UI.lineItem: [{ position: 220 }]
+  @UI.identification: [{ position: 220 }]
+  @EndUserText.label: 'Cash Discount Days 1'
+  CashDiscDays1;
+
+  @UI.lineItem: [{ position: 230 }]
+  @UI.identification: [{ position: 230 }]
+  @EndUserText.label: 'CD Percentage 1'
+  CdPercent1;
+
+  @UI.lineItem: [{ position: 240 }]
+  @UI.identification: [{ position: 240 }]
+  @EndUserText.label: 'Cash Discount Days 2'
+  CashDiscDays2;
+
+  @UI.lineItem: [{ position: 250 }]
+  @UI.identification: [{ position: 250 }]
+  @EndUserText.label: 'CD Percentage 2'
+  CdPercent2;
+
+  @UI.lineItem: [{ position: 260 }]
+  @UI.identification: [{ position: 260 }]
+  @EndUserText.label: 'Payment Method'
+  PaymentMethod;
+
+  @UI.lineItem: [{ position: 270 }]
+  @UI.identification: [{ position: 270 }]
+  @EndUserText.label: 'Pmt Meth. Supplement'
+  PmtSupplement;
+
+  @UI.lineItem: [{ position: 280 }]
+  @UI.identification: [{ position: 280 }]
+  @EndUserText.label: 'Pmt Meth. Supplement'
+  PaymentReference;
+
+  @UI.lineItem: [{ position: 290 }]
+  @UI.identification: [{ position: 290 }]
+  @EndUserText.label: 'Partner Bank Type'
+  PartnerBankType;
+
+  @UI.lineItem: [{ position: 300 }]
+  @UI.identification: [{ position: 300 }]
+  @EndUserText.label: 'House Bank'
+  HouseBank;
+
+  @UI.lineItem: [{ position: 310 }]
+  @UI.identification: [{ position: 310 }]
+  @EndUserText.label: 'Account Id'
+  AccountId;
+
+  @UI.lineItem: [{ position: 320 }]
+  @UI.identification: [{ position: 320 }]
+  @EndUserText.label: 'Reason Code'
+  ReasonCode;
+
+  @UI.lineItem: [{ position: 330 }]
+  @UI.identification: [{ position: 330 }]
+  @EndUserText.label: 'Net Pmt Terms Period'
+  NetPmtTermPeriod;
+
+  @UI.lineItem: [{ position: 340 }]
+  @UI.identification: [{ position: 340 }]
+  @EndUserText.label: 'Recon. Account'
+  ReconAccount;
+
+  @UI.lineItem: [{ position: 350 }]
+  @UI.identification: [{ position: 350 }]
+  @EndUserText.label: 'Title'
+  Title;
+
+  @UI.lineItem: [{ position: 360 }]
+  @UI.identification: [{ position: 360 }]
+  @EndUserText.label: 'Name1'
+  Name1;
+
+  @UI.lineItem: [{ position: 370 }]
+  @UI.identification: [{ position: 370 }]
+  @EndUserText.label: 'Name2'
+  Name2;
+
+  @UI.lineItem: [{ position: 380 }]
+  @UI.identification: [{ position: 380 }]
+  @EndUserText.label: 'Name3'
+  Name3;
+
+  @UI.lineItem: [{ position: 390 }]
+  @UI.identification: [{ position: 390 }]
+  @EndUserText.label: 'Name4'
+  Name4;
+
+  @UI.lineItem: [{ position: 400 }]
+  @UI.identification: [{ position: 400 }]
+  @EndUserText.label: 'Street'
+  Street;
+
+  @UI.lineItem: [{ position: 410 }]
+  @UI.identification: [{ position: 410 }]
+  @EndUserText.label: 'City'
+  City;
+
+  @UI.lineItem: [{ position: 420 }]
+  @UI.identification: [{ position: 420 }]
+  @EndUserText.label: 'Postal Code'
+  PostalCode;
+
+  @UI.lineItem: [{ position: 430 }]
+  @UI.identification: [{ position: 430 }]
+  @EndUserText.label: 'Country Region'
+  CountryRegion;
+
+  @UI.lineItem: [{ position: 440 }]
+  @UI.identification: [{ position: 440 }]
+  @EndUserText.label: 'Country Region'
+  Region;
+
+  @UI.lineItem: [{ position: 450 }]
+  @UI.identification: [{ position: 450 }]
+  @EndUserText.label: 'EmailAddress'
+  EmailAddress;
+
+  @UI.lineItem: [{ position: 450 }]
+  @UI.identification: [{ position: 450 }]
+  @EndUserText.label: 'BankCountry'
+  BankCountry;
+
+  @UI.lineItem: [{ position: 460 }]
+  @UI.identification: [{ position: 460 }]
+  @EndUserText.label: 'BankKey'
+  BankKey;
+
+  @UI.lineItem: [{ position: 470 }]
+  @UI.identification: [{ position: 470 }]
+  @EndUserText.label: 'BankAccount'
+  BankAccount;
+
+  @UI.lineItem: [{ position: 480 }]
+  @UI.identification: [{ position: 480 }]
+  @EndUserText.label: 'Bank Control Key'
+  BankControlKey;
+
+  @UI.lineItem: [{ position: 490 }]
+  @UI.identification: [{ position: 490 }]
+  @EndUserText.label: 'Tax Type'
+  TaxType;
+
+  @UI.lineItem: [{ position: 500 }]
+  @UI.identification: [{ position: 500 }]
+  @EndUserText.label: 'TaxNumber Type'
+  TaxNumberType;
+
+  @UI.lineItem: [{ position: 510 }]
+  @UI.identification: [{ position: 510 }]
+  @EndUserText.label: 'TaxNumber1'
+  TaxNumber1;
+
+  @UI.lineItem: [{ position: 520 }]
+  @UI.identification: [{ position: 520 }]
+  @EndUserText.label: 'TaxNumber2'
+  TaxNumber2;
+
+  @UI.lineItem: [{ position: 530 }]
+  @UI.identification: [{ position: 530 }]
+  @EndUserText.label: 'TaxNumber3'
+  TaxNumber3;
+
+  @UI.lineItem: [{ position: 540 }]
+  @UI.identification: [{ position: 540 }]
+  @EndUserText.label: 'TaxNumber4'
+  TaxNumber4;
+
+  @UI.lineItem: [{ position: 550 }]
+  @UI.identification: [{ position: 550 }]
+  @EndUserText.label: 'TaxNumber5'
+  TaxNumber5;
+
+  @UI.lineItem: [{ position: 560 }]
+  @UI.identification: [{ position: 560 }]
+  @EndUserText.label: 'Natural Person'
+  NaturalPerson;
+
+  @UI.lineItem: [{ position: 570 }]
+  @UI.identification: [{ position: 570 }]
+  @EndUserText.label: 'ItemText'
+  ItemText;
+
+  @UI.lineItem: [{ position: 580 }]
+  @UI.identification: [{ position: 580 }]
+  @EndUserText.label: 'TaxCode'
+  TaxCode;
+
+  @UI.lineItem: [{ position: 590 }]
+  @UI.identification: [{ position: 590 }]
+  @EndUserText.label: 'Tax Ctry/Reg. '
+  TaxCtryRegion;
+
+  @UI.lineItem: [{ position: 600 }]
+  @UI.identification: [{ position: 600 }]
+  @EndUserText.label: 'Assignment'
+  Assignment;
+
+  @UI.lineItem: [{ position: 610 }]
+  @UI.identification: [{ position: 610 }]
+  @EndUserText.label: 'Reference key 1'
+  RefKey1;
+
+  @UI.lineItem: [{ position: 620 }]
+  @UI.identification: [{ position: 620 }]
+  @EndUserText.label: 'Reference key 2'
+  RefKey2;
+
+  @UI.lineItem: [{ position: 630 }]
+  @UI.identification: [{ position: 630 }]
+  @EndUserText.label: 'Reference key 3'
+  RefKey3;
+
+  @UI.lineItem: [{ position: 640 }]
+  @UI.identification: [{ position: 640 }]
+  @EndUserText.label: 'Value Date'
+  ValueDate;
+
+  @UI.lineItem: [{ position: 650 }]
+  @UI.identification: [{ position: 650 }]
+  @EndUserText.label: 'Cost Center'
+  CostCenter;
+
+  @UI.lineItem: [{ position: 660 }]
+  @UI.identification: [{ position: 660 }]
+  @EndUserText.label: 'Profit Center'
+  ProfitCenter;
+
+  @UI.lineItem: [{ position: 670 }]
+  @UI.identification: [{ position: 670 }]
+  @EndUserText.label: 'Order'
+  OrderNo;
+
+  @UI.lineItem: [{ position: 680 }]
+  @UI.identification: [{ position: 680 }]
+  @EndUserText.label: 'Reason code'
+  ReasonCode2;
+
+  @UI.lineItem: [{ position: 690 }]
+  @UI.identification: [{ position: 690 }]
+  @EndUserText.label: 'WBS Element'
+  WbsElement;
+
+  @UI.lineItem: [{ position: 690 }]
+  @UI.identification: [{ position: 690 }]
+  @EndUserText.label: 'Functional Area'
+  FunctionalArea;
+
+  @UI.lineItem: [{ position: 700 }]
+  @UI.identification: [{ position: 700 }]
+  @EndUserText.label: 'Tax Country'
+  TaxCountry;
+
+  @UI.lineItem: [{ position: 710 }]
+  @UI.identification: [{ position: 710 }]
+  @EndUserText.label: 'Tax Amount'
+  TaxAmount;
+
+  @UI.lineItem: [{ position: 720 }]
+  @UI.identification: [{ position: 720 }]
+  @EndUserText.label: 'Tax Base Amt in Transaction Currency'
+  TaxBaseTranCurr;
+
+  @UI.lineItem: [{ position: 730 }]
+  @UI.identification: [{ position: 730 }]
+  @EndUserText.label: 'Tax Amount - Local'
+  TaxAmountLocal;
+
+  @UI.lineItem: [{ position: 740 }]
+  @UI.identification: [{ position: 740 }]
+  @EndUserText.label: 'Tax Base Amt in Local Currency'
+  TaxBaseLocal;
+
+  @UI.lineItem: [{ position: 750 }]
+  @UI.identification: [{ position: 750 }]
+  @EndUserText.label: 'Tax Item Text'
+  TaxItemText;
+
+  @UI.lineItem: [{ position: 760 }]
+  @UI.identification: [{ position: 760 }]
+  @EndUserText.label: 'Provider Contract'
+  ProviderContract;
+
+  @UI.lineItem: [{ position: 770 }]
+  @UI.identification: [{ position: 770 }]
+  @EndUserText.label: 'Contract Item'
+  ContractItem;
+
+  @UI.lineItem: [{ position: 780 }]
+  @UI.identification: [{ position: 780 }]
+  @EndUserText.label: 'Customer 2'
+  Customer2;
+
+  @UI.lineItem: [{ position: 780 }]
+  @UI.identification: [{ position: 780 }]
+  @EndUserText.label: 'Customer Group'
+  CustomerGroup;
+  
+  @UI.lineItem: [{ position: 790 }]
+  @UI.identification: [{ position: 790 }]
+  @EndUserText.label: 'Industry'
+  Industry;
+  
+  @UI.lineItem: [{ position: 800 }]
+  @UI.identification: [{ position: 800 }]
+  @EndUserText.label: 'Country/Region Key'
+  CountryRegionKey;
+  
+  @UI.lineItem: [{ position: 810 }]
+  @UI.identification: [{ position: 810 }]
+  @EndUserText.label: 'Sales Organization'
+  SalesOrg;
+  
+  @UI.lineItem: [{ position: 820 }]
+  @UI.identification: [{ position: 820 }]
+  @EndUserText.label: 'Distribution Channel'
+  DistChannel;
+  
+  @UI.lineItem: [{ position: 830 }]
+  @UI.identification: [{ position: 830 }]
+  @EndUserText.label: 'Division'
+  Division;
+  
+  @UI.lineItem: [{ position: 840 }]
+  @UI.identification: [{ position: 840 }]
+  @EndUserText.label: 'Billing Type'
+  BillingType;
+  
+  @UI.lineItem: [{ position: 850 }]
+  @UI.identification: [{ position: 850 }]
+  Createdbyuser;
+  
+  @UI.lineItem: [{ position: 860 }]
+  @UI.identification: [{ position: 860 }]
+  Createddate;
+  
+  @UI.lineItem: [{ position: 870 }]
+  @UI.identification: [{ position: 870 }]
+  Changedbyuser;
+  
+  @UI.lineItem: [{ position: 880 }]
+  @UI.identification: [{ position: 880 }]
+  Changeddate;    
+    
+}

@@ -10,15 +10,15 @@
 define view entity ZJP_CFG_STATUSINV
   as select from zjp_hd_config
 {
-  key id_sys        as IdSys,
-  key id_domain     as IdDomain,
+//  key id_sys        as IdSys,
+//  key id_domain     as IdDomain,
   key value         as Value,
-      description   as Description,
-      createdbyuser as Createdbyuser,
-      createddate   as Createddate,
-      changedbyuser as Changedbyuser,
-      changeddate   as Changeddate
+      description   as Description
+//      createdbyuser as Createdbyuser,
+//      createddate   as Createddate,
+//      changedbyuser as Changedbyuser,
+//      changeddate   as Changeddate
 }
 where
       id_domain = 'STATUSINV'
-  and id_sys    = 'FPT'
+  and id_sys    = '001'

@@ -1,0 +1,4 @@
+@EndUserText.label: 'Service Definition for FI Report'
+define service ZFI_REPORT_SRVD {
+  expose zjp_c_soquytienmat as SoQuyTienMat;
+}

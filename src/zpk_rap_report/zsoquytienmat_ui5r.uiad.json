@@ -1,0 +1,33 @@
+{
+  "formatVersion": "1",
+  "header": {
+    "description": "Sổ quỹ tiền mặt",
+    "originalLanguage": "en",
+    "abapLanguageVersion": "cloudDevelopment"
+  },
+  "generalInformation": {
+    "appType": "ui5",
+    "catalogId": "SAP_TC_UI5_REPO_UIAD"
+  },
+  "ui5AppDetails": {
+    "appId": "zsoquytienmat"
+  },
+  "navigation": {
+    "targetMappingId": "UI5R_3B85AEADA474AF0771CD6A1E050D58CEF938AB01_TM",
+    "semanticObject": "zsoquytienmat",
+    "action": "display",
+    "desktop": true,
+    "tablet": true,
+    "phone": true
+  },
+  "tiles": [
+    {
+      "id": "UI5R_3B85AEADA474AF0771CD6A1E050D58CEF938AB01_AL",
+      "tileType": "static",
+      "isDefault": true,
+      "standard": {
+        "title": "Sổ quỹ tiền mặt"
+      }
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+managed implementation in class zbp_jp_r_hd_taxcode unique;
+strict ( 2 );
+
+define behavior for ZJP_R_HD_TAXCODE alias hdtaxcode
+persistent table zjp_hd_taxcode
+lock master
+authorization master ( instance )
+etag master Changeddate
+{
+  create;
+  update;
+  delete;
+  field ( readonly : update ) Companycode, Currency, Taxcode, Taxpercentage;
+
+  field ( readonly ) Createdbyuser, Createddate, Changedbyuser, Changeddate;
+
+  mapping for zjp_hd_taxcode
+    {
+      Companycode   = companycode;
+      Currency      = currency;
+      Taxcode       = taxcode;
+      Taxpercentage = taxpercentage;
+      Createdbyuser = createdbyuser;
+      Createddate   = createddate;
+      Changedbyuser = changedbyuser;
+      Changeddate   = changeddate;
+    }
+}

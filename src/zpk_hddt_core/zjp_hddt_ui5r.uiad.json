@@ -1,0 +1,33 @@
+{
+  "formatVersion": "1",
+  "header": {
+    "description": "Integration SInvoice",
+    "originalLanguage": "en",
+    "abapLanguageVersion": "cloudDevelopment"
+  },
+  "generalInformation": {
+    "appType": "ui5",
+    "catalogId": "SAP_TC_UI5_REPO_UIAD"
+  },
+  "ui5AppDetails": {
+    "appId": "zjphddt"
+  },
+  "navigation": {
+    "targetMappingId": "UI5R_D60B127119521696BA42943FB6C87933F8ECF53B_TM",
+    "semanticObject": "zjp_hddt",
+    "action": "display",
+    "desktop": true,
+    "tablet": true,
+    "phone": true
+  },
+  "tiles": [
+    {
+      "id": "UI5R_D60B127119521696BA42943FB6C87933F8ECF53B_AL",
+      "tileType": "static",
+      "isDefault": true,
+      "standard": {
+        "title": "Integration SInvoice"
+      }
+    }
+  ]
+}

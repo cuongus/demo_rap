@@ -1,0 +1,33 @@
+{
+  "formatVersion": "1",
+  "header": {
+    "description": "Config Domain SInvoice",
+    "originalLanguage": "en",
+    "abapLanguageVersion": "cloudDevelopment"
+  },
+  "generalInformation": {
+    "appType": "ui5",
+    "catalogId": "SAP_TC_UI5_REPO_UIAD"
+  },
+  "ui5AppDetails": {
+    "appId": "zjphddtcf"
+  },
+  "navigation": {
+    "targetMappingId": "UI5R_E47F69DC41815F4700C6CBDDA518C9E3FCA7F7CC_TM",
+    "semanticObject": "zjp_hddt_cf",
+    "action": "display",
+    "desktop": true,
+    "tablet": true,
+    "phone": true
+  },
+  "tiles": [
+    {
+      "id": "UI5R_E47F69DC41815F4700C6CBDDA518C9E3FCA7F7CC_AL",
+      "tileType": "static",
+      "isDefault": true,
+      "standard": {
+        "title": "Config Domain SInvoice"
+      }
+    }
+  ]
+}

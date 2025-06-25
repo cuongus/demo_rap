@@ -1,0 +1,33 @@
+{
+  "formatVersion": "1",
+  "header": {
+    "description": "Config TaxCode SInvoice",
+    "originalLanguage": "en",
+    "abapLanguageVersion": "cloudDevelopment"
+  },
+  "generalInformation": {
+    "appType": "ui5",
+    "catalogId": "SAP_TC_UI5_REPO_UIAD"
+  },
+  "ui5AppDetails": {
+    "appId": "zjphdtaxcode"
+  },
+  "navigation": {
+    "targetMappingId": "UI5R_A71EE20FA794A28AE4FECB48D5AA5B20A34DBE13_TM",
+    "semanticObject": "zjp_hdtaxcode",
+    "action": "display",
+    "desktop": true,
+    "tablet": true,
+    "phone": true
+  },
+  "tiles": [
+    {
+      "id": "UI5R_A71EE20FA794A28AE4FECB48D5AA5B20A34DBE13_AL",
+      "tileType": "static",
+      "isDefault": true,
+      "standard": {
+        "title": "Config TaxCode SInvoice"
+      }
+    }
+  ]
+}

@@ -1,0 +1,112 @@
+@Metadata.layer: #CORE
+@UI:{
+    headerInfo: { typeName: 'Document Details',
+                  typeNamePlural: 'Document Details',
+                  title: { type: #STANDARD, label: 'Items', value: 'AccountingDocumentItem' },
+                  description: { value: 'DocumentItemText', targetElement: 'Longtext'}
+    },
+    presentationVariant: [{ sortOrder: [{ by: 'AccountingDocumentItem', direction: #ASC }] }]
+}
+annotate entity ZJP_C_HDDT_I with
+{
+  @UI.facet          : [
+  {id                : 'Items',
+  purpose            : #STANDARD,
+  position           : 10,
+  label              : 'Items',
+  type               : #IDENTIFICATION_REFERENCE
+  }
+  ]
+  
+  @UI.hidden: true
+  CompanyCode;
+  
+  @UI.hidden: true
+  AccountingDocument;
+  
+  @UI.hidden: true
+  FiscalYear;
+  
+  @UI.lineItem       : [{ position: 10 }]
+  @UI.identification : [{ position: 10 }]
+  AccountingDocumentItem;
+  
+  @UI.lineItem       : [{ position: 20 }]
+  @UI.identification : [{ position: 20 }]
+  TaxCode;
+  
+  @UI.lineItem       : [{ position: 30 }]
+  @UI.identification : [{ position: 30 }]
+  TaxPercentage;
+  
+  @UI.lineItem       : [{ position: 40 }]
+  @UI.identification : [{ position: 40 }]
+  ItemEinvoice;
+  
+  @UI.lineItem       : [{ position: 50 }]
+  @UI.identification : [{ position: 50 }]
+  Product;
+  
+  @UI.lineItem       : [{ position: 60 }]
+  @UI.identification : [{ position: 60 }]
+  Longtext;
+  
+  @UI.lineItem       : [{ position: 70 }]
+  @UI.identification : [{ position: 70 }]
+  DocumentItemText;
+  
+  @UI.lineItem       : [{ position: 80 }]
+  @UI.identification : [{ position: 80 }]
+  Quantity;
+  
+  @UI.lineItem       : [{ position: 90 }]
+  @UI.identification : [{ position: 90 }]
+  BaseUnit;
+  
+  @UI.lineItem       : [{ position: 100 }]
+  @UI.identification : [{ position: 100 }]
+  UnitofMeasureLongname;
+  
+  @UI.lineItem       : [{ position: 110 }]
+  @UI.identification : [{ position: 110 }]
+  CompanyCodeCurrency;
+  
+  @UI.lineItem       : [{ position: 120 }]
+  @UI.identification : [{ position: 120 }]
+  priceInCoCodeCrcy;
+  
+  @UI.lineItem       : [{ position: 130 }]
+  @UI.identification : [{ position: 130 }]
+  AmountInCoCodeCrcy;
+  
+  @UI.lineItem       : [{ position: 140 }]
+  @UI.identification : [{ position: 140 }]
+  VatAmountInCoCodeCrcy;
+  
+  @UI.lineItem       : [{ position: 150 }]
+  @UI.identification : [{ position: 150 }]
+  TotalAmountInCoCodeCrcy;
+  
+  @UI.lineItem       : [{ position: 160 }]
+  @UI.identification : [{ position: 160 }]
+  TransactionCurrency;
+  
+  @UI.lineItem       : [{ position: 170 }]
+  @UI.identification : [{ position: 170 }]
+  priceintransaccrcy;
+  
+  @UI.lineItem       : [{ position: 180 }]
+  @UI.identification : [{ position: 180 }]
+  AmountInTransacCrcy;
+  
+  @UI.lineItem       : [{ position: 190 }]
+  @UI.identification : [{ position: 190 }]
+  VatAmountInTransacCrcy;
+  
+  @UI.lineItem       : [{ position: 200 }]
+  @UI.identification : [{ position: 200 }]
+  TotalAmountInTransacCrcy;
+  /* Associations */
+//  _EInvoicesHeaders;
+
+}

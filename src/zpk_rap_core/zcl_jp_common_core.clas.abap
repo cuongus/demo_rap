@@ -68,12 +68,18 @@ CLASS zcl_jp_common_core DEFINITION
                                 ir_enduser            TYPE tt_ranges
                                 ir_testrun            TYPE tt_ranges
 
+                                ir_businesspartner    TYPE tt_ranges
+
                                 wa_page_info          TYPE st_page_info
                       ,
 
       "Method get Customer info
       get_customer_details IMPORTING wa_document         TYPE zst_document_info OPTIONAL
                            EXPORTING wa_customer_details TYPE zst_customer_info,
+
+      "Method get Supplier info
+      get_supplier_details IMPORTING wa_document         TYPE zst_document_info OPTIONAL
+                           EXPORTING wa_supplier_details TYPE zst_customer_info,
 
       "Method get Company Code info
       get_companycode_details IMPORTING iv_companycode         TYPE bukrs
@@ -103,7 +109,7 @@ CLASS zcl_jp_common_core IMPLEMENTATION.
   METHOD get_address_id_details.
 
     "Customer Address
-    SELECT SINGLE AddresseeFullName,
+    SELECT AddresseeFullName,
                   HouseNumber,
                   StreetName,             "Street
                   StreetPrefixName1,      "str_suppl1 - Street 2
@@ -115,10 +121,12 @@ CLASS zcl_jp_common_core IMPLEMENTATION.
                   Country
     FROM i_address_2
     WITH PRIVILEGED ACCESS
-    WHERE AddressID = @wa_addressid_details-addressid
-      AND AddressRepresentationCode = 'R'
-    INTO @DATA(ls_address_2)
+    WHERE AddressID = @addressid
+*      AND AddressRepresentationCode = 'R'
+    INTO TABLE @DATA(lt_address_2)
     .
+
+    READ TABLE lt_address_2 INTO DATA(ls_address_2) INDEX 1.
 
     wa_addressid_details-addressname = ls_address_2-AddresseeFullName.
     wa_addressid_details-address =
@@ -129,6 +137,11 @@ CLASS zcl_jp_common_core IMPLEMENTATION.
     REPLACE ALL OCCURRENCES OF |, , , ,| IN wa_addressid_details-address WITH |,|.
     REPLACE ALL OCCURRENCES OF |, , ,| IN wa_addressid_details-address WITH |,|.
     REPLACE ALL OCCURRENCES OF |, ,| IN wa_addressid_details-address WITH |,|.
+
+
+    SHIFT wa_addressid_details-address LEFT DELETING LEADING ','.
+    SHIFT wa_addressid_details-address RIGHT DELETING TRAILING ','.
+    SHIFT wa_addressid_details-address LEFT DELETING LEADING ''.
 
     "Customer Email
     SELECT SINGLE EmailAddress FROM I_AddressEmailAddress_2
@@ -162,10 +175,22 @@ CLASS zcl_jp_common_core IMPLEMENTATION.
     INTO CORRESPONDING FIELDS OF @wa_companycode_details
     .
 
+    zcl_jp_common_core=>get_address_id_details(
+        EXPORTING
+        addressid = wa_companycode_details-addressid
+        IMPORTING
+        wa_addressid_details = DATA(ls_addressid_dtails)
+    ).
+
+    wa_companycode_details-companycodename = ls_addressid_dtails-addressname.
+    wa_companycode_details-companycodeaddr = ls_addressid_dtails-address.
+
   ENDMETHOD.
 
 
   METHOD get_customer_details.
+
+    CLEAR: wa_customer_details.
 
     DATA: lv_url TYPE string VALUE IS INITIAL. "API read BP Details
     DATA: lv_country TYPE land1 VALUE IS INITIAL.
@@ -207,6 +232,8 @@ CLASS zcl_jp_common_core IMPLEMENTATION.
 
       READ TABLE gt_customer_info INTO wa_customer_details WITH KEY customer = wa_document-customer BINARY SEARCH.
       IF sy-subrc NE 0.
+        DATA(lv_index) = sy-index.
+
         SELECT SINGLE cus~customer,
                       cus~addressid,
                       cus~VATRegistration,
@@ -239,8 +266,8 @@ CLASS zcl_jp_common_core IMPLEMENTATION.
         wa_customer_details-emailaddress    = ls_addressid-emailaddress.
         wa_customer_details-telephonenumber = ls_addressid-telephonenumber.
 
-        APPEND wa_customer_details TO gt_customer_info.
-        CLEAR: wa_customer_details.
+        INSERT wa_customer_details INTO TABLE gt_customer_info.
+
       ENDIF.
 
     ENDIF.
@@ -279,8 +306,8 @@ CLASS zcl_jp_common_core IMPLEMENTATION.
         WHEN 'FISCALYEAR'.
           MOVE-CORRESPONDING ls_ranges-range TO ir_fiscalyear.
         WHEN 'ACCOUNTINGDOCUMENTITEM'.
-          MOVE-CORRESPONDING ls_ranges-range to ir_buzei.
-        WHEN 'CASHACCOUNTING'.
+          MOVE-CORRESPONDING ls_ranges-range TO ir_buzei.
+        WHEN 'CASHACCOUNTING' OR 'GLACCOUNT'.
           MOVE-CORRESPONDING ls_ranges-range TO ir_glaccount.
         WHEN 'POSTINGDATE'.
           MOVE-CORRESPONDING ls_ranges-range TO ir_postingdate.
@@ -304,6 +331,8 @@ CLASS zcl_jp_common_core IMPLEMENTATION.
           MOVE-CORRESPONDING ls_ranges-range TO ir_enduser.
         WHEN 'TESTRUN'.
           MOVE-CORRESPONDING ls_ranges-range TO ir_testrun.
+        WHEN 'DOITUONG'.
+          MOVE-CORRESPONDING ls_ranges-range TO ir_businesspartner.
         WHEN OTHERS.
       ENDCASE.
     ENDLOOP.
@@ -327,21 +356,27 @@ CLASS zcl_jp_common_core IMPLEMENTATION.
           CompanyCode,
           GLAccount,
           DebitCreditCode,
+          IsNegativePosting,
       SUM( AbsoluteAmountInCoCodeCrcy ) AS sodudk ,
       SUM( AbsoluteAmountInTransacCrcy ) AS sodudk_nt
       FROM i_operationalacctgdocitem
       WHERE CompanyCode        IN @ir_companycode
         AND AccountingDocument IN @ir_glaccount
         AND PostingDate        LT @lv_date_dk
-      GROUP BY CompanyCode, GLAccount, DebitCreditCode
+      GROUP BY CompanyCode, GLAccount, DebitCreditCode, IsNegativePosting
       INTO TABLE @DATA(lt_sodudk)
      .
 
       LOOP AT lt_sodudk INTO DATA(ls_sodudk).
         MOVE-CORRESPONDING ls_sodudk TO ls_sodu.
+
         IF ls_sodudk-DebitCreditCode = 'H'.
           ls_sodu-sodudk = ls_sodudk-sodudk * ( -1 ).
           ls_sodu-sodudk_nt = ls_sodudk-sodudk_nt * ( -1 ).
+        ENDIF.
+
+        if ls_sodudk-IsNegativePosting is NOT INITIAL.
+          ls_sodudk-sodudk = ls_sodudk-sodudk * ( -1 ).
         ENDIF.
 
         COLLECT ls_sodu INTO it_sodu_dk.
@@ -354,13 +389,14 @@ CLASS zcl_jp_common_core IMPLEMENTATION.
            CompanyCode,
            GLAccount,
            DebitCreditCode,
+           IsNegativePosting,
        SUM( AbsoluteAmountInCoCodeCrcy ) AS sodudk ,
        SUM( AbsoluteAmountInTransacCrcy ) AS sodudk_nt
        FROM i_operationalacctgdocitem
        WHERE CompanyCode        IN @ir_companycode
          AND AccountingDocument IN @ir_glaccount
          AND PostingDate        LE @lv_date_ck
-       GROUP BY CompanyCode, GLAccount, DebitCreditCode
+       GROUP BY CompanyCode, GLAccount, DebitCreditCode, IsNegativePosting
        INTO TABLE @DATA(lt_soduck)
       .
 
@@ -369,6 +405,10 @@ CLASS zcl_jp_common_core IMPLEMENTATION.
         IF ls_soduck-DebitCreditCode = 'H'.
           ls_sodu-sodudk = ls_soduck-sodudk * ( -1 ).
           ls_sodu-sodudk_nt = ls_soduck-sodudk_nt * ( -1 ).
+        ENDIF.
+
+        if ls_soduck-IsNegativePosting is NOT INITIAL.
+          ls_soduck-sodudk = ls_soduck-sodudk * ( -1 ).
         ENDIF.
 
         COLLECT ls_sodu INTO it_sodu_ck.
@@ -383,4 +423,91 @@ CLASS zcl_jp_common_core IMPLEMENTATION.
                                            THEN mo_instance
                                            ELSE NEW #( ) ).
   ENDMETHOD.
+
+  METHOD get_supplier_details.
+
+CLEAR: wa_supplier_details.
+
+    DATA: lv_url TYPE string VALUE IS INITIAL. "API read BP Details
+    DATA: lv_country TYPE land1 VALUE IS INITIAL.
+
+    SELECT SINGLE isonetimeaccount FROM i_customer WHERE Customer = @wa_document-customer
+    INTO @DATA(lv_xcpdk).
+
+    IF lv_xcpdk IS NOT INITIAL.
+      SELECT SINGLE
+            businesspartnername1 AS name1,
+            businesspartnername2 AS name2,
+            businesspartnername3 AS name3,
+            businesspartnername4 AS name4,
+            streetaddressname AS stras,
+            cityname AS ort01,
+            taxid1 AS stcd1,
+            accountingclerkinternetaddress AS intad,
+            Country AS land1
+        FROM i_onetimeaccountcustomer
+        WHERE accountingdocument = @wa_document-accountingdocument AND
+              companycode        = @wa_document-companycode AND
+              fiscalyear         = @wa_document-fiscalyear
+        INTO @DATA(ls_bsec).
+
+      IF sy-subrc EQ 0. "Nếu Mã khách lẻ
+
+        wa_supplier_details-customername = |{ ls_bsec-name2 } { ls_bsec-name3 } { ls_bsec-name4 } | .
+        IF ls_bsec-name2 IS INITIAL AND ls_bsec-name3 IS INITIAL AND ls_bsec-name4 IS INITIAL.
+          wa_supplier_details-customername = ls_bsec-name1 .
+        ENDIF.
+        wa_supplier_details-customeraddress = |{ ls_bsec-stras }{ ls_bsec-ort01 }| .
+        wa_supplier_details-identificationnumber  = ls_bsec-stcd1.
+        wa_supplier_details-emailaddress = ls_bsec-intad.
+        "Country
+        lv_country = ls_bsec-land1.
+      ENDIF.
+
+    ELSE.
+
+      READ TABLE gt_customer_info INTO wa_supplier_details WITH KEY customer = wa_document-customer BINARY SEARCH.
+      IF sy-subrc NE 0.
+        DATA(lv_index) = sy-index.
+
+        SELECT SINGLE cus~supplier as customer,
+                      cus~addressid,
+                      cus~VATRegistration,
+                      cus~isonetimeaccount,
+                      cus~createdbyuser,
+                      cus~creationdate,
+                      bp~creationtime
+        FROM i_supplier AS cus
+        INNER JOIN i_businesspartner AS bp ON cus~Supplier = bp~BusinessPartner
+        WHERE cus~Supplier = @wa_document-customer
+        INTO CORRESPONDING FIELDS OF @wa_supplier_details
+        .
+
+        "Customer Identification Number
+        SELECT SINGLE BPIdentificationNumber FROM I_BuPaIdentification
+        INTO @wa_supplier_details-identificationnumber
+*       WHERE BPIdentificationType = ?
+        .
+
+        "Customer Address
+        zcl_jp_common_core=>get_address_id_details(
+            EXPORTING
+            addressid = wa_supplier_details-addressid
+            IMPORTING
+            wa_addressid_details = DATA(ls_addressid)
+        ).
+**-----------------------------------------------------------------------**
+        wa_supplier_details-customername    = ls_addressid-addressname.
+        wa_supplier_details-customeraddress = ls_addressid-address.
+        wa_supplier_details-emailaddress    = ls_addressid-emailaddress.
+        wa_supplier_details-telephonenumber = ls_addressid-telephonenumber.
+
+        INSERT wa_supplier_details INTO TABLE gt_customer_info.
+
+      ENDIF.
+
+    ENDIF.
+
+  ENDMETHOD.
+
 ENDCLASS.

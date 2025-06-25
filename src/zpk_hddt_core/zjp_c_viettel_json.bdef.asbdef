@@ -1,0 +1,11 @@
+projection;
+strict ( 2 );
+
+define behavior for ZJP_C_VIETTEL_JSON //alias <alias_name>
+{
+  use create;
+  use update;
+  use delete;
+
+  use action Generate;
+}

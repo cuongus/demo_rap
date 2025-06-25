@@ -67,7 +67,7 @@ CLASS zcl_einvoice_process DEFINITION
       tt_result_replace TYPE TABLE FOR ACTION RESULT zjp_c_hddt_h\\hddt_headers~Replace,
 
       "Update
-      tt_update_entry   TYPE TABLE FOR UPDATE zjp_c_hddt_h\\hddt_headers,
+      tt_update_head    TYPE TABLE FOR UPDATE zjp_c_hddt_h\\hddt_headers,
 
       "Cba entities
       tt_entities_cba   TYPE TABLE FOR CREATE zjp_c_hddt_h\\hddt_headers\_einvoiceitems,
@@ -98,23 +98,25 @@ CLASS zcl_einvoice_process DEFINITION
       ir_accountingdocument TYPE tt_ranges,
       ir_fiscalyear         TYPE tt_ranges,
 
-      gt_headers_save       TYPE TABLE OF wa_document,
-      gt_docsrc_save        TYPE TABLE OF wa_document.
+      gt_headers            TYPE TABLE OF wa_document,
+      gt_items              TYPE tt_items,
+
+      gt_adjust_doc         TYPE TABLE OF wa_document.
 
     CLASS-DATA:
-              go_fpt_einvoice TYPE REF TO zcl_manage_fpt_einvoices.
+      go_fpt_einvoice     TYPE REF TO zcl_manage_fpt_einvoices,
+      go_viettel_sinvoice TYPE REF TO zcl_manage_viettel_einvoices.
 
     METHODS constructor .
 
     CLASS-METHODS:
 
-*      get_Instance RETURNING VALUE(ro_instance) TYPE REF TO zcl_einvoice_process,
-
       clear_variables ,
 
-      get_document      IMPORTING keys      TYPE ANY TABLE
-                        EXPORTING e_headers TYPE tt_headers
-                                  e_items   TYPE tt_items,
+      get_keys      IMPORTING keys                  TYPE ANY TABLE
+                    EXPORTING ir_companycode        TYPE tt_ranges
+                              ir_accountingdocument TYPE tt_ranges
+                              ir_fiscalyear         TYPE tt_ranges,
 
       get_password IMPORTING i_document   TYPE wa_document
                    EXPORTING e_document   TYPE wa_document
@@ -125,7 +127,8 @@ CLASS zcl_einvoice_process DEFINITION
                              cx_abap_context_info_error,
 
       move_log          IMPORTING i_input  TYPE wa_document
-                        EXPORTING o_output TYPE wa_document,
+                        EXPORTING o_output TYPE wa_document
+                        CHANGING  c_items  TYPE tt_items,
 
       integration_einvoice IMPORTING i_document            TYPE wa_document OPTIONAL
                                      i_action              TYPE zde_action_invoice
@@ -160,10 +163,10 @@ CLASS zcl_einvoice_process DEFINITION
                            failed   TYPE tt_failed_early "response for failed early zcs_rap_einv_entry
                            reported TYPE tt_reported_early, "response for reported early zcs_rap_einv_entry
 
-      update_entry IMPORTING entities TYPE tt_update_entry "table for update zcs_rap_einv_entry\\hddt_headers
-                   CHANGING  mapped   TYPE tt_mapped_early "response for mapped early zcs_rap_einv_entry
-                             failed   TYPE tt_failed_early "response for failed early zcs_rap_einv_entry
-                             reported TYPE tt_reported_early, "response for reported early zcs_rap_einv_entry
+      update_head IMPORTING entities TYPE tt_update_head "table for update zcs_rap_einv_entry\\hddt_headers
+                  CHANGING  mapped   TYPE tt_mapped_early "response for mapped early zcs_rap_einv_entry
+                            failed   TYPE tt_failed_early "response for failed early zcs_rap_einv_entry
+                            reported TYPE tt_reported_early, "response for reported early zcs_rap_einv_entry
 
       cba_einvoiceitems IMPORTING entities_cba TYPE tt_entities_cba "table for create zcs_rap_einv_entry\\hddt_headers\_einvoiceitems
                         CHANGING  mapped       TYPE tt_mapped_early "response for mapped early zcs_rap_einv_entry
@@ -252,15 +255,25 @@ CLASS ZCL_EINVOICE_PROCESS IMPLEMENTATION.
     DATA: it_headers TYPE TABLE OF wa_document,
           it_items   TYPE TABLE OF wa_items.
 
+    CREATE OBJECT: go_einvoice_process, go_viettel_sinvoice.
+
+    go_einvoice_process->clear_variables( ).
+
     LOOP AT keys INTO DATA(ls_keys).
       ls_adjust-accountingdocument = ls_param-AccountingDocumentSource = ls_keys-%param-AccountingDocumentSource.
       ls_adjust-fiscalyear = ls_param-FiscalYearSource = ls_keys-%param-FiscalYearSource.
       ls_param-adjusttype = ls_keys-%param-adjusttype.
     ENDLOOP.
-
-    FREE: ir_companycode, ir_accountingdocument, ir_fiscalyear.
-
-    go_einvoice_process->clear_variables( ).
+**" Get data from keys entities
+    go_einvoice_process->get_keys(
+        EXPORTING
+        keys = keys
+        IMPORTING
+        ir_companycode = ir_companycode
+        ir_accountingdocument = ir_accountingdocument
+        ir_fiscalyear = ir_fiscalyear
+    ).
+**""
 
     go_einvoice_process->integration_einvoice(
         EXPORTING
@@ -270,13 +283,13 @@ CLASS ZCL_EINVOICE_PROCESS IMPLEMENTATION.
         ir_accountingdocument   = ir_accountingdocument
         ir_fiscalyear           = ir_fiscalyear
         IMPORTING
-        e_headers               = gt_headers_save
-        e_items                 = it_items
-        e_docsrc                = gt_docsrc_save
+        e_headers               = gt_headers
+        e_items                 = gt_items
+        e_docsrc                = gt_adjust_doc
         e_return                = e_return
     ).
 
-    LOOP AT gt_headers_save ASSIGNING FIELD-SYMBOL(<fs_headers>).
+    LOOP AT gt_headers ASSIGNING FIELD-SYMBOL(<fs_headers>).
 
       ls_result-%tky-Companycode        = <fs_headers>-Companycode.
       ls_result-%tky-Accountingdocument = <fs_headers>-Accountingdocument.
@@ -297,7 +310,7 @@ CLASS ZCL_EINVOICE_PROCESS IMPLEMENTATION.
 
       MOVE-CORRESPONDING <fs_headers> TO ls_result-%param.
       IF gs_docsrc IS NOT INITIAL.
-        APPEND gs_docsrc TO gt_docsrc_save.
+        APPEND gs_docsrc TO gt_adjust_doc.
       ENDIF.
 
       INSERT CORRESPONDING #( ls_result ) INTO TABLE result.
@@ -312,6 +325,8 @@ CLASS ZCL_EINVOICE_PROCESS IMPLEMENTATION.
     DATA: ls_param  TYPE zpr_cancel_einvoice,
           ls_result LIKE LINE OF result.
 
+    CREATE OBJECT: go_einvoice_process, go_viettel_sinvoice.
+
     LOOP AT keys INTO DATA(ls_keys).
       ls_param-noti_taxtype = ls_keys-%param-noti_taxtype.
       ls_param-noti_taxnum  = ls_keys-%param-noti_taxnum.
@@ -319,18 +334,39 @@ CLASS ZCL_EINVOICE_PROCESS IMPLEMENTATION.
       ls_param-noti_type    = ls_keys-%param-noti_type.
     ENDLOOP.
 
+**" Get data from keys entities
+    go_einvoice_process->get_keys(
+        EXPORTING
+        keys = keys
+        IMPORTING
+        ir_companycode = ir_companycode
+        ir_accountingdocument = ir_accountingdocument
+        ir_fiscalyear = ir_fiscalyear
+    ).
+
+    go_einvoice_data->get_einvoice_data(
+        EXPORTING
+        ir_companycode = ir_companycode
+        ir_accountingdocument = ir_accountingdocument
+        ir_fiscalyear = ir_fiscalyear
+        IMPORTING
+        it_einvoice_header = gt_headers
+*        it_einvoice_item = gt_items
+    ).
+**""
+
     go_einvoice_process->get_einvoice_data(
         EXPORTING
         ir_companycode = ir_companycode
         ir_accountingdocument = ir_accountingdocument
         ir_fiscalyear = ir_fiscalyear
         IMPORTING
-        it_einvoice_header = DATA(it_headers)
+        it_einvoice_header = gt_headers
     ).
 
     gv_action = 'CANCEL_INVOICE'.
 
-    LOOP AT it_headers ASSIGNING FIELD-SYMBOL(<fs_headers>).
+    LOOP AT gt_headers ASSIGNING FIELD-SYMBOL(<fs_headers>).
 
       go_einvoice_process->clear_variables( ).
 
@@ -394,6 +430,8 @@ CLASS ZCL_EINVOICE_PROCESS IMPLEMENTATION.
            i_input = gs_status
            IMPORTING
            o_output = <fs_headers>
+           CHANGING
+           c_items = gt_items
         ).
       ENDIF.
 
@@ -415,7 +453,6 @@ CLASS ZCL_EINVOICE_PROCESS IMPLEMENTATION.
 
     ENDLOOP.
 
-    MOVE-CORRESPONDING it_headers TO gt_headers_save.
   ENDMETHOD.
 
 
@@ -531,6 +568,16 @@ CLASS ZCL_EINVOICE_PROCESS IMPLEMENTATION.
 
   METHOD cleanup.
 
+    "Call SOAP Over HTTP
+    TRY.
+        zsc_call_service_com_0002=>get_instance( )->change_journal_entry_http(
+        i_header = gt_headers
+        i_items  = gt_items
+         ).
+      CATCH cx_uuid_error cx_abap_context_info_error.
+        "handle exception
+    ENDTRY.
+
   ENDMETHOD.
 
 
@@ -557,7 +604,16 @@ CLASS ZCL_EINVOICE_PROCESS IMPLEMENTATION.
 *      if_t100_message~t100key = textid.
     ENDIF.
 
-    CREATE OBJECT go_einvoice_process.
+    go_einvoice_process = COND #( WHEN go_einvoice_process IS BOUND
+                                  THEN go_einvoice_process
+                                  ELSE NEW #( )
+                                  ).
+
+    go_viettel_sinvoice = COND #( WHEN go_viettel_sinvoice IS BOUND
+                                  THEN go_viettel_sinvoice
+                                  ELSE NEW #( )
+                                  ).
+
   ENDMETHOD.
 
 
@@ -566,7 +622,26 @@ CLASS ZCL_EINVOICE_PROCESS IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD get_document.
+  METHOD get_keys.
+
+    FREE: ir_companycode, ir_accountingdocument, ir_fiscalyear.
+
+    LOOP AT keys ASSIGNING FIELD-SYMBOL(<lfs_keys>).
+      ASSIGN COMPONENT '%tky-Companycode' OF STRUCTURE <lfs_keys> TO FIELD-SYMBOL(<lv_value>).
+      IF sy-subrc EQ 0.
+        APPEND VALUE #( sign = 'I' option = 'EQ' low = <lv_value> ) TO ir_companycode.
+      ENDIF.
+
+      ASSIGN COMPONENT '%tky-Accountingdocument' OF STRUCTURE <lfs_keys> TO <lv_value>.
+      IF sy-subrc EQ 0.
+        APPEND VALUE #( sign = 'I' option = 'EQ' low = <lv_value> ) TO ir_accountingdocument.
+      ENDIF.
+
+      ASSIGN COMPONENT '%tky-Fiscalyear' OF STRUCTURE <lfs_keys> TO <lv_value>.
+      IF sy-subrc EQ 0.
+        APPEND VALUE #( sign = 'I' option = 'EQ' low = <lv_value> ) TO ir_fiscalyear.
+      ENDIF.
+    ENDLOOP.
 
   ENDMETHOD.
 
@@ -574,6 +649,8 @@ CLASS ZCL_EINVOICE_PROCESS IMPLEMENTATION.
   METHOD get_password.
 
     DATA: lv_fiscalyear TYPE gjahr.
+
+    CREATE OBJECT: go_einvoice_process, go_viettel_sinvoice.
 
     SELECT SINGLE * FROM zjp_hd_userpass WHERE Companycode = @i_document-companycode
                                            AND usertype    = @i_document-usertype
@@ -607,7 +684,9 @@ CLASS ZCL_EINVOICE_PROCESS IMPLEMENTATION.
   METHOD integration_einvoice.
 
     DATA: it_headers TYPE tt_headers,
-          it_items   TYPE tt_items.
+          gt_items   TYPE tt_items.
+
+    CREATE OBJECT: go_einvoice_process, go_viettel_sinvoice.
 
     go_einvoice_process->get_einvoice_data(
     EXPORTING
@@ -616,7 +695,7 @@ CLASS ZCL_EINVOICE_PROCESS IMPLEMENTATION.
         ir_fiscalyear         = ir_fiscalyear
     IMPORTING
         it_einvoice_header    = it_headers
-        it_einvoice_item      = it_items
+        it_einvoice_item      = gt_items
     ).
 
     LOOP AT it_headers ASSIGNING FIELD-SYMBOL(<fs_headers>).
@@ -639,11 +718,11 @@ CLASS ZCL_EINVOICE_PROCESS IMPLEMENTATION.
                 e_userpass = gs_userpass
             ).
 
-            IF gv_action EQ 'ADJUST_INVOICE' OR gv_action EQ 'REPLACE_INVOICE'.
+            IF gv_action CP 'ADJUST_INVOICE*' OR gv_action CP 'REPLACE_INVOICE*'.
 
               <fs_headers>-AccountingDocumentSource = i_param-AccountingDocumentSource.
               <fs_headers>-FiscalYearSource         = i_param-FiscalYearSource.
-              IF gv_action EQ 'ADJUST_INVOICE'.
+              IF gv_action CP 'ADJUST_INVOICE*'.
                 <fs_headers>-AdjustType               = i_param-AdjustType.
               ELSE.
                 <fs_headers>-AdjustType               = '3'. "Replace HĐ
@@ -690,24 +769,43 @@ CLASS ZCL_EINVOICE_PROCESS IMPLEMENTATION.
                   MOVE-CORRESPONDING <fs_headers> TO gs_document.
 
 **--Adjust/Replace EInvoice
-                  go_fpt_einvoice->adjust_einvoices(
-                      EXPORTING
-                      i_action    = gv_action
-                      i_einvoice  = gs_document
-                      i_items     = it_items
-                      i_userpass  = gs_userpass
-                      IMPORTING
-                      e_status    = gs_status
-                      e_docsrc    = gs_docsrc
-                      e_json      = gs_json
-                      e_return    = gs_return
-                  ).
+                  CASE gs_document-idsys.
+                    WHEN 'VIETTEL'.
+                      go_viettel_sinvoice->adjust_sinvoices(
+                          EXPORTING
+                          i_action    = gv_action
+                          i_einvoice  = gs_document
+                          i_items     = gt_items
+                          i_userpass  = gs_userpass
+                          IMPORTING
+                          e_status    = gs_status
+                          e_docsrc    = gs_docsrc
+                          e_json      = gs_json
+                          e_return    = gs_return
+                      ).
+                    WHEN 'FPT'.
+                      go_fpt_einvoice->adjust_einvoices(
+                          EXPORTING
+                          i_action    = gv_action
+                          i_einvoice  = gs_document
+                          i_items     = gt_items
+                          i_userpass  = gs_userpass
+                          IMPORTING
+                          e_status    = gs_status
+                          e_docsrc    = gs_docsrc
+                          e_json      = gs_json
+                          e_return    = gs_return
+                      ).
+                    WHEN OTHERS.
+                  ENDCASE.
 
                   go_einvoice_process->move_log(
                     EXPORTING
                     i_input = gs_status
                     IMPORTING
                     o_output = <fs_headers>
+                    CHANGING
+                    c_items = gt_items
                 ).
 
                   IF gs_return-type           = 'E'.
@@ -724,28 +822,47 @@ CLASS ZCL_EINVOICE_PROCESS IMPLEMENTATION.
                 ENDIF.
               ENDIF.
 
-            ELSE.
+            ELSEIF gv_action CP 'CREATE_INVOICE*'.
 **--Create New EInvoice
-              go_fpt_einvoice->create_einvoices(
-                  EXPORTING
-                  i_action    = gv_action
-                  i_einvoice  = gs_document
-                  i_items     = it_items
-                  i_userpass  = gs_userpass
-                  IMPORTING
-                  e_status    = gs_status
-                  e_docsrc    = gs_docsrc
-                  e_json      = gs_json
-                  e_return    = gs_return
-              ).
+              CASE gs_document-idsys.
+                WHEN 'VIETTEL'.
+                  go_viettel_sinvoice->create_sinvoices(
+                      EXPORTING
+                      i_action    = gv_action
+                      i_einvoice  = gs_document
+                      i_items     = gt_items
+                      i_userpass  = gs_userpass
+                      IMPORTING
+                      e_status    = gs_status
+                      e_docsrc    = gs_docsrc
+                      e_json      = gs_json
+                      e_return    = gs_return
+                  ).
+                WHEN 'FPT'.
+                  go_fpt_einvoice->create_einvoices(
+                      EXPORTING
+                      i_action    = gv_action
+                      i_einvoice  = gs_document
+                      i_items     = gt_items
+                      i_userpass  = gs_userpass
+                      IMPORTING
+                      e_status    = gs_status
+                      e_docsrc    = gs_docsrc
+                      e_json      = gs_json
+                      e_return    = gs_return
+                  ).
+                WHEN OTHERS.
+              ENDCASE.
 
-            ENDIF.
+            ENDIF. "End IF Case Create new OR Adjust Invoice
 
             go_einvoice_process->move_log(
                 EXPORTING
                 i_input = gs_status
                 IMPORTING
                 o_output = <fs_headers>
+                CHANGING
+                c_items = gt_items
             ).
 
             IF gs_return-type = 'E'.
@@ -793,7 +910,7 @@ CLASS ZCL_EINVOICE_PROCESS IMPLEMENTATION.
     ENDLOOP.
 
     MOVE-CORRESPONDING it_headers   TO e_headers.
-    MOVE-CORRESPONDING it_items     TO e_items.
+    MOVE-CORRESPONDING gt_items     TO e_items.
 
   ENDMETHOD.
 
@@ -813,7 +930,18 @@ CLASS ZCL_EINVOICE_PROCESS IMPLEMENTATION.
 
     FREE: ir_companycode, ir_accountingdocument, ir_fiscalyear.
 
+    CREATE OBJECT: go_einvoice_process, go_viettel_sinvoice.
+
     go_einvoice_process->clear_variables( ).
+
+    go_einvoice_process->get_keys(
+        EXPORTING
+        keys = keys
+        IMPORTING
+        ir_companycode = ir_companycode
+        ir_accountingdocument = ir_accountingdocument
+        ir_fiscalyear = ir_fiscalyear
+    ).
 
     go_einvoice_process->integration_einvoice(
         EXPORTING
@@ -822,13 +950,13 @@ CLASS ZCL_EINVOICE_PROCESS IMPLEMENTATION.
         ir_accountingdocument   = ir_accountingdocument
         ir_fiscalyear           = ir_fiscalyear
         IMPORTING
-        e_headers               = gt_headers_save
-        e_items                 = it_items
-        e_docsrc                = gt_docsrc_save
+        e_headers               = gt_headers
+        e_items                 = gt_items
+        e_docsrc                = gt_adjust_doc
         e_return                = e_return
     ).
 
-    LOOP AT gt_headers_save ASSIGNING FIELD-SYMBOL(<fs_headers>).
+    LOOP AT gt_headers ASSIGNING FIELD-SYMBOL(<fs_headers>).
       ls_result-%tky-Companycode        = <fs_headers>-Companycode.
       ls_result-%tky-Accountingdocument = <fs_headers>-Accountingdocument.
       ls_result-%tky-Fiscalyear         = <fs_headers>-Fiscalyear.
@@ -849,7 +977,7 @@ CLASS ZCL_EINVOICE_PROCESS IMPLEMENTATION.
       MOVE-CORRESPONDING <fs_headers> TO ls_result-%param.
 
       IF gs_docsrc IS NOT INITIAL.
-        APPEND gs_docsrc TO gt_docsrc_save.
+        APPEND gs_docsrc TO gt_adjust_doc.
       ENDIF.
 
       INSERT CORRESPONDING #( ls_result ) INTO TABLE result.
@@ -878,6 +1006,14 @@ CLASS ZCL_EINVOICE_PROCESS IMPLEMENTATION.
     o_output-createdbyuser         = i_input-createdbyuser.
     o_output-createddate           = i_input-createddate.
     o_output-createdtime           = i_input-createdtime.
+
+    LOOP AT c_items ASSIGNING FIELD-SYMBOL(<fs_items>) WHERE companycode = i_input-companycode
+                                                         AND accountingdocument = i_input-accountingdocument
+                                                         AND fiscalyear = i_input-fiscalyear.
+
+      <fs_items>-statussap = i_input-statussap.
+    ENDLOOP.
+
   ENDMETHOD.
 
 
@@ -894,14 +1030,27 @@ CLASS ZCL_EINVOICE_PROCESS IMPLEMENTATION.
   METHOD replace_einvoice.
     DATA: ls_param TYPE wa_param.
     DATA: it_headers TYPE tt_headers,
-          it_items   TYPE tt_items.
+          gt_items   TYPE tt_items.
 
     DATA: ls_result         LIKE LINE OF result,
           ls_mapped_headers LIKE LINE OF mapped-hddt_headers.
 
     FREE: ir_companycode, ir_accountingdocument, ir_fiscalyear.
 
+    CREATE OBJECT: go_einvoice_process, go_viettel_sinvoice.
+
     go_einvoice_process->clear_variables( ).
+
+**" Get data from keys entities
+    go_einvoice_process->get_keys(
+        EXPORTING
+        keys = keys
+        IMPORTING
+        ir_companycode = ir_companycode
+        ir_accountingdocument = ir_accountingdocument
+        ir_fiscalyear = ir_fiscalyear
+    ).
+**""
 
     go_einvoice_process->integration_einvoice(
         EXPORTING
@@ -911,13 +1060,13 @@ CLASS ZCL_EINVOICE_PROCESS IMPLEMENTATION.
         ir_accountingdocument   = ir_accountingdocument
         ir_fiscalyear           = ir_fiscalyear
         IMPORTING
-        e_headers               = gt_headers_save
-        e_items                 = it_items
-        e_docsrc                = gt_docsrc_save
+        e_headers               = gt_headers
+        e_items                 = gt_items
+        e_docsrc                = gt_adjust_doc
         e_return                = e_return
     ).
 
-    LOOP AT gt_headers_save ASSIGNING FIELD-SYMBOL(<fs_headers>).
+    LOOP AT gt_headers ASSIGNING FIELD-SYMBOL(<fs_headers>).
 
       ls_result-%tky-Companycode            = <fs_headers>-Companycode.
       ls_result-%tky-Accountingdocument     = <fs_headers>-Accountingdocument.
@@ -946,12 +1095,14 @@ CLASS ZCL_EINVOICE_PROCESS IMPLEMENTATION.
 
   METHOD save_einvoice.
 
-    SORT gt_headers_save    BY companycode accountingdocument fiscalyear ASCENDING.
-    SORT gt_docsrc_save     BY companycode accountingdocument fiscalyear ASCENDING.
+    SORT gt_headers    BY companycode accountingdocument fiscalyear ASCENDING.
+    SORT gt_adjust_doc BY companycode accountingdocument fiscalyear ASCENDING.
 
-    LOOP AT gt_headers_save INTO DATA(ls_header).
+    SORT gt_items BY companycode accountingdocument fiscalyear accountingdocumentitem ASCENDING.
 
-      READ TABLE gt_docsrc_save TRANSPORTING NO FIELDS WITH KEY
+    LOOP AT gt_headers INTO DATA(ls_header).
+
+      READ TABLE gt_adjust_doc TRANSPORTING NO FIELDS WITH KEY
         companycode         = ls_header-companycode
         accountingdocument  = ls_header-accountingdocument
         fiscalyear          = ls_header-fiscalyear BINARY SEARCH.
@@ -1007,14 +1158,35 @@ CLASS ZCL_EINVOICE_PROCESS IMPLEMENTATION.
 
     ENDLOOP.
 
-    LOOP AT gt_docsrc_save INTO DATA(ls_einv_docsrc).
-      UPDATE zjp_a_hddt_h SET iconsap       = @ls_einv_docsrc-Iconsap ,
-                              statussap     = @ls_einv_docsrc-StatusSap ,
-                              messagetext   = @ls_einv_docsrc-messagetext
+    LOOP AT gt_adjust_doc INTO DATA(ls_adjust_doc).
+      UPDATE zjp_a_hddt_h SET iconsap       = @ls_adjust_doc-Iconsap ,
+                              statussap     = @ls_adjust_doc-StatusSap ,
+                              messagetext   = @ls_adjust_doc-messagetext
 
-      WHERE companycode          = @ls_einv_docsrc-Companycode
-        AND accountingdocument   = @ls_einv_docsrc-Accountingdocument
-        AND fiscalyear           = @ls_einv_docsrc-Fiscalyear.
+      WHERE companycode          = @ls_adjust_doc-Companycode
+        AND accountingdocument   = @ls_adjust_doc-Accountingdocument
+        AND fiscalyear           = @ls_adjust_doc-Fiscalyear.
+    ENDLOOP.
+
+    LOOP AT gt_items INTO DATA(ls_ietms).
+
+      SELECT COUNT(*) FROM zjp_a_hddt_i
+            WHERE companycode        = @ls_ietms-companycode
+              AND accountingdocument = @ls_ietms-accountingdocument
+              AND fiscalyear         = @ls_ietms-fiscalyear
+              INTO @lv_count.
+      IF sy-subrc NE 0.
+        CLEAR: lv_count.
+      ENDIF.
+
+      IF lv_count = 0.
+        MODIFY zjp_a_hddt_i FROM @ls_ietms.
+      ELSE.
+        IF ls_ietms-statussap = '01' OR ls_ietms-statussap = '03'.
+          MODIFY zjp_a_hddt_i FROM @ls_ietms.
+        ENDIF.
+      ENDIF.
+
     ENDLOOP.
 
   ENDMETHOD.
@@ -1027,21 +1199,64 @@ CLASS ZCL_EINVOICE_PROCESS IMPLEMENTATION.
     DATA: it_headers TYPE TABLE OF wa_document,
           it_items   TYPE TABLE OF wa_items.
 
+    CREATE OBJECT: go_einvoice_process, go_viettel_sinvoice.
+
+**" Get data from keys entities
+    go_einvoice_process->get_keys(
+        EXPORTING
+        keys = keys
+        IMPORTING
+        ir_companycode = ir_companycode
+        ir_accountingdocument = ir_accountingdocument
+        ir_fiscalyear = ir_fiscalyear
+    ).
+**""
+
+    TRY.
+        go_einvoice_process->get_einvoice_data(
+        EXPORTING
+            ir_companycode        = ir_companycode
+            ir_accountingdocument = ir_accountingdocument
+            ir_fiscalyear         = ir_fiscalyear
+        IMPORTING
+            it_einvoice_header    = it_headers
+            it_einvoice_item      = gt_items
+        ).
+      CATCH cx_abap_context_info_error.
+        "handle exception
+    ENDTRY.
+
     LOOP AT it_headers ASSIGNING FIELD-SYMBOL(<fs_headers>).
-      IF <fs_headers>-usertype IS NOT INITIAL.
+*      IF <fs_headers>-usertype IS NOT INITIAL.
         MOVE-CORRESPONDING <fs_headers> TO gs_document.
 
         gv_action = 'SEARCH_INVOICE'.
-        go_fpt_einvoice->search_einvoices(
-            EXPORTING
-            i_action      = gv_action
-            i_einvoice    = gs_document
-            i_userpass    = gs_userpass
-            IMPORTING
-            e_return      = gs_return
-            e_status      = gs_status
-            e_docsrc      = gs_docsrc
-        ).
+        CASE <fs_headers>-idsys.
+          WHEN 'VIETTEL'.
+            go_viettel_sinvoice->search_sinvoices(
+                EXPORTING
+                i_action      = gv_action
+                i_einvoice    = gs_document
+                i_userpass    = gs_userpass
+                IMPORTING
+                e_return      = gs_return
+                e_status      = gs_status
+                e_docsrc      = gs_docsrc
+            ).
+          WHEN 'FPT'.
+            go_fpt_einvoice->search_einvoices(
+                EXPORTING
+                i_action      = gv_action
+                i_einvoice    = gs_document
+                i_userpass    = gs_userpass
+                IMPORTING
+                e_return      = gs_return
+                e_status      = gs_status
+                e_docsrc      = gs_docsrc
+            ).
+          WHEN OTHERS.
+        ENDCASE.
+
 
         SELECT SINGLE * FROM zjp_a_hddt_h
         WHERE Companycode              = @<fs_headers>-Companycode
@@ -1069,19 +1284,21 @@ CLASS ZCL_EINVOICE_PROCESS IMPLEMENTATION.
               i_input = gs_status
               IMPORTING
               o_output = <fs_headers>
+              CHANGING
+              c_items = gt_items
           ).
 
         ENDIF.
 
         IF gs_docsrc IS NOT INITIAL.
-          APPEND gs_docsrc TO gt_docsrc_save.
+          APPEND gs_docsrc TO gt_adjust_doc.
         ENDIF.
 
-      ELSE.
-        <fs_headers>-statussap = '01'.
-        <fs_headers>-messagetype = ''.
-        <fs_headers>-messagetext = ''.
-      ENDIF.
+*      ELSE.
+*        <fs_headers>-statussap = '01'.
+*        <fs_headers>-messagetype = ''.
+*        <fs_headers>-messagetext = ''.
+*      ENDIF.
 
       ls_result-%tky-companycode        = <fs_headers>-companycode.
       ls_result-%tky-accountingdocument = <fs_headers>-accountingdocument.
@@ -1092,12 +1309,12 @@ CLASS ZCL_EINVOICE_PROCESS IMPLEMENTATION.
 
     ENDLOOP.
 
-    MOVE-CORRESPONDING it_headers TO gt_headers_save.
+    MOVE-CORRESPONDING it_headers TO gt_headers.
 
   ENDMETHOD.
 
 
-  METHOD update_entry.
+  METHOD update_head.
 
   ENDMETHOD.
 ENDCLASS.

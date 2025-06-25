@@ -1,12 +1,4 @@
-class ZBP_JP_C_HDDT_H definition
-  public
-  abstract
-  final
-  create public .
-
-public section.
-protected section.
-private section.
+CLASS zbp_jp_c_hddt_h DEFINITION PUBLIC ABSTRACT FINAL FOR BEHAVIOR OF zjp_c_hddt_h.
 ENDCLASS.
 
 

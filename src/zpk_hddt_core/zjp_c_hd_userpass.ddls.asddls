@@ -8,6 +8,7 @@ define root view entity ZJP_C_HD_USERPASS
     key Companycode,
     key Usertype,
     Username,
+    @UI.masked: true
     Password,
     Suppliertax,
     Createdbyuser,

@@ -129,6 +129,7 @@ annotate entity ZJP_C_HDDT_H with
 
   @UI.lineItem       : [{ position: 120  }]
   @UI.identification : [{ position: 120  }]
+  @EndUserText.label: 'Supplier tax'
   SupplierTax;
 
   @UI.selectionField : [{ position: 130 }]
@@ -146,6 +147,7 @@ annotate entity ZJP_C_HDDT_H with
 
   @UI.lineItem       : [{ position: 160  }]
   @UI.identification : [{ position: 160  }]
+  @EndUserText.label: 'Customer tax'
   IdentificationNumber;
 
   @UI.lineItem       : [{ position: 170  }]

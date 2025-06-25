@@ -1,0 +1,151 @@
+managed implementation in class zbp_jp_r_file_fi unique;
+strict ( 2 );
+
+with draft;
+define behavior for ZJP_R_FILE_FI alias FileUpload
+persistent table zuser_upload_fi
+draft table zupload_fi_d
+etag master Changedbyuser
+lock master total etag Changedbyuser
+authorization master ( instance )
+
+{
+  create;
+  update;
+  delete;
+  field ( readonly, numbering : managed ) Uuid;
+  field ( readonly ) EndUser;
+  association _DataFile { create; with draft; }
+
+  draft action ( features : instance ) Edit;
+  draft action Activate optimized;
+  draft action Discard;
+  draft action Resume;
+  draft determine action Prepare;
+
+  mapping for zuser_upload_fi
+    {
+      uuid          = uuid;
+      enduser       = end_user;
+      zcnt          = zcnt;
+      status        = status;
+      attachment    = attachment;
+      mimetype      = mimetype;
+      filename      = filename;
+      createdbyuser = createdbyuser;
+      createddate   = createddate;
+      changedbyuser = changedbyuser;
+      changeddate   = changeddate;
+    }
+}
+
+define behavior for ZJP_R_DATAFILE_FI alias DataFile
+persistent table zup_data_file_fi
+draft table zdataupfi_d
+lock dependent by _FileUpload
+etag master Changedbyuser
+authorization dependent by _FileUpload
+
+{
+  update;
+  delete;
+  field ( readonly, numbering : managed ) Uuid;
+  field ( readonly ) UserUuid, EndUser;
+  association _FileUpload { with draft; }
+
+  mapping for zup_data_file_fi
+    {
+      uuid              = uuid;
+      useruuid          = user_uuid;
+      enduser           = end_user;
+      docseqno          = doc_seq_no;
+      companycode       = company_code;
+      reference         = reference;
+      documentdate      = document_date;
+      postingdate       = posting_date;
+      taxdetdate        = tax_det_date;
+      documenttype      = document_type;
+      docheadertext     = doc_header_text;
+      currency          = currency;
+      translationdate   = translation_date;
+      exchangerate      = exchange_rate;
+      customer          = customer;
+      vendor            = vendor;
+      glaccount         = gl_account;
+      transactionamount = transaction_amount;
+      localamount       = local_amount;
+      paymentblock      = payment_block;
+      baselinedate      = baseline_date;
+      cashdiscbase      = cash_disc_base;
+      cashdiscdays1     = cash_disc_days1;
+      cdpercent1        = cd_percent1;
+      cashdiscdays2     = cash_disc_days2;
+      cdpercent2        = cd_percent2;
+      paymentmethod     = payment_method;
+      pmtsupplement     = pmt_supplement;
+      paymentreference  = payment_reference;
+      partnerbanktype   = partner_bank_type;
+      housebank         = house_bank;
+      accountid         = account_id;
+      reasoncode        = reason_code;
+      netpmttermperiod  = net_pmt_term_period;
+      reconaccount      = recon_account;
+      title             = title;
+      name1             = name1;
+      name2             = name2;
+      name3             = name3;
+      name4             = name4;
+      street            = street;
+      city              = city;
+      postalcode        = postal_code;
+      countryregion     = country_region;
+      region            = region;
+      emailaddress      = email_address;
+      bankcountry       = bank_country;
+      bankkey           = bank_key;
+      bankaccount       = bank_account;
+      bankcontrolkey    = bank_control_key;
+      taxtype           = tax_type;
+      taxnumbertype     = tax_number_type;
+      taxnumber1        = tax_number1;
+      taxnumber2        = tax_number2;
+      taxnumber3        = tax_number3;
+      taxnumber4        = tax_number4;
+      taxnumber5        = tax_number5;
+      naturalperson     = natural_person;
+      itemtext          = item_text;
+      taxcode           = tax_code;
+      taxctryregion     = tax_ctry_region;
+      assignment        = assignment;
+      refkey1           = ref_key1;
+      refkey2           = ref_key2;
+      refkey3           = ref_key3;
+      valuedate         = value_date;
+      costcenter        = cost_center;
+      profitcenter      = profit_center;
+      orderno           = order_no;
+      reasoncode2       = reason_code_2;
+      wbselement        = wbs_element;
+      functionalarea    = functional_area;
+      taxcountry        = tax_country;
+      taxamount         = tax_amount;
+      taxbasetrancurr   = tax_base_tran_curr;
+      taxamountlocal    = tax_amount_local;
+      taxbaselocal      = tax_base_local;
+      taxitemtext       = tax_item_text;
+      providercontract  = provider_contract;
+      contractitem      = contract_item;
+      customer2         = customer2;
+      customergroup     = customer_group;
+      industry          = industry;
+      countryregionkey  = country_region_key;
+      salesorg          = sales_org;
+      distchannel       = dist_channel;
+      division          = division;
+      billingtype       = billing_type;
+      createdbyuser     = createdbyuser;
+      createddate       = createddate;
+      changedbyuser     = changedbyuser;
+      changeddate       = changeddate;
+    }
+}

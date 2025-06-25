@@ -172,7 +172,7 @@ CLASS ZCL_MANAGE_FPT_EINVOICES IMPLEMENTATION.
     DATA: ls_einvoice  TYPE zst_fpt_cancel,
           ls_can_items LIKE LINE OF ls_einvoice-wrongnotice-items.
 
-    DATA: lv_url  TYPE zde_text255.
+    DATA: lv_url  TYPE zde_txt255.
     CLEAR: e_status, e_json, e_return.
 * Username - Password
     ls_einvoice-user-username = i_userpass-Username.
@@ -258,7 +258,11 @@ CLASS ZCL_MANAGE_FPT_EINVOICES IMPLEMENTATION.
 
 
   METHOD contructor.
-    CREATE OBJECT go_fpt_einvoice.
+    if go_fpt_einvoice is BOUND.
+
+    ELSE.
+        go_fpt_einvoice = new #( ).
+    ENDIF.
   ENDMETHOD.
 
 
@@ -432,9 +436,9 @@ CLASS ZCL_MANAGE_FPT_EINVOICES IMPLEMENTATION.
       ENDIF.
 
 * Xác định loại điều chỉnh
-      IF i_einvoice-Adjusttype = 1. "Điều chỉnh tăng
+      IF i_einvoice-Adjusttype = '1'. "Điều chỉnh tăng
         ls_einvoice-inv-ud = '1'.
-      ELSEIF i_einvoice-Adjusttype = 2. "Điều chỉnh giảm
+      ELSEIF i_einvoice-Adjusttype = '2'. "Điều chỉnh giảm
         ls_einvoice-inv-ud = '0'.
       ELSE. "Thay thế
 
@@ -907,6 +911,7 @@ CLASS ZCL_MANAGE_FPT_EINVOICES IMPLEMENTATION.
         WHEN OTHERS.
 
       ENDCASE.
+
       IF e_header-StatusSap = '98' OR e_header-StatusSap = '99'.
         "Hóa đơn bị điều chỉnh
         SELECT SINGLE * FROM zjp_a_hddt_h WHERE Companycode        = @i_einvoice-Companycode

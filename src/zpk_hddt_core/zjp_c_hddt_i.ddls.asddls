@@ -1,4 +1,4 @@
-@EndUserText.label: 'Projection CDS for HDDT Item'
+@EndUserText.label: 'Projection CDS for HDDT Items'
 @ObjectModel: {
     query: {
             implementedBy: 'ABAP:ZCL_EINVOICE_DATA' }
@@ -33,9 +33,8 @@ define custom entity ZJP_C_HDDT_I
       VatAmountInTransacCrcy   : zde_dmbtr;
       TotalAmountInTransacCrcy : zde_dmbtr;
 
-      _EInvoicesHeaders        : association to parent ZJP_C_HDDT_H on  $projection.CompanyCode        = _EInvoicesHeaders.CompanyCode
-                                                                    and $projection.AccountingDocument = _EInvoicesHeaders.AccountingDocument
-                                                                    and $projection.FiscalYear         = _EInvoicesHeaders.FiscalYear;
-
+      _EInvoicesHeaders        : association to parent zjp_c_hddt_h on  $projection.companycode        = _EInvoicesHeaders.companycode
+                                                                    and $projection.accountingdocument = _EInvoicesHeaders.accountingdocument
+                                                                    and $projection.fiscalyear         = _EInvoicesHeaders.fiscalyear;
 
 }

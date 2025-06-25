@@ -1,0 +1,59 @@
+managed implementation in class zbp_i_report unique;
+strict ( 2 );
+//with draft;
+define behavior for ZI_REPORT //alias <alias_name>
+persistent table ztb_report
+//draft table ztb_report_D
+lock master //total etag LastChangedAt
+authorization master ( instance )
+etag master LastChangedAt
+{
+  create;
+  update;
+  delete;
+
+  field ( readonly : update ) RpId;
+  association _rp_item { create; }
+  mapping for ztb_report
+    {
+      RpId          = rp_id;
+      RpCode        = rp_code;
+      RpName        = rp_name;
+      CreatedBy     = created_by;
+      CreatedAt     = created_at;
+      LastChangedBy = last_changed_by;
+      LastChangedAt = last_changed_at;
+    }
+}
+
+define behavior for ZI_rp_item //alias <alias_name>
+persistent table ztb_rp_item
+//draft table ztb_rp_item_d
+lock dependent by _Report
+authorization dependent by _Report
+//etag master <field_name>
+early numbering
+{
+  update;
+  delete;
+  field ( readonly ) RpId;
+  field ( readonly : update ) ItemId;
+
+  association _Report;
+
+  mapping for ztb_rp_item
+    {
+      RpId        = rp_id;
+      ItemId      = item_id;
+      ItemCode    = item_code;
+      ItemCode1    = item_code1;
+      DisplayCode = Display_code;
+      ItemDesc    = item_desc;
+      ItemCond    = item_cond;
+      ItemCond2   = item_cond2;
+      ItemCond3   = item_cond3;
+      ItemCond4   = item_cond4;
+      display     = display;
+      Formula     = formula;
+    }
+}

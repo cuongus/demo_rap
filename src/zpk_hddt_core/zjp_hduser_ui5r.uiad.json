@@ -1,0 +1,33 @@
+{
+  "formatVersion": "1",
+  "header": {
+    "description": "Config User SInvoice",
+    "originalLanguage": "en",
+    "abapLanguageVersion": "cloudDevelopment"
+  },
+  "generalInformation": {
+    "appType": "ui5",
+    "catalogId": "SAP_TC_UI5_REPO_UIAD"
+  },
+  "ui5AppDetails": {
+    "appId": "zjphduser"
+  },
+  "navigation": {
+    "targetMappingId": "UI5R_B77A299849A9022C90ACA3C07B05CAC94CC870A6_TM",
+    "semanticObject": "zjp_hduser",
+    "action": "display",
+    "desktop": true,
+    "tablet": true,
+    "phone": true
+  },
+  "tiles": [
+    {
+      "id": "UI5R_B77A299849A9022C90ACA3C07B05CAC94CC870A6_AL",
+      "tileType": "static",
+      "isDefault": true,
+      "standard": {
+        "title": "Config User SInvoice"
+      }
+    }
+  ]
+}

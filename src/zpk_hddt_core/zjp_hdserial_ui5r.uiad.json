@@ -1,0 +1,33 @@
+{
+  "formatVersion": "1",
+  "header": {
+    "description": "Config Form SInvoice",
+    "originalLanguage": "en",
+    "abapLanguageVersion": "cloudDevelopment"
+  },
+  "generalInformation": {
+    "appType": "ui5",
+    "catalogId": "SAP_TC_UI5_REPO_UIAD"
+  },
+  "ui5AppDetails": {
+    "appId": "zjphdserial"
+  },
+  "navigation": {
+    "targetMappingId": "UI5R_9EF04D69DA33EBC42F46820CF57D098FC86EEBA3_TM",
+    "semanticObject": "zjp_hdserial",
+    "action": "display",
+    "desktop": true,
+    "tablet": true,
+    "phone": true
+  },
+  "tiles": [
+    {
+      "id": "UI5R_9EF04D69DA33EBC42F46820CF57D098FC86EEBA3_AL",
+      "tileType": "static",
+      "isDefault": true,
+      "standard": {
+        "title": "Config Form SInvoice"
+      }
+    }
+  ]
+}

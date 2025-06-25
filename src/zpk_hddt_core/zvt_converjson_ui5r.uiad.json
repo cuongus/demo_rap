@@ -1,0 +1,33 @@
+{
+  "formatVersion": "1",
+  "header": {
+    "description": "Convert Json SInvoice",
+    "originalLanguage": "en",
+    "abapLanguageVersion": "cloudDevelopment"
+  },
+  "generalInformation": {
+    "appType": "ui5",
+    "catalogId": "SAP_TC_UI5_REPO_UIAD"
+  },
+  "ui5AppDetails": {
+    "appId": "zvtconverjson"
+  },
+  "navigation": {
+    "targetMappingId": "UI5R_23C15B0C2BE7644831B559F5A3340BEE50588AD4_TM",
+    "semanticObject": "zvt_convertjson",
+    "action": "display",
+    "desktop": true,
+    "tablet": true,
+    "phone": true
+  },
+  "tiles": [
+    {
+      "id": "UI5R_23C15B0C2BE7644831B559F5A3340BEE50588AD4_AL",
+      "tileType": "static",
+      "isDefault": true,
+      "standard": {
+        "title": "Convert Json SInvoice"
+      }
+    }
+  ]
+}

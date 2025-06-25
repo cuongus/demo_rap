@@ -1,0 +1,26 @@
+managed implementation in class zbp_jp_r_hd_payment unique;
+//strict ( 2 );
+
+define behavior for ZJP_R_HD_PAYMENT alias hdpayment
+persistent table zjp_hd_payment
+lock master
+authorization master ( instance )
+etag master Changeddate
+{
+  create;
+  update;
+  delete;
+  field ( readonly : update ) Companycode, Zlsch, Paymtext;
+  field ( readonly ) Createdbyuser, Createddate, Changedbyuser, Changeddate;
+
+  mapping for zjp_hd_payment
+    {
+      Companycode   = companycode;
+      Zlsch         = zlsch;
+      Paymtext      = paymtext;
+      Createdbyuser = createdbyuser;
+      Createddate   = createddate;
+      Changedbyuser = changedbyuser;
+      Changeddate   = changeddate;
+    }
+}

@@ -1,0 +1,33 @@
+{
+  "formatVersion": "1",
+  "header": {
+    "description": "Config GLaccount SInvoice",
+    "originalLanguage": "en",
+    "abapLanguageVersion": "cloudDevelopment"
+  },
+  "generalInformation": {
+    "appType": "ui5",
+    "catalogId": "SAP_TC_UI5_REPO_UIAD"
+  },
+  "ui5AppDetails": {
+    "appId": "zjphdglacc"
+  },
+  "navigation": {
+    "targetMappingId": "UI5R_D7E0EAFCBE5BCD1712B4E9E7B9AA80650897A5B8_TM",
+    "semanticObject": "zjp_hdglacc",
+    "action": "display",
+    "desktop": true,
+    "tablet": true,
+    "phone": true
+  },
+  "tiles": [
+    {
+      "id": "UI5R_D7E0EAFCBE5BCD1712B4E9E7B9AA80650897A5B8_AL",
+      "tileType": "static",
+      "isDefault": true,
+      "standard": {
+        "title": "Config GLaccount SInvoice"
+      }
+    }
+  ]
+}

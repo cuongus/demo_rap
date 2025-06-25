@@ -1,14 +1,13 @@
-@EndUserText.label: 'Projection CDS for HDDT Header'
+@EndUserText.label: 'Projection CDS for HDDT Headers'
 @ObjectModel: {
     query: {
             implementedBy: 'ABAP:ZCL_EINVOICE_DATA'
-//            combinedCountAndDataRetrievalEnabled: true
             }
     }
 @Metadata.allowExtensions: true
 @Search.searchable: true
 define root custom entity ZJP_C_HDDT_H
-  //   with parameters IdSys_pr : abap.char(10)
+  // with parameters parameter_name : parameter_type
 {
       @Search.defaultSearchElement   : true
       @Consumption.valueHelpDefinition:[
@@ -153,4 +152,6 @@ define root custom entity ZJP_C_HDDT_H
       _ConfigStatusCQT               : association [0..1] to ZJP_CFG_STATUSCQT on _ConfigStatusCQT.Value = $projection.StatusCQTRes;
 
       _ConfigAdjType                 : association [0..1] to ZJP_CFG_ADJTYPE on _ConfigAdjType.Value = $projection.AdjustType;
+
+
 }

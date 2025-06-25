@@ -1,0 +1,26 @@
+managed implementation in class zbp_jp_r_hddt_url unique;
+//strict ( 2 );
+
+define behavior for ZJP_R_HDDT_URL alias hddturl
+persistent table zjp_hddt_url
+lock master
+authorization master ( instance )
+etag master Changeddate
+{
+  create;
+  update;
+  delete;
+  field ( readonly : update ) IdSys, Action, UrlValue;
+  field ( readonly ) Createdbyuser, Createddate, Changedbyuser, Changeddate;
+
+  mapping for zjp_hddt_url
+    {
+      IdSys         = id_sys;
+      Action        = action;
+      UrlValue      = url_value;
+      Createdbyuser = createdbyuser;
+      Createddate   = createddate;
+      Changedbyuser = changedbyuser;
+      Changeddate   = changeddate;
+    }
+}

@@ -1,0 +1,55 @@
+@Metadata.layer: #CORE
+annotate view ZC_REPORT
+    with 
+{
+  @UI.facet: [{
+      id: 'REPORT',
+      purpose: #STANDARD,
+      position: 10 ,
+      label: 'Report',
+      type: #IDENTIFICATION_REFERENCE
+  },
+  {
+      id: 'Items',
+      purpose: #STANDARD,
+      position: 20 ,
+      label: 'Items',
+      type: #LINEITEM_REFERENCE,
+      targetElement: '_rp_item'
+  }
+  ]
+  
+     @UI.lineItem: [ {
+    position: 10 , 
+    label: 'Report Id'
+  } ]
+  @UI.selectionField: [ {
+    position: 10 
+  } ]
+  
+  @UI.identification: [{ position: 10 }]
+  
+  RpId;
+  
+  @UI.lineItem: [ {
+    position: 20 , 
+    label: 'Report code'
+  } ]
+  @UI.selectionField: [ {
+    position: 20 
+  } ]
+  
+    @UI.identification: [{ position: 20 }]
+  RpCode;
+  
+    @UI.lineItem: [ {
+    position: 30 , 
+    label: 'Report name'
+  } ]
+  @UI.selectionField: [ {
+    position: 30 
+  } ]
+  @UI.identification: [{ position: 30 }]
+  RpName;
+    
+}

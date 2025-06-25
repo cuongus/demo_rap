@@ -479,9 +479,18 @@ CLASS ZCL_EINVOICE_DATA IMPLEMENTATION.
           WHERE unitofmeasure = @ls_bseg-BaseUnit INTO @ls_einvoice_item-unitofmeasurelongname.
 
           "Tax Percentage
+          DATA: lv_currency TYPE zjp_hd_taxcode-currency.
+          CASE lv_currencytype.
+            WHEN '1'. "Transaction currency
+              lv_currency = ls_bkpf-TransactionCurrency.
+            WHEN '2'. "Companycode currency
+              lv_currency = ls_bkpf-CompanyCodeCurrency.
+            WHEN OTHERS.
+          ENDCASE.
+
           SELECT SINGLE taxpercentage FROM zjp_hd_taxcode
           WHERE companycode  = @ls_bkpf-CompanyCode
-            AND currency     = @ls_bkpf-CompanyCodeCurrency
+            AND currency     = @lv_currency
             AND taxcode      = @ls_bseg-TaxCode
           INTO @ls_einvoice_item-taxpercentage.
           IF sy-subrc NE 0.
@@ -636,7 +645,7 @@ CLASS ZCL_EINVOICE_DATA IMPLEMENTATION.
       ls_einvoice_header-typeofdate     = lv_typeofdate.
 
 **--Time CREATE
-      go_einvoice_data->getdate_einvoice(
+      lo_einvoice_data->getdate_einvoice(
           EXPORTING
           i_document = ls_einvoice_header
           IMPORTING
@@ -665,8 +674,17 @@ CLASS ZCL_EINVOICE_DATA IMPLEMENTATION.
         ENDIF.
       ENDIF.
 
+      ls_einvoice_header-idsys = 'VIETTEL'.
+
 **--Get Customer Information
       ls_einvoice_header-customer = ls_bkpf-Customer.
+      CLEAR: wa_customer_details, wa_document.
+
+      wa_document-companycode           = ls_bkpf-CompanyCode.
+      wa_document-accountingdocument    = ls_bkpf-AccountingDocument.
+      wa_document-fiscalyear            = ls_bkpf-FiscalYear.
+      wa_document-customer              = ls_bkpf-Customer.
+
       IF ls_bkpf-Customer IS NOT INITIAL.
         go_jp_common_core->get_customer_details(
             EXPORTING
@@ -686,6 +704,7 @@ CLASS ZCL_EINVOICE_DATA IMPLEMENTATION.
         ls_einvoice_header-telephonenumber       = wa_customer_details-telephonenumber.
       ENDIF.
 
+      APPEND ls_einvoice_header TO lt_einvoice_header.
 **-----------------------------------------------------------------------**
       CLEAR: ls_einvoice_header.
       CLEAR: ls_a_hddt_h.
@@ -815,6 +834,9 @@ CLASS ZCL_EINVOICE_DATA IMPLEMENTATION.
 *      DELETE lt_einvoice_header WHERE einvoicenumber NOT IN ir_einvoicenumber.
 *    ENDIF.
 
+***----Export data---***
+    it_einvoice_header = lt_einvoice_header.
+    it_einvoice_item = lt_einvoice_item.
   ENDMETHOD.
 
 
@@ -982,7 +1004,7 @@ CLASS ZCL_EINVOICE_DATA IMPLEMENTATION.
 
         DATA(exception_t100_key) = cl_message_helper=>get_latest_t100_exception( exception )->t100key.
 
-        RAISE EXCEPTION TYPE zcl_jp_get_data_scttgnh
+        RAISE EXCEPTION TYPE zcl_einvoice_data
           EXPORTING
             textid   = VALUE scx_t100key(
             msgid = exception_t100_key-msgid

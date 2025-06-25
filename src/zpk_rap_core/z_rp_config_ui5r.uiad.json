@@ -1,0 +1,34 @@
+{
+  "formatVersion": "1",
+  "header": {
+    "description": "Report Configuration",
+    "originalLanguage": "en",
+    "abapLanguageVersion": "cloudDevelopment"
+  },
+  "generalInformation": {
+    "appType": "ui5",
+    "catalogId": "SAP_TC_UI5_REPO_UIAD"
+  },
+  "ui5AppDetails": {
+    "appId": "zrpconfig"
+  },
+  "navigation": {
+    "targetMappingId": "UI5R_2724E2AC6E1A0DC632019027DFB806095BB9C7E2_TM",
+    "semanticObject": "z_rp_config",
+    "action": "crud",
+    "desktop": true,
+    "tablet": true,
+    "phone": true
+  },
+  "tiles": [
+    {
+      "id": "UI5R_2724E2AC6E1A0DC632019027DFB806095BB9C7E2_AL",
+      "tileType": "static",
+      "isDefault": true,
+      "standard": {
+        "title": "Report Configuration",
+        "icon": "sap-icon://wrench"
+      }
+    }
+  ]
+}

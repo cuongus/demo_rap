@@ -6,7 +6,9 @@
 "ZJP_R_HD_GLACC"
 ],
 "ASSOCIATED":
-[],
+[
+"ZJP_CFG_GLACC"
+],
 "BASE":
 [],
 "ANNO_REF":

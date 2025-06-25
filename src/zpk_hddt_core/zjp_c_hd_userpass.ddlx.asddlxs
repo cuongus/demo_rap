@@ -32,37 +32,32 @@ annotate view ZJP_C_HD_USERPASS with
 
   @UI.identification: [{ position: 30 }]
   @UI.lineItem: [{ position: 30 }]
-  @UI.selectionField: [{ position: 30 }]
   Username;
 
   @UI.identification: [{ position: 40 }]
-  @UI.lineItem: [{ position: 40 }]
-  @UI.selectionField: [{ position: 40 }]
+//  @UI.lineItem: [{ position: 40 }]
+  @UI.masked: true
+//  @UI.hidden: true
   Password;
 
   @UI.identification: [{ position: 50 }]
   @UI.lineItem: [{ position: 50 }]
-  @UI.selectionField: [{ position: 50 }]
   Suppliertax;
 
   @UI.identification: [{ position: 60 }]
   @UI.lineItem: [{ position: 60 }]
-  @UI.selectionField: [{ position: 60 }]
   Createdbyuser;
 
   @UI.identification: [{ position: 70 }]
   @UI.lineItem: [{ position: 70 }]
-  @UI.selectionField: [{ position: 70 }]
   Createddate;
 
   @UI.identification: [{ position: 80 }]
   @UI.lineItem: [{ position: 80 }]
-  @UI.selectionField: [{ position: 80 }]
   Changedbyuser;
 
   @UI.identification: [{ position: 90 }]
   @UI.lineItem: [{ position: 90 }]
-  @UI.selectionField: [{ position: 90 }]
   Changeddate;
 
 }

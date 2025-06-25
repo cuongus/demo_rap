@@ -1,0 +1,33 @@
+{
+  "formatVersion": "1",
+  "header": {
+    "description": "Config Doctype SInvoice",
+    "originalLanguage": "en",
+    "abapLanguageVersion": "cloudDevelopment"
+  },
+  "generalInformation": {
+    "appType": "ui5",
+    "catalogId": "SAP_TC_UI5_REPO_UIAD"
+  },
+  "ui5AppDetails": {
+    "appId": "zjphddoctype"
+  },
+  "navigation": {
+    "targetMappingId": "UI5R_E82515FEAE46C83F921DBDA163111D7B497351E4_TM",
+    "semanticObject": "zjp_hddoctype",
+    "action": "display",
+    "desktop": true,
+    "tablet": true,
+    "phone": true
+  },
+  "tiles": [
+    {
+      "id": "UI5R_E82515FEAE46C83F921DBDA163111D7B497351E4_AL",
+      "tileType": "static",
+      "isDefault": true,
+      "standard": {
+        "title": "Config Doctype SInvoice"
+      }
+    }
+  ]
+}

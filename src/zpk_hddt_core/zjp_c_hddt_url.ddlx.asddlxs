@@ -1,0 +1,49 @@
+@Metadata.layer: #CORE
+@UI: {
+      headerInfo:{ typeName: 'HDDT Url',
+                   typeNamePlural: 'HDDT Url',
+                   title: { type: #STANDARD, label: 'Action', value: 'Action' }
+                  }
+}
+annotate view ZJP_C_HDDT_URL with
+{
+  @UI.facet: [
+    {
+        id: 'Global',
+        purpose: #STANDARD,
+        type: #IDENTIFICATION_REFERENCE,
+        label: 'Config Value',
+        position: 10
+    }]
+
+  @UI.identification: [{ position: 10 }]
+  @UI.lineItem: [{ position: 10 }]
+  @UI.selectionField: [{ position: 10 }]
+  IdSys;
+
+  @UI.identification: [{ position: 20 }]
+  @UI.lineItem: [{ position: 20 }]
+  @UI.selectionField: [{ position: 20 }]
+  Action;
+
+  @UI.identification: [{ position: 30 }]
+  @UI.lineItem: [{ position: 30 }]
+  UrlValue;
+  
+  @UI.identification: [{ position: 40 }]
+  @UI.lineItem: [{ position: 40 }]
+  Createdbyuser;
+  
+  @UI.identification: [{ position: 50 }]
+  @UI.lineItem: [{ position: 50 }]
+  Createddate;
+  
+  @UI.identification: [{ position: 60 }]
+  @UI.lineItem: [{ position: 60 }]
+  Changedbyuser;
+  
+  @UI.identification: [{ position: 70 }]
+  @UI.lineItem: [{ position: 70 }]
+  Changeddate;
+
+}

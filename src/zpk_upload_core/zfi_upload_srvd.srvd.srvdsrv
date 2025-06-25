@@ -1,0 +1,5 @@
+@EndUserText.label: 'Service Definition for FI Upload'
+define service ZFI_UPLOAD_SRVD {
+  expose ZJP_C_FILE_FI     as FileUpload;
+  expose ZJP_C_DATAFILE_FI as DataFile;
+}

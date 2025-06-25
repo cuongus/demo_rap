@@ -10,7 +10,7 @@ etag master Changeddate
   create;
   update;
   delete;
-  field ( readonly : update ) Companycode, Usertype;
+  field ( readonly : update ) Companycode, Usertype, Username, Password;
   field ( readonly ) Createdbyuser, Createddate, Changedbyuser, Changeddate;
 
   mapping for zjp_hd_userpass

@@ -1,0 +1,5 @@
+@EndUserText.label: 'Report'
+define service ZSD_REPORT {
+  expose ZC_REPORT;
+  expose ZC_RP_ITEM;
+}

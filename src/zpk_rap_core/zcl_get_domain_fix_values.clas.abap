@@ -11,7 +11,8 @@ ENDCLASS.
 
 
 
-CLASS zcl_get_domain_fix_values IMPLEMENTATION.
+CLASS ZCL_GET_DOMAIN_FIX_VALUES IMPLEMENTATION.
+
 
   METHOD if_rap_query_provider~select.
 
@@ -48,7 +49,7 @@ CLASS zcl_get_domain_fix_values IMPLEMENTATION.
         ENDIF.
 
         SELECT * FROM zjp_hd_config
-        WHERE id_sys IN ( '000', 'FPT' )
+        WHERE id_sys IN ( '001', 'FPT' )
           AND id_domain = @domain_name
           INTO TABLE @DATA(lt_hd_config).
         IF sy-subrc EQ 0.
@@ -118,5 +119,4 @@ CLASS zcl_get_domain_fix_values IMPLEMENTATION.
 
     ENDTRY.
   ENDMETHOD.
-
 ENDCLASS.

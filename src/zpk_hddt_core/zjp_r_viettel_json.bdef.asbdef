@@ -1,0 +1,28 @@
+managed implementation in class zbp_jp_r_viettel_json unique;
+strict ( 2 );
+
+define behavior for ZJP_R_VIETTEL_JSON alias viettel_json
+persistent table zjp_viettel_json
+lock master
+authorization master ( instance )
+etag master Changeddate
+{
+  create;
+  update;
+  delete;
+  field ( readonly : update ) TagMain, TagName, Value;
+  field ( readonly ) Createdbyuser, Createddate, Changedbyuser, Changeddate;
+
+  static action Generate result [1] $self;
+
+  mapping for zjp_viettel_json
+    {
+      TagMain       = tagmain;
+      TagName       = tagname;
+      Value         = value;
+      Createdbyuser = createdbyuser;
+      Createddate   = createddate;
+      Changedbyuser = changedbyuser;
+      Changeddate   = changeddate;
+    }
+}

@@ -1,4 +1,6 @@
 CLASS zbp_jp_r_hd_serial DEFINITION PUBLIC ABSTRACT FINAL FOR BEHAVIOR OF zjp_r_hd_serial.
+protected section.
+private section.
 ENDCLASS.
 
 

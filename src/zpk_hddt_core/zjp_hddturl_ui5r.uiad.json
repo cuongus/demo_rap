@@ -1,0 +1,33 @@
+{
+  "formatVersion": "1",
+  "header": {
+    "description": "Config Url SInvoice",
+    "originalLanguage": "en",
+    "abapLanguageVersion": "cloudDevelopment"
+  },
+  "generalInformation": {
+    "appType": "ui5",
+    "catalogId": "SAP_TC_UI5_REPO_UIAD"
+  },
+  "ui5AppDetails": {
+    "appId": "zjphddturl"
+  },
+  "navigation": {
+    "targetMappingId": "UI5R_D750FD9E4AAB7861B65EA7834E6AECDF2ED044A5_TM",
+    "semanticObject": "zjp_hddturl",
+    "action": "display",
+    "desktop": true,
+    "tablet": true,
+    "phone": true
+  },
+  "tiles": [
+    {
+      "id": "UI5R_D750FD9E4AAB7861B65EA7834E6AECDF2ED044A5_AL",
+      "tileType": "static",
+      "isDefault": true,
+      "standard": {
+        "title": "Config Url SInvoice"
+      }
+    }
+  ]
+}

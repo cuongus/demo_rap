@@ -1,4 +1,6 @@
 CLASS zbp_jp_r_hd_glacc DEFINITION PUBLIC ABSTRACT FINAL FOR BEHAVIOR OF zjp_r_hd_glacc.
+protected section.
+private section.
 ENDCLASS.
 
 
