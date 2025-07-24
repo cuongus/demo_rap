@@ -17,96 +17,150 @@ annotate entity ZJP_C_HDDT_I with
   type               : #IDENTIFICATION_REFERENCE
   }
   ]
-  
+
   @UI.hidden: true
   CompanyCode;
-  
+
   @UI.hidden: true
   AccountingDocument;
-  
+
   @UI.hidden: true
   FiscalYear;
-  
+
   @UI.lineItem       : [{ position: 10 }]
   @UI.identification : [{ position: 10 }]
+  @EndUserText.label: 'Document Item'
   AccountingDocumentItem;
-  
+
   @UI.lineItem       : [{ position: 20 }]
   @UI.identification : [{ position: 20 }]
+  @EndUserText.label: 'Tax Code'
   TaxCode;
-  
+
   @UI.lineItem       : [{ position: 30 }]
   @UI.identification : [{ position: 30 }]
+  @EndUserText.label: 'Tax Percentage'
   TaxPercentage;
-  
+
   @UI.lineItem       : [{ position: 40 }]
   @UI.identification : [{ position: 40 }]
+  @EndUserText.label: 'SInvoice Item'
   ItemEinvoice;
-  
+
   @UI.lineItem       : [{ position: 50 }]
   @UI.identification : [{ position: 50 }]
+  @EndUserText.label: 'Product'
   Product;
-  
+
   @UI.lineItem       : [{ position: 60 }]
   @UI.identification : [{ position: 60 }]
+  @UI.hidden: true
   Longtext;
-  
+
   @UI.lineItem       : [{ position: 70 }]
   @UI.identification : [{ position: 70 }]
+  @EndUserText.label: 'Text'
   DocumentItemText;
-  
+
   @UI.lineItem       : [{ position: 80 }]
   @UI.identification : [{ position: 80 }]
+  @EndUserText.label: 'Quantity'
   Quantity;
-  
+
   @UI.lineItem       : [{ position: 90 }]
   @UI.identification : [{ position: 90 }]
+  @EndUserText.label: 'Unit'
   BaseUnit;
-  
+
   @UI.lineItem       : [{ position: 100 }]
   @UI.identification : [{ position: 100 }]
+  @EndUserText.label: 'Unit Name'
   UnitofMeasureLongname;
-  
+
   @UI.lineItem       : [{ position: 110 }]
   @UI.identification : [{ position: 110 }]
+  @EndUserText.label: 'Companycode Currency'
   CompanyCodeCurrency;
-  
+
   @UI.lineItem       : [{ position: 120 }]
   @UI.identification : [{ position: 120 }]
+  @EndUserText.label: 'Price InCoCode'
   priceInCoCodeCrcy;
-  
+
   @UI.lineItem       : [{ position: 130 }]
   @UI.identification : [{ position: 130 }]
+  @EndUserText.label: 'Amount InCoCode'
   AmountInCoCodeCrcy;
-  
+
   @UI.lineItem       : [{ position: 140 }]
   @UI.identification : [{ position: 140 }]
+  @EndUserText.label: 'VAT InCoCode'
   VatAmountInCoCodeCrcy;
-  
+
   @UI.lineItem       : [{ position: 150 }]
   @UI.identification : [{ position: 150 }]
+  @EndUserText.label: 'Total InCoCode'
   TotalAmountInCoCodeCrcy;
-  
+
   @UI.lineItem       : [{ position: 160 }]
   @UI.identification : [{ position: 160 }]
+  @EndUserText.label: 'Transaction Currency'
   TransactionCurrency;
-  
+
   @UI.lineItem       : [{ position: 170 }]
   @UI.identification : [{ position: 170 }]
+  @EndUserText.label: 'Price Trans'
   priceintransaccrcy;
-  
+
   @UI.lineItem       : [{ position: 180 }]
   @UI.identification : [{ position: 180 }]
+  @EndUserText.label: 'Amount Trans'
   AmountInTransacCrcy;
-  
+
   @UI.lineItem       : [{ position: 190 }]
   @UI.identification : [{ position: 190 }]
+  @EndUserText.label: 'Vat Trans'
   VatAmountInTransacCrcy;
-  
+
   @UI.lineItem       : [{ position: 200 }]
   @UI.identification : [{ position: 200 }]
+  @EndUserText.label: 'Total Trans'
   TotalAmountInTransacCrcy;
+
+  @UI.lineItem       : [{ position: 210 }]
+  AdjustType;
+
+  @UI.lineItem       : [{ position: 220 }]
+  AccountingDocumentSource;
+
+  @UI.lineItem       : [{ position: 230 }]
+  FiscalYearSource;
+
+  @UI.lineItem       : [{ position: 240 }]
+  CurrencyType;
+
+  @UI.lineItem       : [{ position: 250 }]
+  Usertype;
+
+  @UI.lineItem       : [{ position: 260 }]
+  TypeOfDate;
+
+  @UI.lineItem       : [{ position: 270 }]
+  EinvoiceForm;
+
+  @UI.lineItem       : [{ position: 280 }]
+  EinvoiceSerial;
+
+  @UI.lineItem       : [{ position: 290 }]
+  EinvoiceType;
+
+  @UI.lineItem       : [{ position: 310 }]
+  EinvoiceNumber;
+
+  @UI.lineItem       : [{ position: 320 }]
+  @EndUserText.label: 'Test run'
+  testrun;
   /* Associations */
-//  _EInvoicesHeaders;
+  //  _EInvoicesHeaders;
 
 }

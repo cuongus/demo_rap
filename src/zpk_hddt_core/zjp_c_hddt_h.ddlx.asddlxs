@@ -40,17 +40,17 @@ annotate entity ZJP_C_HDDT_H with
    ]
 
   @UI.selectionField : [{ position: 10 }]
-  @UI.lineItem       : [{ position: 10  },{ label: 'Integration Invoices', dataAction: 'Integr', type: #FOR_ACTION }
+  @UI.lineItem       : [{ position: 10  },{ label: 'Integration Invoices', dataAction: 'Integration', type: #FOR_ACTION }
                                            ,{ label: 'Status Invoices', dataAction: 'Search', type: #FOR_ACTION }
-                                           ,{ label: 'Replace Invoices', dataAction: 'Replace', type: #FOR_ACTION }
+//                                           ,{ label: 'Replace Invoices', dataAction: 'Replace', type: #FOR_ACTION }
                                            ,{ label: 'Adjust Invoices', dataAction: 'Adjust', type: #FOR_ACTION }
-                                           ,{ label: 'Cancel Invoices', dataAction: 'Cancel', type: #FOR_ACTION }
+//                                           ,{ label: 'Cancel Invoices', dataAction: 'Cancel', type: #FOR_ACTION }
                                             ]
-  @UI.identification : [{ position: 10  },{ label: 'Integration Invoices', dataAction: 'Integr', type: #FOR_ACTION }
+  @UI.identification : [{ position: 10  },{ label: 'Integration Invoices', dataAction: 'Integration', type: #FOR_ACTION }
                                            ,{ label: 'Status Invoices', dataAction: 'Search', type: #FOR_ACTION }
-                                           ,{ label: 'Replace Invoices', dataAction: 'Replace', type: #FOR_ACTION }
+//                                           ,{ label: 'Replace Invoices', dataAction: 'Replace', type: #FOR_ACTION }
                                            ,{ label: 'Adjust Invoices', dataAction: 'Adjust', type: #FOR_ACTION }
-                                           ,{ label: 'Cancel Invoices', dataAction: 'Cancel', type: #FOR_ACTION }
+//                                           ,{ label: 'Cancel Invoices', dataAction: 'Cancel', type: #FOR_ACTION }
                                             ]
   @UI.fieldGroup     : [ { type: #STANDARD,  position: 10 ,  qualifier: 'QFBasicInfo'  }]
   @Search.defaultSearchElement: true
@@ -70,7 +70,7 @@ annotate entity ZJP_C_HDDT_H with
   @Search.defaultSearchElement: true
   FiscalYear;
 
-  @UI.selectionField : [{ position: 40 }]
+//  @UI.selectionField : [{ position: 40 }]
   @UI.lineItem       : [{ position: 40  }]
   @UI.identification : [{ position: 40  }]
   @UI.fieldGroup     : [ { type: #STANDARD,  position: 40 ,  qualifier: 'QFBasicInfo'  }]
@@ -78,7 +78,7 @@ annotate entity ZJP_C_HDDT_H with
   @Search.defaultSearchElement: true
   IDSys;
 
-  @UI.selectionField : [{ position: 50 }]
+//  @UI.selectionField : [{ position: 50 }]
   @UI.lineItem       : [{ position: 50  }]
   @UI.identification : [{ position: 50  }]
   @UI.fieldGroup     : [ { type: #STANDARD,  position: 50 ,  qualifier: 'QFBasicInfo'  }]
@@ -92,31 +92,31 @@ annotate entity ZJP_C_HDDT_H with
   @EndUserText.label: 'Icon'
   IconSAP;
 
-  @UI.selectionField : [{ position: 70 }]
+//  @UI.selectionField : [{ position: 70 }]
   @UI.lineItem       : [{ position: 70  }]
   @UI.identification : [{ position: 70  }]
   @UI.fieldGroup     : [ { type: #STANDARD,  position: 70 ,  qualifier: 'QFBasicInfo'  }]
   AccountingDocumentType;
 
-  @UI.selectionField : [{ position: 80 }]
+//  @UI.selectionField : [{ position: 80 }]
   @UI.lineItem       : [{ position: 80  }]
   @UI.identification : [{ position: 80  }]
   @UI.fieldGroup     : [ { type: #STANDARD,  position: 80 ,  qualifier: 'QFBasicInfo'  }]
   FiscalPeriod;
 
-  @UI.selectionField : [{ position: 90 }]
+//  @UI.selectionField : [{ position: 90 }]
   @UI.lineItem       : [{ position: 90  }]
   @UI.identification : [{ position: 90  }]
   @UI.fieldGroup     : [ { type: #STANDARD,  position: 90 ,  qualifier: 'QFBasicInfo'  }]
   PostingDate;
 
-  @UI.selectionField : [{ position: 100 }]
+//  @UI.selectionField : [{ position: 100 }]
   @UI.lineItem       : [{ position: 100  }]
   @UI.identification : [{ position: 100  }]
   @UI.fieldGroup     : [ { type: #STANDARD,  position: 100 ,  qualifier: 'QFBasicInfo'  }]
   DocumentDate;
 
-  @UI.selectionField : [{ position: 110 }]
+//  @UI.selectionField : [{ position: 110 }]
   @UI.lineItem       : [{ position: 110  }]
   @UI.identification : [{ position: 110  }]
   @UI.fieldGroup     : [ { type: #STANDARD,  position: 110 ,  qualifier: 'QFBasicInfo'  }]
@@ -166,19 +166,19 @@ annotate entity ZJP_C_HDDT_H with
   @UI.identification : [{ position: 200  }]
   ProfitCenter;
 
-  @UI.selectionField : [{ position: 210 }]
+//  @UI.selectionField : [{ position: 210 }]
   @UI.lineItem       : [{ position: 210  }]
   @UI.identification : [{ position: 210  }]
   @EndUserText.label: 'Adjust Type'
   AdjustType;
 
-  @UI.selectionField : [{ position: 220 }]
+//  @UI.selectionField : [{ position: 220 }]
   @UI.lineItem       : [{ position: 220  }]
   @UI.identification : [{ position: 220  }]
   @EndUserText.label: 'Accounting Document Source'
   AccountingDocumentSource;
 
-  @UI.selectionField : [{ position: 230 }]
+//  @UI.selectionField : [{ position: 230 }]
   @UI.lineItem       : [{ position: 230  }]
   @UI.identification : [{ position: 230  }]
   @EndUserText.label: 'Fiscal Year Source'
@@ -199,7 +199,7 @@ annotate entity ZJP_C_HDDT_H with
   @UI.identification : [{ position: 260  }]
   taxcode;
 
-  @UI.selectionField : [{ position: 270 }]
+//  @UI.selectionField : [{ position: 270 }]
   @UI.lineItem       : [{ position: 270  }]
   @UI.identification : [{ position: 270  }]
   @EndUserText.label: 'Companycode Currency'
@@ -220,7 +220,7 @@ annotate entity ZJP_C_HDDT_H with
   @EndUserText.label: 'Total Amount In CoCode Crcy'
   TotalAmountInCoCodeCrcy;
 
-  @UI.selectionField : [{ position: 310 }]
+//  @UI.selectionField : [{ position: 310 }]
   @UI.lineItem       : [{ position: 310  }]
   @UI.identification : [{ position: 310  }]
   @EndUserText.label: 'Transaction Currency'
@@ -241,7 +241,7 @@ annotate entity ZJP_C_HDDT_H with
   @EndUserText.label: 'Total Amount In Transac Crcy'
   TotalAmountInTransacCrcy;
 
-  @UI.selectionField : [{ position: 350 }]
+//  @UI.selectionField : [{ position: 350 }]
   @UI.lineItem       : [{ position: 350  }]
   @UI.identification : [{ position: 350  }]
   @EndUserText.label: 'User Type'
@@ -265,7 +265,7 @@ annotate entity ZJP_C_HDDT_H with
   @UI.identification : [{ position: 390  }]
   EinvoiceType;
 
-  @UI.selectionField : [{ position: 400 }]
+//  @UI.selectionField : [{ position: 400 }]
   @UI.lineItem       : [{ position: 400  }]
   @UI.identification : [{ position: 400  }]
   EinvoiceNumber;
@@ -274,17 +274,17 @@ annotate entity ZJP_C_HDDT_H with
   @UI.identification : [{ position: 410  }]
   SID;
 
-  @UI.selectionField : [{ position: 420 }]
+//  @UI.selectionField : [{ position: 420 }]
   @UI.lineItem       : [{ position: 420  }]
   @UI.identification : [{ position: 420  }]
   EinvoiceTimeCreate;
 
-  @UI.selectionField : [{ position: 430 }]
+//  @UI.selectionField : [{ position: 430 }]
   @UI.lineItem       : [{ position: 430  }]
   @UI.identification : [{ position: 430  }]
   EinvoiceDateCreate;
 
-  @UI.selectionField : [{ position: 440 }]
+//  @UI.selectionField : [{ position: 440 }]
   @UI.lineItem       : [{ position: 440  }]
   @UI.identification : [{ position: 440  }]
   EinvoiceDateCancel;
@@ -320,32 +320,32 @@ annotate entity ZJP_C_HDDT_H with
   @UI.identification : [{ position: 510  }]
   MessageText;
 
-  @UI.selectionField : [{ position: 520 }]
+//  @UI.selectionField : [{ position: 520 }]
   @UI.lineItem       : [{ position: 520  }]
   @UI.identification : [{ position: 520  }]
   CreatedByUser;
 
-  @UI.selectionField : [{ position: 530 }]
+//  @UI.selectionField : [{ position: 530 }]
   @UI.lineItem       : [{ position: 530  }]
   @UI.identification : [{ position: 530  }]
   CreatedDate;
 
-  @UI.selectionField : [{ position: 540 }]
+//  @UI.selectionField : [{ position: 540 }]
   @UI.lineItem       : [{ position: 540  }]
   @UI.identification : [{ position: 540  }]
   CreatedTime;
 
-  @UI.selectionField : [{ position: 550 }]
+//  @UI.selectionField : [{ position: 550 }]
   @UI.lineItem       : [{ position: 550  }]
   @UI.identification : [{ position: 550  }]
   ChangedByUser;
 
-  @UI.selectionField : [{ position: 560 }]
+//  @UI.selectionField : [{ position: 560 }]
   @UI.lineItem       : [{ position: 560  }]
   @UI.identification : [{ position: 560  }]
   ChangedDate;
 
-  @UI.selectionField : [{ position: 570 }]
+//  @UI.selectionField : [{ position: 570 }]
   @UI.lineItem       : [{ position: 570  }]
   @UI.identification : [{ position: 570  }]
   ChangedTime;

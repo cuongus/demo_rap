@@ -38,7 +38,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_jp_get_data_report_fi IMPLEMENTATION.
+CLASS ZCL_JP_GET_DATA_REPORT_FI IMPLEMENTATION.
 
 
   METHOD get_soqytienmat.

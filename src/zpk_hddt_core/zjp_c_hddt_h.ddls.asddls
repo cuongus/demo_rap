@@ -20,11 +20,63 @@ define root custom entity ZJP_C_HDDT_H
       @Search.defaultSearchElement   : true
       @Consumption.filter            : { mandatory:  true }
   key FiscalYear                     : gjahr;
+      @ObjectModel.text.element      : [ '_ConfigAdjType.Description' ]
+  key AdjustType                     : zde_adjusttype;
+
+  key AccountingDocumentSource       : belnr_d;
+  key FiscalYearSource               : gjahr;
+
+      @Search.defaultSearchElement   : true
+      @Consumption.valueHelpDefinition:[
+      { entity                       : { name : 'ZJP_C_DOMAIN_FIX_VAL' , element: 'low' } ,
+      additionalBinding              : [{ element: 'domain_name',
+                localConstant        : 'CURRTYPE', usage: #FILTER }]
+                , distinctValues     : true
+      }]
+      @Consumption.filter            : { mandatory: true, defaultValue: '1', selectionType: #SINGLE}
+  key CurrencyType                   : zde_currtype;
+
+      @Search.defaultSearchElement   : true
+      @Consumption.valueHelpDefinition:[
+      { entity                       : { name : 'ZJP_C_DOMAIN_FIX_VAL' , element: 'low' } ,
+      additionalBinding              : [{ element: 'domain_name',
+                localConstant        : 'USERTYPE', usage: #FILTER }]
+                , distinctValues     : true
+      }]
+      @Consumption.filter            : { selectionType: #SINGLE}
+      @ObjectModel.text.element      : ['_ConfigUsertype.Description']
+  key Usertype                       : zde_usertype;
+
+      @Search.defaultSearchElement   : true
+      @Consumption.valueHelpDefinition:[
+      { entity                       : { name : 'ZJP_C_DOMAIN_FIX_VAL' , element: 'low' } ,
+      additionalBinding              : [{ element: 'domain_name',
+                localConstant        : 'TYPEOFDATE', usage: #FILTER }]
+                , distinctValues     : true
+      }]
+      @Consumption.filter            : { mandatory:  true, defaultValue: '04', selectionType: #SINGLE}
+      @ObjectModel.text.element      : [ '_ConfigTypeOfDate.Description' ]
+  key TypeOfDate                     : zde_typeofdate;
+
+  key EinvoiceForm                   : zde_einvoiceform;
+  key EinvoiceSerial                 : zde_einvoiceserial;
+
+      @Search.defaultSearchElement   : true
+      @Consumption.valueHelpDefinition:[
+      { entity                       : { name : 'ZJP_R_HD_SERIAL' , element: 'EinvoiceType' }
+      }]
+      @Consumption.filter            : { mandatory:  true, selectionType: #SINGLE}
+  key EinvoiceType                   : zde_einvoicetype;
+
+  key EinvoiceNumber                 : zde_einvoicenumber;
+
+      @Search.defaultSearchElement   : true
+  key testrun                        : abap_boolean;
+
       @Search.defaultSearchElement   : true
       //ID System Integration Invoice
       IDSys                          : abap.char(10);
-      @Search.defaultSearchElement   : true
-      testrun                        : abap_boolean;
+
       IconSAP                        : abap.char(5);
       AccountingDocumentType         : blart;
       FiscalPeriod                   : monat;
@@ -41,23 +93,7 @@ define root custom entity ZJP_C_HDDT_H
       TelephoneNumber                : zde_telephone;
       PaymentMethod                  : zde_payment;
       ProfitCenter                   : prctr;
-
-      @ObjectModel.text.element      : [ '_ConfigAdjType.Description' ]
-      AdjustType                     : zde_adjusttype;
-
-      AccountingDocumentSource       : belnr_d;
-      FiscalYearSource               : gjahr;
       AccountingDocumentHeaderText   : bktxt;
-
-      @Search.defaultSearchElement   : true
-      @Consumption.valueHelpDefinition:[
-      { entity                       : { name : 'ZJP_C_DOMAIN_FIX_VAL' , element: 'low' } ,
-      additionalBinding              : [{ element: 'domain_name',
-                localConstant        : 'CURRTYPE', usage: #FILTER }]
-                , distinctValues     : true
-      }]
-      @Consumption.filter            : { defaultValue: '', selectionType: #SINGLE}
-      CurrencyType                   : zde_currtype;
 
       taxcode                        : zde_taxcode;
       CompanycodeCurrency            : waers;
@@ -69,39 +105,6 @@ define root custom entity ZJP_C_HDDT_H
       VatAmountInTransacCrcy         : zde_dmbtr;
       TotalAmountInTransacCrcy       : zde_dmbtr;
 
-      @Search.defaultSearchElement   : true
-      @Consumption.valueHelpDefinition:[
-      { entity                       : { name : 'ZJP_C_DOMAIN_FIX_VAL' , element: 'low' } ,
-      additionalBinding              : [{ element: 'domain_name',
-                localConstant        : 'USERTYPE', usage: #FILTER }]
-                , distinctValues     : true
-      }]
-      @Consumption.filter            : { selectionType: #SINGLE}
-      @ObjectModel.text.element      : ['_ConfigUsertype.Description']
-      Usertype                       : zde_usertype;
-
-      @Search.defaultSearchElement   : true
-      @Consumption.valueHelpDefinition:[
-      { entity                       : { name : 'ZJP_C_DOMAIN_FIX_VAL' , element: 'low' } ,
-      additionalBinding              : [{ element: 'domain_name',
-                localConstant        : 'TYPEOFDATE', usage: #FILTER }]
-                , distinctValues     : true
-      }]
-      @Consumption.filter            : { mandatory:  true, selectionType: #SINGLE}
-      @ObjectModel.text.element      : [ '_ConfigTypeOfDate.Description' ]
-      TypeOfDate                     : zde_typeofdate;
-
-      EinvoiceForm                   : zde_einvoiceform;
-      EinvoiceSerial                 : zde_einvoiceserial;
-
-      @Search.defaultSearchElement   : true
-      @Consumption.valueHelpDefinition:[
-      { entity                       : { name : 'ZJP_R_HD_SERIAL' , element: 'EinvoiceType' }
-      }]
-      @Consumption.filter            : { mandatory:  true, selectionType: #SINGLE}
-      EinvoiceType                   : zde_einvoicetype;
-
-      EinvoiceNumber                 : zde_einvoicenumber;
       SID                            : zde_sid;
       EinvoiceTimeCreate             : zde_einv_time;
       EinvoiceDateCreate             : zde_einv_date;
@@ -117,9 +120,11 @@ define root custom entity ZJP_C_HDDT_H
                 , distinctValues     : true
       }]
       @Consumption.filter            : { selectionType: #SINGLE}
+      
+      _ConfigStatusSAP               : association [0..1] to zjp_cfg_statussap on _ConfigStatusSAP.Value = $projection.StatusSAP;
       @ObjectModel.text.element      : [ '_ConfigStatusSAP.Description' ]
       StatusSAP                      : zde_statussap;
-
+        
       @ObjectModel.text.element      : [ '_ConfigStatusINVRES.Description' ]
       StatusInvRes                   : zde_statusinvres;
 
@@ -144,8 +149,6 @@ define root custom entity ZJP_C_HDDT_H
       _ConfigUsertype                : association [0..1] to ZJP_CFG_USERTYPE on _ConfigUsertype.Value = $projection.Usertype;
 
       _ConfigTypeOfDate              : association [0..1] to ZJP_CFG_TYPEOFDATE on _ConfigTypeOfDate.Value = $projection.TypeOfDate;
-
-      _ConfigStatusSAP               : association [0..1] to zjp_cfg_statussap on _ConfigStatusSAP.Value = $projection.StatusSAP;
 
       _ConfigStatusINVRES            : association [0..1] to ZJP_CFG_STATUSINV on _ConfigStatusINVRES.Value = $projection.StatusInvRes;
 

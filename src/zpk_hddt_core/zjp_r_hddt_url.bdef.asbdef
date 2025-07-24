@@ -10,7 +10,7 @@ etag master Changeddate
   create;
   update;
   delete;
-  field ( readonly : update ) IdSys, Action, UrlValue;
+  field ( readonly : update ) IdSys, Action;
   field ( readonly ) Createdbyuser, Createddate, Changedbyuser, Changeddate;
 
   mapping for zjp_hddt_url

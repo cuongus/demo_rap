@@ -116,23 +116,23 @@ CLASS ZCL_MANAGE_FPT_EINVOICES IMPLEMENTATION.
     CLEAR: e_status, e_json, e_return, e_docsrc.
 
     go_fpt_einvoice->get_general(
-        EXPORTING
+      EXPORTING
         i_einvoice = i_einvoice
         i_userpass = i_userpass
-        i_items = i_items
-        i_type = 'ADJUST'
-        IMPORTING
-        e_adjust = ls_einvoice
+        i_items    = i_items
+        i_type     = 'ADJUST'
+      IMPORTING
+        e_adjust   = ls_einvoice
     ).
 
 * Create JSON *
 
     /ui2/cl_json=>serialize(
-        EXPORTING
-        data = ls_einvoice
-         pretty_name  =  /ui2/cl_json=>pretty_mode-low_case
-        RECEIVING
-        r_json = DATA(lv_json_string)
+      EXPORTING
+        data        = ls_einvoice
+        pretty_name = /ui2/cl_json=>pretty_mode-low_case
+      RECEIVING
+        r_json      = DATA(lv_json_string)
     ).
 
 * Test run *
@@ -155,15 +155,15 @@ CLASS ZCL_MANAGE_FPT_EINVOICES IMPLEMENTATION.
 
 *-------------------------THE--END-------------------------*
     go_fpt_einvoice->process_status(
-        EXPORTING
-        i_action    = i_action
-        i_einvoice  = i_einvoice
-        i_return    = e_return
-        i_status    = lv_json_results
-        IMPORTING
-        e_header    = e_status
-        e_docsrc    = e_docsrc
-        ).
+      EXPORTING
+        i_action   = i_action
+        i_einvoice = i_einvoice
+        i_return   = e_return
+        i_status   = lv_json_results
+      IMPORTING
+        e_header   = e_status
+        e_docsrc   = e_docsrc
+    ).
 
   ENDMETHOD.
 
@@ -220,11 +220,11 @@ CLASS ZCL_MANAGE_FPT_EINVOICES IMPLEMENTATION.
 *    e_json = lv_json_string.
 
     /ui2/cl_json=>serialize(
-        EXPORTING
-        data = ls_einvoice
-         pretty_name  =  /ui2/cl_json=>pretty_mode-low_case
-        RECEIVING
-        r_json = DATA(lv_json_string)
+      EXPORTING
+        data        = ls_einvoice
+        pretty_name = /ui2/cl_json=>pretty_mode-low_case
+      RECEIVING
+        r_json      = DATA(lv_json_string)
     ).
 
 * Test run *
@@ -245,23 +245,23 @@ CLASS ZCL_MANAGE_FPT_EINVOICES IMPLEMENTATION.
         e_return   = e_return ).
 *-------------------------THE--END-------------------------*
     go_fpt_einvoice->process_status(
-        EXPORTING
-        i_action = i_action
+      EXPORTING
+        i_action   = i_action
         i_einvoice = i_einvoice
-        i_return = e_return
-        i_status = lv_json_results
-        IMPORTING
-        e_header = e_status
-        ).
+        i_return   = e_return
+        i_status   = lv_json_results
+      IMPORTING
+        e_header   = e_status
+    ).
 
   ENDMETHOD.
 
 
   METHOD contructor.
-    if go_fpt_einvoice is BOUND.
+    IF go_fpt_einvoice IS BOUND.
 
     ELSE.
-        go_fpt_einvoice = new #( ).
+      go_fpt_einvoice = NEW #( ).
     ENDIF.
   ENDMETHOD.
 
@@ -277,24 +277,24 @@ CLASS ZCL_MANAGE_FPT_EINVOICES IMPLEMENTATION.
     DATA: ls_einvoice TYPE zst_fpt_create.
 
     go_fpt_einvoice->get_general(
-        EXPORTING
+      EXPORTING
         i_einvoice = i_einvoice
         i_userpass = i_userpass
         i_items    = i_items
         i_type     = 'CREATE'
-        IMPORTING
-        e_create = ls_einvoice
+      IMPORTING
+        e_create   = ls_einvoice
     ).
 *----------------------------------------------------------*
 * Create JSON *
     DATA: lv_json_string TYPE string.
 
     /ui2/cl_json=>serialize(
-        EXPORTING
-        data = ls_einvoice
-         pretty_name  =  /ui2/cl_json=>pretty_mode-low_case
-        RECEIVING
-        r_json = lv_json_string
+      EXPORTING
+        data        = ls_einvoice
+        pretty_name = /ui2/cl_json=>pretty_mode-low_case
+      RECEIVING
+        r_json      = lv_json_string
     ).
 * Test run *
     IF i_einvoice-testrun IS NOT INITIAL.
@@ -317,14 +317,14 @@ CLASS ZCL_MANAGE_FPT_EINVOICES IMPLEMENTATION.
         e_return   = e_return ).
 *-------------------------THE--END-------------------------*
     go_fpt_einvoice->process_status(
-        EXPORTING
-        i_action = i_action
+      EXPORTING
+        i_action   = i_action
         i_einvoice = i_einvoice
-        i_return = e_return
-        i_status = lv_json_results
-        IMPORTING
-        e_header = e_status
-        ).
+        i_return   = e_return
+        i_status   = lv_json_results
+      IMPORTING
+        e_header   = e_status
+    ).
 
   ENDMETHOD.
 
@@ -335,9 +335,9 @@ CLASS ZCL_MANAGE_FPT_EINVOICES IMPLEMENTATION.
 *-- Create HTTP client ->
     TRY.
         DATA(lo_destination) = cl_http_destination_provider=>create_by_comm_arrangement(
-                                 comm_scenario  = |Z_API_FPT_EINVOICE_CSCEN|
-                                 service_id     = |Z_API_FPT_EINVOICE_OB_REST|
-                               ).
+          comm_scenario = |Z_API_FPT_EINVOICE_CSCEN|
+          service_id    = |Z_API_FPT_EINVOICE_OB_REST|
+        ).
 
         DATA(lo_http_client) = cl_web_http_client_manager=>create_by_http_destination( i_destination = lo_destination ).
 *-- Add path ->
@@ -359,13 +359,13 @@ CLASS ZCL_MANAGE_FPT_EINVOICES IMPLEMENTATION.
 *-- Authorization
         lo_http_client->get_http_request( )->set_authorization_basic( i_username = lv_username i_password = lv_password ).
 *-- GET
-        lo_http_client->execute( i_method = if_web_http_client=>get
+        lo_http_client->execute( i_method  = if_web_http_client=>get
                                  i_timeout = 60 ).
 
         lo_http_client->get_http_request( )->set_content_type( |application/json| ).
 
 *-- Response ->
-        DATA(lo_response) = lo_http_client->execute( i_method = if_web_http_client=>get
+        DATA(lo_response) = lo_http_client->execute( i_method  = if_web_http_client=>get
                                                      i_timeout = 60 ).
 *-- Get the status of the response ->
         e_context = lo_response->get_text( ).
@@ -575,9 +575,9 @@ CLASS ZCL_MANAGE_FPT_EINVOICES IMPLEMENTATION.
 *-- Create HTTP client ->
     TRY.
         DATA(lo_destination) = cl_http_destination_provider=>create_by_comm_arrangement(
-                                 comm_scenario  = |Z_API_FPT_EINVOICE_CSCEN|
-                                 service_id     = |Z_API_FPT_EINVOICE_OB_REST|
-                               ).
+          comm_scenario = |Z_API_FPT_EINVOICE_CSCEN|
+          service_id    = |Z_API_FPT_EINVOICE_OB_REST|
+        ).
 
         DATA(lo_http_client) = cl_web_http_client_manager=>create_by_http_destination( i_destination = lo_destination ).
 *-- Add path ->
@@ -601,13 +601,14 @@ CLASS ZCL_MANAGE_FPT_EINVOICES IMPLEMENTATION.
 
         lo_http_client->get_http_request( )->set_content_type( |application/json| ).
 *-- POST
-        lo_http_client->execute( i_method = if_web_http_client=>post
+        lo_http_client->execute( i_method  = if_web_http_client=>post
                                  i_timeout = 60 ).
 *-- Send request ->
         lo_http_client->get_http_request( )->set_text( i_context ).
 *-- Response ->
-        DATA(lo_response) = lo_http_client->execute( i_method = if_web_http_client=>post
+        DATA(lo_response) = lo_http_client->execute( i_method  = if_web_http_client=>post
                                                      i_timeout = 60 ).
+
 *-- Get the status of the response ->
         e_context = lo_response->get_text( ).
         IF lo_response->get_status( )-code NE 200.
@@ -651,47 +652,47 @@ CLASS ZCL_MANAGE_FPT_EINVOICES IMPLEMENTATION.
       OR i_action = 'ADJUST_INVOICE'.
 *        xco_cp_json=>data->from_string( i_status )->write_to( REF #( ls_cr_response ) ).
         /ui2/cl_json=>deserialize(
-         EXPORTING
-           json             = i_status
-*        jsonx            =
-           pretty_name      = /ui2/cl_json=>pretty_mode-user
-*        assoc_arrays     =
-*        assoc_arrays_opt =
-*        name_mappings    =
-*        conversion_exits =
-*        hex_as_base64    =
-         CHANGING
-           data             = ls_cr_response
-       ).
+          EXPORTING
+            json        = i_status
+*           jsonx       =
+            pretty_name = /ui2/cl_json=>pretty_mode-user
+*           assoc_arrays     =
+*           assoc_arrays_opt =
+*           name_mappings    =
+*           conversion_exits =
+*           hex_as_base64    =
+          CHANGING
+            data        = ls_cr_response
+        ).
       ELSEIF i_action = 'SEARCH_INVOICE'.
         /ui2/cl_json=>deserialize(
-           EXPORTING
-             json             = i_status
-*                jsonx            =
-             pretty_name      = /ui2/cl_json=>pretty_mode-user
-*                assoc_arrays     =
-*                assoc_arrays_opt =
-*                name_mappings    =
-*                conversion_exits =
-*                hex_as_base64    =
-           CHANGING
-             data             = lt_sr_response
-         ).
+          EXPORTING
+            json        = i_status
+*           jsonx       =
+            pretty_name = /ui2/cl_json=>pretty_mode-user
+*           assoc_arrays     =
+*           assoc_arrays_opt =
+*           name_mappings    =
+*           conversion_exits =
+*           hex_as_base64    =
+          CHANGING
+            data        = lt_sr_response
+        ).
       ELSEIF i_action = 'CANCEL_INVOICE'.
 *        xco_cp_json=>data->from_string( i_status )->write_to( REF #( ls_cancel_response ) ).
         /ui2/cl_json=>deserialize(
-         EXPORTING
-           json             = i_status
-*        jsonx            =
-           pretty_name      = /ui2/cl_json=>pretty_mode-user
-*        assoc_arrays     =
-*        assoc_arrays_opt =
-*        name_mappings    =
-*        conversion_exits =
-*        hex_as_base64    =
-         CHANGING
-           data             = ls_cancel_response
-       ).
+          EXPORTING
+            json        = i_status
+*           jsonx       =
+            pretty_name = /ui2/cl_json=>pretty_mode-user
+*           assoc_arrays     =
+*           assoc_arrays_opt =
+*           name_mappings    =
+*           conversion_exits =
+*           hex_as_base64    =
+          CHANGING
+            data        = ls_cancel_response
+        ).
       ENDIF.
 
       DATA: lv_date TYPE zde_txt25,
@@ -754,22 +755,22 @@ CLASS ZCL_MANAGE_FPT_EINVOICES IMPLEMENTATION.
 
           IF ls_cr_response-seq IS INITIAL.
             go_fpt_einvoice->process_message(
-            EXPORTING
+              EXPORTING
                 i_document   = e_header
                 status_sap   = TEXT-s02
                 message_type = 'S'
                 message_text = TEXT-a02
-            IMPORTING
+              IMPORTING
                 e_header     = e_header
             ).
           ELSE.
             go_fpt_einvoice->process_message(
-            EXPORTING
+              EXPORTING
                 i_document   = e_header
                 status_sap   = TEXT-s98
                 message_type = 'S'
                 message_text = TEXT-a98
-            IMPORTING
+              IMPORTING
                 e_header     = e_header
             ).
           ENDIF.
@@ -779,133 +780,133 @@ CLASS ZCL_MANAGE_FPT_EINVOICES IMPLEMENTATION.
             WHEN '1'. "Chờ cấp số.
               go_fpt_einvoice->process_message(
                 EXPORTING
-                    i_document   = e_header
-                    status_sap   = TEXT-s02
-                    message_type = 'S'
-                    message_text = TEXT-a21
+                  i_document   = e_header
+                  status_sap   = TEXT-s02
+                  message_type = 'S'
+                  message_text = TEXT-a21
                 IMPORTING
-                    e_header     = e_header
-                ).
+                  e_header     = e_header
+              ).
             WHEN '2'. "Chờ duyệt.
               go_fpt_einvoice->process_message(
                 EXPORTING
-                    i_document   = e_header
-                    status_sap   = TEXT-s02
-                    message_type = 'S'
-                    message_text = TEXT-a22
+                  i_document   = e_header
+                  status_sap   = TEXT-s02
+                  message_type = 'S'
+                  message_text = TEXT-a22
                 IMPORTING
-                    e_header     = e_header
-                ).
+                  e_header     = e_header
+              ).
             WHEN '3'. "Đã Duyệt.
               CASE ls_sr_response-doc-status_received.
                 WHEN '0'. "Chờ gửi CQT
                   go_fpt_einvoice->process_message(
                     EXPORTING
-                        i_document   = e_header
-                        status_sap   = TEXT-s98
-                        message_type = 'S'
-                        message_text = TEXT-a23
+                      i_document   = e_header
+                      status_sap   = TEXT-s98
+                      message_type = 'S'
+                      message_text = TEXT-a23
                     IMPORTING
-                        e_header     = e_header
-                    ).
+                      e_header     = e_header
+                  ).
                 WHEN '1'. "Đã gửi CQT
                   go_fpt_einvoice->process_message(
                     EXPORTING
-                        i_document   = e_header
-                        status_sap   = TEXT-s98
-                        message_type = 'S'
-                        message_text = TEXT-a24
+                      i_document   = e_header
+                      status_sap   = TEXT-s98
+                      message_type = 'S'
+                      message_text = TEXT-a24
                     IMPORTING
-                        e_header     = e_header
-                    ).
+                      e_header     = e_header
+                  ).
                 WHEN '2'. "Gửi không thành công
                   go_fpt_einvoice->process_message(
                     EXPORTING
-                        i_document   = e_header
-                        status_sap   = TEXT-s10
-                        message_type = 'S'
-                        message_text = TEXT-a25
+                      i_document   = e_header
+                      status_sap   = TEXT-s10
+                      message_type = 'S'
+                      message_text = TEXT-a25
                     IMPORTING
-                        e_header     = e_header
-                    ).
+                      e_header     = e_header
+                  ).
                 WHEN '8'. "Kiểm tra hợp lệ(Hóa đơn không mã hợp lệ)
                   go_fpt_einvoice->process_message(
                     EXPORTING
-                        i_document   = e_header
-                        status_sap   = TEXT-s99
-                        message_type = 'S'
-                        message_text = TEXT-a26
+                      i_document   = e_header
+                      status_sap   = TEXT-s99
+                      message_type = 'S'
+                      message_text = TEXT-a26
                     IMPORTING
-                        e_header     = e_header
-                    ).
+                      e_header     = e_header
+                  ).
                 WHEN '9'. "Kiểm tra không hợp lệ
                   go_fpt_einvoice->process_message(
                     EXPORTING
-                        i_document   = e_header
-                        status_sap   = TEXT-s10
-                        message_type = 'S'
-                        message_text = TEXT-a27
+                      i_document   = e_header
+                      status_sap   = TEXT-s10
+                      message_type = 'S'
+                      message_text = TEXT-a27
                     IMPORTING
-                        e_header     = e_header
-                    ).
+                      e_header     = e_header
+                  ).
                 WHEN '10'. "Đã cấp mã(HĐ có mã hợp lệ đã được CQT cấp mã)
                   go_fpt_einvoice->process_message(
                     EXPORTING
-                        i_document   = e_header
-                        status_sap   = TEXT-s99
-                        message_type = 'S'
-                        message_text = TEXT-a26
+                      i_document   = e_header
+                      status_sap   = TEXT-s99
+                      message_type = 'S'
+                      message_text = TEXT-a26
                     IMPORTING
-                        e_header     = e_header
-                    ).
+                      e_header     = e_header
+                  ).
                 WHEN OTHERS.
               ENDCASE.
             WHEN '4'. "Đã hủy.
               go_fpt_einvoice->process_message(
                 EXPORTING
-                    i_document   = e_header
-                    status_sap   = TEXT-s04
-                    message_type = 'S'
-                    message_text = TEXT-a04
+                  i_document   = e_header
+                  status_sap   = TEXT-s04
+                  message_type = 'S'
+                  message_text = TEXT-a04
                 IMPORTING
-                    e_header     = e_header
-                ).
+                  e_header     = e_header
+              ).
             WHEN OTHERS.
           ENDCASE.
         WHEN 'CANCEL_INVOICE'. "Hủy hóa đơn
           IF i_status = |Thông báo: Đã hủy hóa đơn thành công và tạo, duyệt thông báo sai sót gửi Thuế|.
             e_header-einvoicedatecancel = xco_cp=>sy->date( )->as( xco_cp_time=>format->abap )->value.
             go_fpt_einvoice->process_message(
-                EXPORTING
-                    i_document   = e_header
-                    status_sap   = TEXT-s04
-                    message_type = 'S'
-                    message_text = TEXT-a04
-                IMPORTING
-                    e_header     = e_header
-                ).
+              EXPORTING
+                i_document   = e_header
+                status_sap   = TEXT-s04
+                message_type = 'S'
+                message_text = TEXT-a04
+              IMPORTING
+                e_header     = e_header
+            ).
           ELSE.
             IF ls_cancel_response-errorcode IS INITIAL.
               e_header-einvoicedatecancel = xco_cp=>sy->date( )->as( xco_cp_time=>format->abap )->value.
               go_fpt_einvoice->process_message(
                 EXPORTING
-                    i_document   = e_header
-                    status_sap   = TEXT-s04
-                    message_type = 'S'
-                    message_text = TEXT-a04
+                  i_document   = e_header
+                  status_sap   = TEXT-s04
+                  message_type = 'S'
+                  message_text = TEXT-a04
                 IMPORTING
-                    e_header     = e_header
-                ).
+                  e_header     = e_header
+              ).
             ELSE.
               go_fpt_einvoice->process_message(
                 EXPORTING
-                    i_document   = e_header
-                    status_sap   = TEXT-s03
-                    message_type = 'E'
-                    message_text = ls_cancel_response-description
+                  i_document   = e_header
+                  status_sap   = TEXT-s03
+                  message_type = 'E'
+                  message_text = ls_cancel_response-description
                 IMPORTING
-                    e_header     = e_header
-                ).
+                  e_header     = e_header
+              ).
             ENDIF.
           ENDIF.
         WHEN OTHERS.
@@ -1013,15 +1014,15 @@ CLASS ZCL_MANAGE_FPT_EINVOICES IMPLEMENTATION.
         e_return  = e_return ).
 *-------------------------THE--END-------------------------*
     go_fpt_einvoice->process_status(
-        EXPORTING
-        i_action = i_action
+      EXPORTING
+        i_action   = i_action
         i_einvoice = i_einvoice
-        i_return = e_return
-        i_status = lv_json_results
-        IMPORTING
-        e_header = e_status
-        e_docsrc = e_docsrc
-        ).
+        i_return   = e_return
+        i_status   = lv_json_results
+      IMPORTING
+        e_header   = e_status
+        e_docsrc   = e_docsrc
+    ).
 
   ENDMETHOD.
 ENDCLASS.

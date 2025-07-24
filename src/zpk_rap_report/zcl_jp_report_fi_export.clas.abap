@@ -26,7 +26,8 @@ ENDCLASS.
 
 
 
-CLASS zcl_jp_report_fi_export IMPLEMENTATION.
+CLASS ZCL_JP_REPORT_FI_EXPORT IMPLEMENTATION.
+
 
   METHOD btnexportexcel.
     DATA: lt_data      TYPE TABLE OF zjp_c_soquytienmat.

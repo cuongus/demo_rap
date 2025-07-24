@@ -5,6 +5,14 @@ CLASS zcl_get_domain_fix_values DEFINITION
 
   PUBLIC SECTION.
     INTERFACES if_rap_query_provider.
+
+    TYPES: tt_business_data TYPE TABLE OF zjp_c_domain_fix_val.
+
+    CLASS-METHODS:
+      handle_zjp_c_hddt_h IMPORTING domain_name   TYPE sxco_ad_object_name
+                          EXPORTING business_data TYPE tt_business_data,
+      handle_unknown_case EXPORTING e_message TYPE string.
+
   PROTECTED SECTION.
   PRIVATE SECTION.
 ENDCLASS.
@@ -14,26 +22,59 @@ ENDCLASS.
 CLASS ZCL_GET_DOMAIN_FIX_VALUES IMPLEMENTATION.
 
 
+  METHOD handle_unknown_case.
+
+    e_message = 'Invalid method or parameter'.
+
+  ENDMETHOD.
+
+
+  METHOD handle_zjp_c_hddt_h.
+    DATA: business_data_line LIKE LINE OF business_data.
+    DATA: pos TYPE int1.
+
+    SELECT * FROM zjp_hd_config
+        WHERE id_sys IN ( '001', 'FPT' )
+          AND id_domain = @domain_name
+          INTO TABLE @DATA(lt_hd_config).
+    IF sy-subrc EQ 0.
+      LOOP AT lt_hd_config INTO DATA(fs_hd_config).
+        pos += 1.
+        business_data_line-domain_name = domain_name .
+        business_data_line-pos         = pos.
+        business_data_line-low         = fs_hd_config-value .
+        business_data_line-description = fs_hd_config-description.
+        APPEND business_data_line TO business_data.
+        CLEAR: business_data_line.
+      ENDLOOP.
+    ENDIF.
+  ENDMETHOD.
+
+
   METHOD if_rap_query_provider~select.
 
-    DATA business_data TYPE TABLE OF zjp_c_domain_fix_val .
+    DATA(o_get_domain) = NEW zcl_get_domain_fix_values( ).
 
+    DATA business_data TYPE TABLE OF zjp_c_domain_fix_val .
     DATA business_data_line TYPE zjp_c_domain_fix_val .
 
     DATA(top)     = io_request->get_paging( )->get_page_size( ).
     DATA(skip)    = io_request->get_paging( )->get_offset( ).
 
-    DATA(requested_fields)  = io_request->get_requested_elements( ).
+    DATA(requested_fields) = io_request->get_requested_elements( ).
+    DATA(sort_order)       = io_request->get_sort_elements( ).
+    DATA(lv_entity_id)     = io_request->get_entity_id( ).
 
-    DATA(sort_order)    = io_request->get_sort_elements( ).
+    DATA domain_name  TYPE sxco_ad_object_name .
 
-    DATA domain_name  TYPE sxco_ad_object_name  .
+    DATA: lt_parameters TYPE abap_parmbind_tab.
+    DATA: ls_line LIKE LINE OF lt_parameters.
 
     DATA pos TYPE i.
 
     TRY.
         DATA(filter_condition_string) = io_request->get_filter( )->get_as_sql_string( ).
-        DATA(filter_condition_ranges) = io_request->get_filter( )->get_as_ranges(  ).
+        DATA(filter_condition_ranges) = io_request->get_filter( )->get_as_ranges( ).
 
         READ TABLE filter_condition_ranges WITH KEY name = 'DOMAIN_NAME'
                INTO DATA(filter_condition_domain_name).
@@ -48,48 +89,59 @@ CLASS ZCL_GET_DOMAIN_FIX_VALUES IMPLEMENTATION.
 
         ENDIF.
 
-        SELECT * FROM zjp_hd_config
-        WHERE id_sys IN ( '001', 'FPT' )
-          AND id_domain = @domain_name
-          INTO TABLE @DATA(lt_hd_config).
-        IF sy-subrc EQ 0.
-          LOOP AT lt_hd_config INTO DATA(fs_hd_config).
-            pos += 1.
-            business_data_line-domain_name = domain_name .
-            business_data_line-pos         = pos.
-            business_data_line-low         = fs_hd_config-value .
-            business_data_line-description = fs_hd_config-description.
-            APPEND business_data_line TO business_data.
-            CLEAR: business_data_line.
-          ENDLOOP.
+        DATA(lv_dyn_method) = |handle_{ to_lower( lv_entity_id ) }|.
+        TRANSLATE lv_dyn_method TO UPPER CASE.
+
+        ls_line-name  = 'DOMAIN_NAME' .
+        ls_line-kind  = cl_abap_objectdescr=>exporting .
+        ls_line-value = REF #( domain_name ).
+        INSERT ls_line INTO TABLE lt_parameters .
+
+        ls_line-name  = 'BUSINESS_DATA' .
+        ls_line-kind  = cl_abap_objectdescr=>importing .
+        ls_line-value = REF #( business_data ).
+        INSERT ls_line INTO TABLE lt_parameters .
+
+        TRY.
+            CALL METHOD o_get_domain->(lv_dyn_method)
+              PARAMETER-TABLE lt_parameters.
+          CATCH cx_sy_dyn_call_illegal_method INTO DATA(lx_dyn).
+            " Trường hợp method không tồn tại
+            CALL METHOD o_get_domain->handle_unknown_case(
+              IMPORTING
+                e_message = DATA(lv_message)
+            ).
+        ENDTRY.
+
+        IF business_data IS NOT INITIAL.
+
         ELSE.
-*          *
-*          CAST cl_abap_elemdescr( cl_abap_typedescr=>describe_by_name( domain_name ) )->get_ddic_fixed_values(
-*            EXPORTING
-*              p_langu        = sy-langu
-*            RECEIVING
-*              p_fixed_values = DATA(fixed_values)
-*            EXCEPTIONS
-*              not_found      = 1
-*              no_ddic_type   = 2
-*              OTHERS         = 3 ).
-*
-*          IF sy-subrc > 0.
-*            "do some exception handling
+          CAST cl_abap_elemdescr( cl_abap_typedescr=>describe_by_name( domain_name ) )->get_ddic_fixed_values(
+            EXPORTING
+              p_langu        = sy-langu
+            RECEIVING
+              p_fixed_values = DATA(fixed_values)
+            EXCEPTIONS
+              not_found      = 1
+              no_ddic_type   = 2
+              OTHERS         = 3 ).
+
+          IF sy-subrc > 0.
+            "do some exception handling
 *            io_response->set_total_number_of_records( lines( business_data ) ).
 *            io_response->set_data( business_data ).
 *            EXIT.
-*          ENDIF.
-*
-*          LOOP AT fixed_values INTO DATA(fixed_value).
-*            pos += 1.
-*            business_data_line-pos         = pos.
-*            business_data_line-low         = fixed_value-low .
-*            business_data_line-high        = fixed_value-high .
-*            business_data_line-description = fixed_value-ddtext.
-*            APPEND business_data_line TO business_data.
-*            CLEAR: business_data_line.
-*          ENDLOOP.
+          ENDIF.
+
+          LOOP AT fixed_values INTO DATA(fixed_value).
+            pos += 1.
+            business_data_line-pos         = pos.
+            business_data_line-low         = fixed_value-low .
+            business_data_line-high        = fixed_value-high .
+            business_data_line-description = fixed_value-ddtext.
+            APPEND business_data_line TO business_data.
+            CLEAR: business_data_line.
+          ENDLOOP.
         ENDIF.
 
         IF top IS NOT INITIAL.

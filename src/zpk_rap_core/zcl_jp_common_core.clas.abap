@@ -41,6 +41,8 @@ CLASS zcl_jp_common_core DEFINITION
       "Table customer info
       gt_customer_info TYPE SORTED TABLE OF zst_customer_info WITH UNIQUE KEY customer.
 
+    INTERFACES if_oo_adt_classrun.
+
     CLASS-METHODS:
       "Contructor
       get_Instance RETURNING VALUE(ro_instance) TYPE REF TO zcl_jp_common_core,
@@ -95,10 +97,36 @@ CLASS zcl_jp_common_core DEFINITION
                                    ir_date        TYPE tt_ranges
 
                          EXPORTING it_sodu_dk     TYPE tt_sodu
-                                   it_sodu_ck     TYPE tt_sodu
-                         .
+                                   it_sodu_ck     TYPE tt_sodu,
+
+      get_last_day IMPORTING i_date TYPE zde_date
+                   EXPORTING o_date TYPE zde_date,
+
+      get_FSV IMPORTING HierarchyID     TYPE hryid
+                        ChartOfAccounts TYPE ktopl
+              .
+
+    METHODS get_week_of_date
+      IMPORTING
+        date_analyzed      TYPE zde_date
+      RETURNING
+        VALUE(week_number) TYPE i.
+
   PROTECTED SECTION.
   PRIVATE SECTION.
+
+    METHODS get_first_day_of_year_for_date
+      IMPORTING
+        date_analyzed            TYPE zde_date
+      RETURNING
+        VALUE(first_day_of_year) TYPE zde_date.
+
+    METHODS get_daynumber_of_date
+      IMPORTING
+        date_analyzed     TYPE zde_date
+      RETURNING
+        VALUE(day_number) TYPE i.
+
 ENDCLASS.
 
 
@@ -176,14 +204,16 @@ CLASS zcl_jp_common_core IMPLEMENTATION.
     .
 
     zcl_jp_common_core=>get_address_id_details(
-        EXPORTING
-        addressid = wa_companycode_details-addressid
-        IMPORTING
+      EXPORTING
+        addressid            = wa_companycode_details-addressid
+      IMPORTING
         wa_addressid_details = DATA(ls_addressid_dtails)
     ).
 
     wa_companycode_details-companycodename = ls_addressid_dtails-addressname.
     wa_companycode_details-companycodeaddr = ls_addressid_dtails-address.
+    wa_companycode_details-telephonenumber = ls_addressid_dtails-telephonenumber.
+    wa_companycode_details-email = ls_addressid_dtails-emailaddress.
 
   ENDMETHOD.
 
@@ -249,15 +279,16 @@ CLASS zcl_jp_common_core IMPLEMENTATION.
 
         "Customer Identification Number
         SELECT SINGLE BPIdentificationNumber FROM I_BuPaIdentification
+        WHERE BusinessPartner = @wa_document-customer
+         AND BPIdentificationType = 'VATRU'
         INTO @wa_customer_details-identificationnumber
-*       WHERE BPIdentificationType = ?
         .
 
         "Customer Address
         zcl_jp_common_core=>get_address_id_details(
-            EXPORTING
-            addressid = wa_customer_details-addressid
-            IMPORTING
+          EXPORTING
+            addressid            = wa_customer_details-addressid
+          IMPORTING
             wa_addressid_details = DATA(ls_addressid)
         ).
 **-----------------------------------------------------------------------**
@@ -375,7 +406,7 @@ CLASS zcl_jp_common_core IMPLEMENTATION.
           ls_sodu-sodudk_nt = ls_sodudk-sodudk_nt * ( -1 ).
         ENDIF.
 
-        if ls_sodudk-IsNegativePosting is NOT INITIAL.
+        IF ls_sodudk-IsNegativePosting IS NOT INITIAL.
           ls_sodudk-sodudk = ls_sodudk-sodudk * ( -1 ).
         ENDIF.
 
@@ -407,7 +438,7 @@ CLASS zcl_jp_common_core IMPLEMENTATION.
           ls_sodu-sodudk_nt = ls_soduck-sodudk_nt * ( -1 ).
         ENDIF.
 
-        if ls_soduck-IsNegativePosting is NOT INITIAL.
+        IF ls_soduck-IsNegativePosting IS NOT INITIAL.
           ls_soduck-sodudk = ls_soduck-sodudk * ( -1 ).
         ENDIF.
 
@@ -426,7 +457,7 @@ CLASS zcl_jp_common_core IMPLEMENTATION.
 
   METHOD get_supplier_details.
 
-CLEAR: wa_supplier_details.
+    CLEAR: wa_supplier_details.
 
     DATA: lv_url TYPE string VALUE IS INITIAL. "API read BP Details
     DATA: lv_country TYPE land1 VALUE IS INITIAL.
@@ -470,7 +501,7 @@ CLEAR: wa_supplier_details.
       IF sy-subrc NE 0.
         DATA(lv_index) = sy-index.
 
-        SELECT SINGLE cus~supplier as customer,
+        SELECT SINGLE cus~supplier AS customer,
                       cus~addressid,
                       cus~VATRegistration,
                       cus~isonetimeaccount,
@@ -491,9 +522,9 @@ CLEAR: wa_supplier_details.
 
         "Customer Address
         zcl_jp_common_core=>get_address_id_details(
-            EXPORTING
-            addressid = wa_supplier_details-addressid
-            IMPORTING
+          EXPORTING
+            addressid            = wa_supplier_details-addressid
+          IMPORTING
             wa_addressid_details = DATA(ls_addressid)
         ).
 **-----------------------------------------------------------------------**
@@ -507,6 +538,79 @@ CLEAR: wa_supplier_details.
       ENDIF.
 
     ENDIF.
+
+  ENDMETHOD.
+
+  METHOD get_week_of_date.
+
+    DATA(first_day_of_year)         = get_first_day_of_year_for_date( date_analyzed ).
+    DATA(day_number_first_day_year) = get_daynumber_of_date( first_day_of_year ).
+    DATA(number_day_to_sunday)      = 7 - day_number_first_day_year.
+
+    week_number = ( ( date_analyzed - first_day_of_year - number_day_to_sunday ) DIV 7 ) + 1.
+
+  ENDMETHOD.
+
+  METHOD get_first_day_of_year_for_date.
+    first_day_of_year = |{ date_analyzed+0(4) }0101|.
+  ENDMETHOD.
+
+  METHOD get_daynumber_of_date.
+    day_number = ( ( date_analyzed - '19790101' ) MOD 7 ) + 1.
+  ENDMETHOD.
+
+  METHOD get_last_day.
+
+    " 1) Get the date object for any date (e.g. today):
+
+    DATA(lo_date) = xco_cp=>sy->date( )->overwrite(
+       iv_year  = i_date+0(4)
+       iv_month = i_date+4(2)
+       iv_day   = i_date+6(2) ).
+
+    " 2) Compute the 1st of next month and then subtract one day:
+    DATA(lv_last_day) = lo_date->overwrite( iv_day   = 1 )->add( iv_month = 1 )->subtract( iv_day   = 1 )->as( xco_cp_time=>format->abap )->value.
+
+    IF lv_last_day IS NOT INITIAL.
+      o_date = lv_last_day.
+    ENDIF.
+  ENDMETHOD.
+
+  METHOD if_oo_adt_classrun~main.
+    DATA(o_jp_common) = NEW zcl_jp_common_core( ).
+
+
+  ENDMETHOD.
+
+  METHOD get_fsv.
+
+    SELECT * FROM I_FinancialStatementHier
+    WHERE FinancialStatementHierarchy = @hierarchyid
+      AND ChartOfAccounts = @chartofaccounts
+    INTO TABLE @DATA(lt_FinancialStatementHier).
+
+    SELECT * FROM I_FinancialStatementHierT
+    WHERE FinancialStatementHierarchy = @hierarchyid
+     AND Language = 'E'
+    INTO TABLE @DATA(lt_FinancialStatementHierT).
+
+    SELECT * FROM I_FinancialStatementHierNode
+    WHERE FinancialStatementHierarchy = @hierarchyid
+      AND ChartOfAccounts = @chartofaccounts
+    INTO TABLE @DATA(lt_FinancialStatementHierNode).
+
+    SELECT I_FinancialStatementLeafItem~*,
+           I_FinancialStatementLeafItemT~*
+     FROM I_FinancialStatementLeafItem
+     WITH PRIVILEGED ACCESS
+     INNER JOIN I_FinancialStatementLeafItemT
+     ON I_FinancialStatementLeafItem~FinancialStatementLeafItem
+     = I_FinancialStatementLeafItemT~FinancialStatementLeafItem
+     FOR ALL ENTRIES IN @lt_financialstatementhiernode
+     WHERE I_FinancialStatementLeafItem~FinancialStatementLeafItem = @lt_financialstatementhiernode-FinancialStatementLeafItem
+       AND I_FinancialStatementLeafItemT~Language = 'E'
+     INTO TABLE @DATA(I_FinancialStatementLeafItem)
+    .
 
   ENDMETHOD.
 

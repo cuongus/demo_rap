@@ -140,31 +140,31 @@ CLASS ZCL_MANAGE_VIETTEL_EINVOICES IMPLEMENTATION.
     CREATE OBJECT: go_einvoice_process, go_viettel_sinvoice.
 
     go_viettel_sinvoice->get_general(
-        EXPORTING
+      EXPORTING
         i_einvoice = i_einvoice
         i_userpass = i_userpass
-        i_items = i_items
-        i_type = 'ADJUST'
-        IMPORTING
-        e_adjust = ls_einvoice
+        i_items    = i_items
+        i_type     = 'ADJUST'
+      IMPORTING
+        e_adjust   = ls_einvoice
     ).
 
 * Create JSON *
 
     /ui2/cl_json=>serialize(
-        EXPORTING
-        data = ls_einvoice
-         pretty_name  =  /ui2/cl_json=>pretty_mode-low_case
-        RECEIVING
-        r_json = DATA(lv_json_string)
+      EXPORTING
+        data        = ls_einvoice
+        pretty_name = /ui2/cl_json=>pretty_mode-low_case
+      RECEIVING
+        r_json      = DATA(lv_json_string)
     ).
 
     go_viettel_sinvoice->replace_json(
-        EXPORTING
+      EXPORTING
         i_einvoice = ls_einvoice
-        i_json = lv_json_string
-        IMPORTING
-        e_json = lv_json_string
+        i_json     = lv_json_string
+      IMPORTING
+        e_json     = lv_json_string
     ).
 
 * Test run *
@@ -195,15 +195,15 @@ CLASS ZCL_MANAGE_VIETTEL_EINVOICES IMPLEMENTATION.
 
 *-------------------------THE--END-------------------------*
     go_viettel_sinvoice->process_status(
-        EXPORTING
-        i_action    = i_action
-        i_einvoice  = i_einvoice
-        i_return    = e_return
-        i_status    = lv_json_results
-        IMPORTING
-        e_header    = e_status
-        e_docsrc    = e_docsrc
-        ).
+      EXPORTING
+        i_action   = i_action
+        i_einvoice = i_einvoice
+        i_return   = e_return
+        i_status   = lv_json_results
+      IMPORTING
+        e_header   = e_status
+        e_docsrc   = e_docsrc
+    ).
 
   ENDMETHOD.
 
@@ -295,13 +295,13 @@ CLASS ZCL_MANAGE_VIETTEL_EINVOICES IMPLEMENTATION.
 
     TRY.
         go_viettel_sinvoice->get_general(
-            EXPORTING
+          EXPORTING
             i_einvoice = i_einvoice
             i_userpass = i_userpass
             i_items    = i_items
             i_type     = 'CREATE'
-            IMPORTING
-            e_create = ls_einvoice
+          IMPORTING
+            e_create   = ls_einvoice
         ).
       CATCH cx_abap_context_info_error.
         "handle exception
@@ -311,21 +311,21 @@ CLASS ZCL_MANAGE_VIETTEL_EINVOICES IMPLEMENTATION.
     DATA: lv_json_string TYPE string.
 
     /ui2/cl_json=>serialize(
-        EXPORTING
-        data = ls_einvoice
-         pretty_name  =  /ui2/cl_json=>pretty_mode-low_case
-        RECEIVING
-        r_json = lv_json_string
+      EXPORTING
+        data        = ls_einvoice
+        pretty_name = /ui2/cl_json=>pretty_mode-low_case
+      RECEIVING
+        r_json      = lv_json_string
     ).
 
 
     go_viettel_sinvoice->replace_json(
-            EXPORTING
-            i_einvoice = ls_einvoice
-            i_json = lv_json_string
-            IMPORTING
-            e_json = lv_json_string
-        ).
+      EXPORTING
+        i_einvoice = ls_einvoice
+        i_json     = lv_json_string
+      IMPORTING
+        e_json     = lv_json_string
+    ).
 
 * Test run *
     IF i_einvoice-testrun IS NOT INITIAL.
@@ -356,14 +356,14 @@ CLASS ZCL_MANAGE_VIETTEL_EINVOICES IMPLEMENTATION.
         e_return   = e_return ).
 *-------------------------THE--END-------------------------*
     go_viettel_sinvoice->process_status(
-        EXPORTING
-        i_action = i_action
+      EXPORTING
+        i_action   = i_action
         i_einvoice = i_einvoice
-        i_return = e_return
-        i_status = lv_json_results
-        IMPORTING
-        e_header = e_status
-        ).
+        i_return   = e_return
+        i_status   = lv_json_results
+      IMPORTING
+        e_header   = e_status
+    ).
 
   ENDMETHOD.
 
@@ -379,9 +379,39 @@ CLASS ZCL_MANAGE_VIETTEL_EINVOICES IMPLEMENTATION.
 
     DATA: ls_invoice TYPE zst_viettel_sinvoice_json.
 
+    DATA(o_jp_common_core) = NEW zcl_jp_common_core( ).
+
     CREATE OBJECT: go_einvoice_process, go_viettel_sinvoice.
 
     CLEAR: ls_invoice, e_adjust, e_create.
+
+****"sellerInfo":      //thông tin người mua
+    ls_invoice-sellerinfo-sellertaxcode         = i_userpass-suppliertax.
+
+    DATA: lv_companycode TYPE bukrs.
+    lv_companycode = i_einvoice-companycode.
+
+    o_jp_common_core->get_companycode_details(
+      EXPORTING
+        iv_companycode         = lv_companycode
+      IMPORTING
+        wa_companycode_details = DATA(ls_companycode_details)
+    ).
+
+    ls_invoice-sellerinfo-sellerlegalname = ls_companycode_details-companycodename.
+
+    ls_invoice-sellerinfo-selleraddressline = ls_companycode_details-companycodeaddr.
+**********************************************************************
+    ls_invoice-sellerinfo-sellerphonenumber = ls_companycode_details-telephonenumber.
+*
+*    ls_invoice-sellerinfo-sellerfaxnumber =
+*
+    ls_invoice-sellerinfo-selleremail = ls_companycode_details-email.
+*
+*    ls_invoice-sellerinfo-sellerBankAccount =
+*
+*    ls_invoice-sellerinfo-sellerbankname =
+***"------------------------------------------------------------------------------
 
 ****"generalInvoiceInfo": //Thông tin chung của hóa đơn
     "Mã loại hóa đơn chỉ
@@ -398,11 +428,11 @@ CLASS ZCL_MANAGE_VIETTEL_EINVOICES IMPLEMENTATION.
 
     "Ngày phát hành hóa đơn
     go_viettel_sinvoice->get_time_milis(
-       EXPORTING
-       i_date = i_einvoice-einvoicedatecreate
-       i_time = i_einvoice-einvoicetimecreate
-       IMPORTING
-       e_current_millis = DATA(e_current_millis)
+      EXPORTING
+        i_date           = i_einvoice-einvoicedatecreate
+        i_time           = i_einvoice-einvoicetimecreate
+      IMPORTING
+        e_current_millis = DATA(e_current_millis)
     ).
 
     SHIFT e_current_millis LEFT DELETING LEADING '0'.
@@ -498,23 +528,6 @@ CLASS ZCL_MANAGE_VIETTEL_EINVOICES IMPLEMENTATION.
       ls_invoice-buyerinfo-buyerNotGetInvoice = '1'.
     ENDIF.
 
-****"sellerInfo":      //thông tin người mua
-    ls_invoice-sellerinfo-sellertaxcode         = i_userpass-suppliertax.
-
-*    ls_invoice-sellerinfo-sellerlegalname =
-*
-*    ls_invoice-sellerinfo-selleraddressline =
-*
-*    ls_invoice-sellerinfo-sellerphonenumber =
-*
-*    ls_invoice-sellerinfo-sellerfaxnumber =
-*
-*    ls_invoice-sellerinfo-selleremail =
-*
-*    ls_invoice-sellerinfo-sellerBankAccount =
-*
-*    ls_invoice-sellerinfo-sellerbankname =
-
     "payments": //thông tin thanh toán
     DATA: ls_payments TYPE zst_payments,
           lt_payments TYPE ztt_payments.
@@ -549,30 +562,41 @@ CLASS ZCL_MANAGE_VIETTEL_EINVOICES IMPLEMENTATION.
         WHEN OTHERS.
       ENDCASE.
 
+      IF ls_item-longtext IS NOT INITIAL.
+        ls_iteminfo-itemname = ls_item-longtext.
+      ELSE.
+        ls_iteminfo-itemname = ls_item-documentitemtext.
+      ENDIF.
+
+      CONDENSE ls_iteminfo-taxamount NO-GAPS.
+      CONDENSE ls_iteminfo-itemtotalamountwithouttax NO-GAPS.
+      CONDENSE ls_iteminfo-unitprice  NO-GAPS.
+
       go_viettel_sinvoice->cloi_put_sign_in_front(
         EXPORTING
-        i_input = ls_iteminfo-itemtotalamountwithouttax
+          i_input  = ls_iteminfo-itemtotalamountwithouttax
         IMPORTING
-        o_output = ls_iteminfo-itemtotalamountwithouttax
+          o_output = ls_iteminfo-itemtotalamountwithouttax
       ).
 
       go_viettel_sinvoice->cloi_put_sign_in_front(
         EXPORTING
-        i_input = ls_iteminfo-taxamount
+          i_input  = ls_iteminfo-taxamount
         IMPORTING
-        o_output = ls_iteminfo-taxamount
+          o_output = ls_iteminfo-taxamount
       ).
 
       IF ls_iteminfo-unitprice IS NOT INITIAL.
         go_viettel_sinvoice->cloi_put_sign_in_front(
           EXPORTING
-          i_input = ls_iteminfo-unitprice
+            i_input  = ls_iteminfo-unitprice
           IMPORTING
-          o_output = ls_iteminfo-unitprice
+            o_output = ls_iteminfo-unitprice
         ).
       ENDIF.
 
       ls_iteminfo-taxpercentage = ls_item-taxpercentage.
+      CONDENSE ls_iteminfo-taxpercentage NO-GAPS.
 
       IF ls_item-quantity = 0.
         ls_iteminfo-quantity = ''.
@@ -580,12 +604,14 @@ CLASS ZCL_MANAGE_VIETTEL_EINVOICES IMPLEMENTATION.
         ls_iteminfo-quantity = ls_item-quantity.
       ENDIF.
 
+      CONDENSE ls_iteminfo-quantity NO-GAPS.
+
       IF ls_iteminfo-quantity IS NOT INITIAL.
         go_viettel_sinvoice->cloi_put_sign_in_front(
           EXPORTING
-          i_input = ls_iteminfo-quantity
+            i_input  = ls_iteminfo-quantity
           IMPORTING
-          o_output = ls_iteminfo-quantity
+            o_output = ls_iteminfo-quantity
         ).
       ENDIF.
 
@@ -595,6 +621,7 @@ CLASS ZCL_MANAGE_VIETTEL_EINVOICES IMPLEMENTATION.
         WHEN '2'. "ĐC Giảm
           ls_iteminfo-isincreaseitem = 'false'.
         WHEN OTHERS.
+          ls_iteminfo-isincreaseitem = 'null'.
       ENDCASE.
 
       ls_iteminfo-unitcode = ls_item-baseunit.
@@ -612,7 +639,10 @@ CLASS ZCL_MANAGE_VIETTEL_EINVOICES IMPLEMENTATION.
           ls_data_tax-vatamount = ls_item-vatamountincocodecrcy.
         WHEN OTHERS.
       ENDCASE.
+
       ls_data_tax-taxpercentage = ls_item-taxpercentage.
+
+      CONDENSE ls_data_tax-taxpercentage NO-GAPS.
 
       COLLECT ls_data_tax INTO lt_data_tax.
       CLEAR: ls_data_tax.
@@ -653,16 +683,16 @@ CLASS ZCL_MANAGE_VIETTEL_EINVOICES IMPLEMENTATION.
       "move negative sign to the front
       go_viettel_sinvoice->cloi_put_sign_in_front(
         EXPORTING
-        i_input = ls_taxbreakdowns-taxamount
+          i_input  = ls_taxbreakdowns-taxamount
         IMPORTING
-        o_output = ls_taxbreakdowns-taxamount
+          o_output = ls_taxbreakdowns-taxamount
       ).
       "move negative sign to the front
       go_viettel_sinvoice->cloi_put_sign_in_front(
         EXPORTING
-        i_input = ls_taxbreakdowns-taxableamount
+          i_input  = ls_taxbreakdowns-taxableamount
         IMPORTING
-        o_output = ls_taxbreakdowns-taxableamount
+          o_output = ls_taxbreakdowns-taxableamount
       ).
 
       CASE i_einvoice-adjusttype.
@@ -697,14 +727,17 @@ CLASS ZCL_MANAGE_VIETTEL_EINVOICES IMPLEMENTATION.
 
   METHOD get_sinvoices.
     DATA: i_prefix TYPE string.
+    DATA: lv_stax TYPE string,
+          lv_uuid TYPE string.
+
     CLEAR: e_context, e_return.
 
 *-- Create HTTP client ->
     TRY.
         DATA(lo_destination) = cl_http_destination_provider=>create_by_comm_arrangement(
-                                 comm_scenario  = |Z_API_VIETTEL_EINVOICE_CSCEN|
-                                 service_id     = |Z_API_VIETTEL_EINVOICE_OB_REST|
-                               ).
+          comm_scenario = |Z_API_VIETTEL_EINVOICE_CSCEN|
+          service_id    = |Z_API_VIETTEL_EINVOICE_OB_REST|
+        ).
 
         DATA(lo_http_client) = cl_web_http_client_manager=>create_by_http_destination( i_destination = lo_destination ).
 *-- Add path ->
@@ -717,9 +750,11 @@ CLASS ZCL_MANAGE_VIETTEL_EINVOICES IMPLEMENTATION.
 
         lo_http_client->get_http_request( )->set_header_field( i_name = |Accept| i_value = |*/*| ).
 
-        lo_http_client->get_http_request( )->set_header_field( i_name = |transactionUuid| i_value = |{ i_einvoice-sid }| ).
+        lv_uuid = i_einvoice-sid.
+        lo_http_client->get_http_request( )->set_form_field( i_name = |transactionUuid| i_value = lv_uuid ).
 
-        lo_http_client->get_http_request( )->set_header_field( i_name = |supplierTaxCode| i_value = |{ i_einvoice-suppliertax }| ).
+        lv_stax = i_einvoice-suppliertax.
+        lo_http_client->get_http_request( )->set_form_field( i_name = |supplierTaxCode| i_value = lv_stax ).
 
         DATA: lv_username TYPE string,
               lv_password TYPE string.
@@ -732,13 +767,13 @@ CLASS ZCL_MANAGE_VIETTEL_EINVOICES IMPLEMENTATION.
 *-- Authorization
         lo_http_client->get_http_request( )->set_authorization_basic( i_username = lv_username i_password = lv_password ).
 *-- GET
-        lo_http_client->execute( i_method = if_web_http_client=>get
+        lo_http_client->execute( i_method  = if_web_http_client=>post
                                  i_timeout = 60 ).
 
-        lo_http_client->get_http_request( )->set_content_type( |application/json| ).
+        lo_http_client->get_http_request( )->set_content_type( |application/x-www-form-urlencoded| ).
 
 *-- Response ->
-        DATA(lo_response) = lo_http_client->execute( i_method = if_web_http_client=>get
+        DATA(lo_response) = lo_http_client->execute( i_method  = if_web_http_client=>post
                                                      i_timeout = 60 ).
 *-- Get the status of the response ->
         e_context = lo_response->get_text( ).
@@ -796,9 +831,9 @@ CLASS ZCL_MANAGE_VIETTEL_EINVOICES IMPLEMENTATION.
 *-- Create HTTP client ->
     TRY.
         DATA(lo_destination) = cl_http_destination_provider=>create_by_comm_arrangement(
-                                 comm_scenario  = |Z_API_VIETTEL_EINVOICE_CSCEN|
-                                 service_id     = |Z_API_VIETTEL_EINVOICE_OB_REST|
-                               ).
+          comm_scenario = |Z_API_VIETTEL_EINVOICE_CSCEN|
+          service_id    = |Z_API_VIETTEL_EINVOICE_OB_REST|
+        ).
 
         DATA(lo_http_client) = cl_web_http_client_manager=>create_by_http_destination( i_destination = lo_destination ).
 *-- Add path ->
@@ -822,12 +857,12 @@ CLASS ZCL_MANAGE_VIETTEL_EINVOICES IMPLEMENTATION.
 
         lo_http_client->get_http_request( )->set_content_type( |application/json| ).
 *-- POST
-        lo_http_client->execute( i_method = if_web_http_client=>post
+        lo_http_client->execute( i_method  = if_web_http_client=>post
                                  i_timeout = 60 ).
 *-- Send request ->
         lo_http_client->get_http_request( )->set_text( i_context ).
 *-- Response ->
-        DATA(lo_response) = lo_http_client->execute( i_method = if_web_http_client=>post
+        DATA(lo_response) = lo_http_client->execute( i_method  = if_web_http_client=>post
                                                      i_timeout = 60 ).
 *-- Get the status of the response ->
         e_context = lo_response->get_text( ).
@@ -872,7 +907,7 @@ CLASS ZCL_MANAGE_VIETTEL_EINVOICES IMPLEMENTATION.
              errorCode TYPE string,
            END OF lty_imessage.
 
-    DATA: ls_message     TYPE lty_message,
+    DATA: ls_message     TYPE zst_vt_response_cre,
           imessage       TYPE lty_imessage,
 
           ls_responseinf TYPE zst_vt_response_info,
@@ -888,18 +923,18 @@ CLASS ZCL_MANAGE_VIETTEL_EINVOICES IMPLEMENTATION.
 
         WHEN 'CREATE_INVOICE' OR 'ADJUST_INVOICE'.
           /ui2/cl_json=>deserialize(
-           EXPORTING
-             json             = i_status
-*        jsonx            =
-             pretty_name      = /ui2/cl_json=>pretty_mode-user
-*        assoc_arrays     =
-*        assoc_arrays_opt =
-*        name_mappings    =
-*        conversion_exits =
-*        hex_as_base64    =
-           CHANGING
-             data             = ls_message
-         ).
+            EXPORTING
+              json        = i_status
+*             jsonx       =
+              pretty_name = /ui2/cl_json=>pretty_mode-none
+*             assoc_arrays     =
+*             assoc_arrays_opt =
+*             name_mappings    =
+*             conversion_exits =
+*             hex_as_base64    =
+            CHANGING
+              data        = ls_message
+          ).
 
           IF ls_message-errorcode IS INITIAL.
 
@@ -907,9 +942,31 @@ CLASS ZCL_MANAGE_VIETTEL_EINVOICES IMPLEMENTATION.
             e_header-createdbyuser = sy-uname.
             e_header-createdtime   = xco_cp=>sy->time( )->as( xco_cp_time=>format->abap )->value.
 
-            e_header-statussap = '02'.
+*            e_header-statussap = '02'.
+            e_header-statussap = '98'.
             e_header-messagetype = 'S'.
             e_header-messagetext = 'Đã lập hóa đơn'.
+
+            lv_invoiceno = ls_message-result-invoiceno.
+
+            e_header-einvoiceform = i_einvoice-einvoiceform.
+            e_header-einvoiceserial = i_einvoice-einvoiceserial.
+            e_header-einvoicetype = i_einvoice-einvoicetype.
+
+            REPLACE ALL OCCURRENCES OF i_einvoice-einvoiceserial IN lv_invoiceno WITH space.
+            CONDENSE lv_invoiceno NO-GAPS.
+
+            e_header-einvoicenumber = lv_invoiceno.
+
+*            lv_millis = ls_message-result-issuedate.
+*
+*                go_viettel_sinvoice->convert_milis(
+*                  EXPORTING
+*                    i_millis = lv_millis
+*                  IMPORTING
+*                    e_date   = e_header-einvoicedatecreate
+*                    e_time   = e_header-einvoicetimecreate
+*                ).
 
           ELSE.
             e_header-statussap = '03'.
@@ -919,18 +976,18 @@ CLASS ZCL_MANAGE_VIETTEL_EINVOICES IMPLEMENTATION.
 
         WHEN 'SEARCH_INVOICE'.
           /ui2/cl_json=>deserialize(
-           EXPORTING
-             json             = i_status
-*        jsonx            =
-             pretty_name      = /ui2/cl_json=>pretty_mode-user
-*        assoc_arrays     =
-*        assoc_arrays_opt =
-*        name_mappings    =
-*        conversion_exits =
-*        hex_as_base64    =
-           CHANGING
-             data             = imessage
-         ).
+            EXPORTING
+              json        = i_status
+*             jsonx       =
+              pretty_name = /ui2/cl_json=>pretty_mode-user
+*             assoc_arrays     =
+*             assoc_arrays_opt =
+*             name_mappings    =
+*             conversion_exits =
+*             hex_as_base64    =
+            CHANGING
+              data        = imessage
+          ).
 
           IF imessage-message = 'NOT_FOUND_DATA'.
             e_header-statussap = '01'.
@@ -938,18 +995,18 @@ CLASS ZCL_MANAGE_VIETTEL_EINVOICES IMPLEMENTATION.
             e_header-messagetext = imessage-data.
           ELSE.
             /ui2/cl_json=>deserialize(
-                 EXPORTING
-                   json             = i_status
-*                jsonx            =
-                   pretty_name      = /ui2/cl_json=>pretty_mode-user
-*                assoc_arrays     =
-*                assoc_arrays_opt =
-*                name_mappings    =
-*                conversion_exits =
-*                hex_as_base64    =
-                 CHANGING
-                   data             = ls_responseinf
-           ).
+              EXPORTING
+                json        = i_status
+*               jsonx       =
+                pretty_name = /ui2/cl_json=>pretty_mode-user
+*               assoc_arrays     =
+*               assoc_arrays_opt =
+*               name_mappings    =
+*               conversion_exits =
+*               hex_as_base64    =
+              CHANGING
+                data        = ls_responseinf
+            ).
 
             IF ls_responseinf-errorcode IS NOT INITIAL.
               e_header-statussap = '03'.
@@ -997,14 +1054,18 @@ CLASS ZCL_MANAGE_VIETTEL_EINVOICES IMPLEMENTATION.
                   WHEN OTHERS.
                 ENDCASE.
 
-                SELECT SINGLE value FROM zjp_hd_config WHERE id_sys = '001' AND id_domain = 'STATUSINV'
-                                           AND description = @ls_result-exchangestatus
-                INTO @e_header-statusinvres PRIVILEGED ACCESS.
+                SELECT SINGLE value FROM zjp_hd_config
+                WITH PRIVILEGED ACCESS
+                WHERE id_sys = '001' AND id_domain = 'STATUSINV'
+                AND description = @ls_result-exchangestatus
+                INTO @e_header-statusinvres.
 
                 IF sy-subrc NE 0.
-                  SELECT SINGLE value FROM zjp_hd_config WHERE id_sys = '001' AND id_domain = 'STATUSINV'
-                                                       AND description = @ls_result-status
-                  INTO @e_header-statusinvres PRIVILEGED ACCESS.
+                  SELECT SINGLE value FROM zjp_hd_config
+                  WITH PRIVILEGED ACCESS
+                  WHERE id_sys = '001' AND id_domain = 'STATUSINV'
+                  AND description = @ls_result-status
+                  INTO @e_header-statusinvres.
                 ENDIF.
 
                 e_header-suppliertax   = ls_result-suppliertaxcode.
@@ -1021,18 +1082,20 @@ CLASS ZCL_MANAGE_VIETTEL_EINVOICES IMPLEMENTATION.
 
                 go_viettel_sinvoice->convert_milis(
                   EXPORTING
-                  i_millis = lv_millis
+                    i_millis = lv_millis
                   IMPORTING
-                  e_date = e_header-einvoicedatecreate
-                  e_time = e_header-einvoicetimecreate
+                    e_date   = e_header-einvoicedatecreate
+                    e_time   = e_header-einvoicetimecreate
                 ).
 
                 e_header-mscqt = ls_result-codeoftax.
 
               ELSE.
                 e_header-statussap = '02'.
-                SELECT SINGLE value FROM zjp_hd_config WHERE id_sys = '001' AND id_domain = 'STATUSINV'
-                                           AND description = 'Đã lập HĐ nháp'
+                SELECT SINGLE value FROM zjp_hd_config
+                WITH PRIVILEGED ACCESS
+                WHERE id_sys = '001' AND id_domain = 'STATUSINV'
+                AND description = 'Đã lập HĐ nháp'
                 INTO @e_header-statusinvres.
                 e_header-messagetype     = 'S'.
                 e_header-messagetext    = 'Đã tích hợp hoá đơn'.
@@ -1049,10 +1112,12 @@ CLASS ZCL_MANAGE_VIETTEL_EINVOICES IMPLEMENTATION.
 
       IF e_header-StatusSap = '98' OR e_header-StatusSap = '99'.
         "Hóa đơn bị điều chỉnh
-        SELECT SINGLE * FROM zjp_a_hddt_h WHERE Companycode        = @i_einvoice-Companycode
-                                            AND Accountingdocument = @i_einvoice-accountingdocumentsource
-                                            AND fiscalyear         = @i_einvoice-fiscalyearsource
-              INTO @DATA(ls_einv_header_src).
+        SELECT SINGLE * FROM zjp_a_hddt_h
+        WITH PRIVILEGED ACCESS
+        WHERE Companycode        = @i_einvoice-Companycode
+        AND Accountingdocument = @i_einvoice-accountingdocumentsource
+        AND fiscalyear         = @i_einvoice-fiscalyearsource
+        INTO @DATA(ls_einv_header_src).
         IF sy-subrc EQ 0.
           CASE i_einvoice-adjusttype.
             WHEN '3'. "Thay thế
@@ -1097,12 +1162,12 @@ CLASS ZCL_MANAGE_VIETTEL_EINVOICES IMPLEMENTATION.
 
     REPLACE ALL OCCURRENCES OF |"true"| IN e_json WITH |true|.
     REPLACE ALL OCCURRENCES OF |"false"| IN e_json WITH |false|.
+    REPLACE ALL OCCURRENCES OF |"null"| IN e_json WITH 'null'.
+
     REPLACE ALL OCCURRENCES OF |paymentMethodname| IN e_json WITH |paymentMethodName|.
 
-    IF i_einvoice-generalinvoiceinfo-adjustmenttype EQ '1'.
-      REPLACE ALL OCCURRENCES OF |, "originalInvoiceId": "", "originalInvoiceIssueDate": ""| IN e_json WITH space.
-
-      REPLACE ALL OCCURRENCES OF |"isIncreaseItem": "",| IN e_json WITH ''.
+    IF i_einvoice-generalinvoiceinfo-adjustmenttype = '1'.
+      REPLACE ALL OCCURRENCES OF |,"originalInvoiceId":"","originalInvoiceIssueDate":""| IN e_json WITH ``.
     ENDIF.
 
   ENDMETHOD.
@@ -1143,21 +1208,21 @@ CLASS ZCL_MANAGE_VIETTEL_EINVOICES IMPLEMENTATION.
       EXPORTING
         i_einvoice = i_einvoice
         i_userpass = i_userpass
-        i_url     = lv_url
+        i_url      = lv_url
       IMPORTING
-        e_context = lv_json_results
-        e_return  = e_return ).
+        e_context  = lv_json_results
+        e_return   = e_return ).
 *-------------------------THE--END-------------------------*
     go_viettel_sinvoice->process_status(
-        EXPORTING
-        i_action = i_action
+      EXPORTING
+        i_action   = i_action
         i_einvoice = i_einvoice
-        i_return = e_return
-        i_status = lv_json_results
-        IMPORTING
-        e_header = e_status
-        e_docsrc = e_docsrc
-        ).
+        i_return   = e_return
+        i_status   = lv_json_results
+      IMPORTING
+        e_header   = e_status
+        e_docsrc   = e_docsrc
+    ).
 
   ENDMETHOD.
 ENDCLASS.

@@ -66,15 +66,15 @@ CLASS zcl_einvoice_data DEFINITION
 
                                   ir_customer           TYPE tt_ranges OPTIONAL
 
-                                  ir_einvoicetype       TYPE tt_ranges OPTIONAL
+                                  ir_einvoicetype       TYPE tt_ranges
                                   ir_statussap          TYPE tt_ranges OPTIONAL
                                   ir_einvoicenumber     TYPE tt_ranges OPTIONAL
 
                                   ir_createdbyuser      TYPE tt_ranges OPTIONAL "Created einvoice from SAP
                                   ir_enduser            TYPE tt_ranges OPTIONAL "Created document in SAP
-                                  ir_usertype           TYPE tt_ranges OPTIONAL
-                                  ir_TypeOfDate         TYPE tt_ranges OPTIONAL
-                                  ir_CurrencyType       TYPE tt_ranges OPTIONAL
+                                  ir_usertype           TYPE tt_ranges
+                                  ir_TypeOfDate         TYPE tt_ranges
+                                  ir_CurrencyType       TYPE tt_ranges
 
                                   ir_TestRun            TYPE tt_ranges OPTIONAL
 
@@ -174,7 +174,7 @@ CLASS ZCL_EINVOICE_DATA IMPLEMENTATION.
       "Message Error!
       ls_returns-type = 'E'.
       ls_returns-message = TEXT-001.
-      APPEND ls_returns TO it_returns.
+*      APPEND ls_returns TO it_returns.
       CLEAR: ls_returns.
     ENDIF.
 
@@ -185,19 +185,34 @@ CLASS ZCL_EINVOICE_DATA IMPLEMENTATION.
 
 **--Lấy cấu hình
     lo_einvoice_data->read_ranges(
-        EXPORTING it_ranges = ir_currencytype[] IMPORTING o_value = lv_currencytype ).
+      EXPORTING
+        it_ranges = ir_currencytype[]
+      IMPORTING
+        o_value   = lv_currencytype ).
 
     lo_einvoice_data->read_ranges(
-        EXPORTING it_ranges = ir_typeofdate[] IMPORTING o_value = lv_typeofdate ).
+      EXPORTING
+        it_ranges = ir_typeofdate[]
+      IMPORTING
+        o_value   = lv_typeofdate ).
 
     lo_einvoice_data->read_ranges(
-        EXPORTING it_ranges = ir_usertype[] IMPORTING o_value = lv_usertype ).
+      EXPORTING
+        it_ranges = ir_usertype[]
+      IMPORTING
+        o_value   = lv_usertype ).
 
     lo_einvoice_data->read_ranges(
-        EXPORTING it_ranges = ir_einvoicetype[] IMPORTING o_value = lv_einvoicetype ).
+      EXPORTING
+        it_ranges = ir_einvoicetype[]
+      IMPORTING
+        o_value   = lv_einvoicetype ).
 
     lo_einvoice_data->read_ranges(
-        EXPORTING it_ranges = ir_testrun[] IMPORTING o_value = lv_testrun ).
+      EXPORTING
+        it_ranges = ir_testrun[]
+      IMPORTING
+        o_value   = lv_testrun ).
 
 **--Lấy Data BKPF
     SELECT   a~companycode ,
@@ -376,44 +391,14 @@ CLASS ZCL_EINVOICE_DATA IMPLEMENTATION.
     SORT lt_a_hddt_h BY companycode accountingdocument fiscalyear ASCENDING.
     SORT lt_bseg BY CompanyCode AccountingDocument fiscalyear AccountingDocumentItem ASCENDING.
 
+    DATA: ls_a_hddt_h LIKE LINE OF lt_a_hddt_h.
 
-**--PRocess Data
+**--Process Data
     LOOP AT lt_bkpf INTO DATA(ls_bkpf).
       CLEAR: lv_count, lv_taxcode.
-
-      READ TABLE lt_a_hddt_h INTO DATA(ls_a_hddt_h)
-      WITH KEY companycode        = ls_bkpf-CompanyCode
-               accountingdocument = ls_bkpf-AccountingDocument
-               fiscalyear         = ls_bkpf-FiscalYear BINARY SEARCH.
-      IF sy-subrc EQ 0.
-        IF ls_a_hddt_h-messagetype = 'S'.
-**---Trường hợp Document Phát hành thành công -> Lấy data từ bảng log hddt
-          APPEND ls_a_hddt_h TO lt_einvoice_header.
-          CLEAR: ls_a_hddt_h.
-
-          READ TABLE lt_a_hddt_i TRANSPORTING NO FIELDS
-          WITH KEY companycode        = ls_bkpf-CompanyCode
-                   accountingdocument = ls_bkpf-AccountingDocument
-                   fiscalyear         = ls_bkpf-FiscalYear BINARY SEARCH.
-          IF sy-subrc EQ 0.
-            lv_index = sy-tabix.
-            LOOP AT lt_a_hddt_i INTO DATA(ls_a_hddt_i) FROM lv_index.
-              IF NOT ( ls_a_hddt_i-companycode        EQ ls_bkpf-CompanyCode AND
-                       ls_a_hddt_i-accountingdocument EQ ls_bkpf-AccountingDocument AND
-                       ls_a_hddt_i-fiscalyear         EQ ls_bkpf-FiscalYear ).
-                EXIT.
-              ENDIF.
-
-              APPEND ls_a_hddt_i TO lt_einvoice_item.
-              CLEAR: ls_a_hddt_i.
-            ENDLOOP.
-          ENDIF.
-
-          CONTINUE.
-**-----------------------------------------------------------------------**
-        ELSE.
-        ENDIF.
-      ENDIF.
+      CLEAR: ls_einvoice_header.
+      CLEAR: ls_a_hddt_h.
+      CLEAR: lv_PaymentMethod.
 
 *  DATA: lv_fwste  TYPE zde_dmbtr.
 
@@ -434,6 +419,64 @@ CLASS ZCL_EINVOICE_DATA IMPLEMENTATION.
       ENDIF.
 
 **---Trường hợp Document Chưa Phát hành thành công -> Lấy data từ bkpf, bseg
+
+**--TestRun Flag
+      IF lv_testrun IS NOT INITIAL.
+        ls_einvoice_header-testrun = lv_testrun.
+      ENDIF.
+
+**--Process Data HDDT Header
+      ls_einvoice_header-companycode        = ls_bkpf-CompanyCode.
+      ls_einvoice_header-accountingdocument = ls_bkpf-AccountingDocument.
+      ls_einvoice_header-fiscalyear         = ls_bkpf-FiscalYear.
+      ls_einvoice_header-fiscalperiod       = ls_bkpf-FiscalPeriod.
+
+      ls_einvoice_header-postingdate        = ls_bkpf-PostingDate.
+      ls_einvoice_header-documentdate       = ls_bkpf-DocumentDate.
+
+      ls_einvoice_header-accountingdocumenttype         = ls_bkpf-AccountingDocumentType.
+      ls_einvoice_header-accountingdocumentcreationdate = ls_bkpf-AccountingDocumentCreationDate.
+      ls_einvoice_header-accountingdocumentheadertext   = ls_bkpf-AccountingDocumentCreationDate.
+
+      ls_einvoice_header-xreversed  = ls_bkpf-IsReversed.
+      ls_einvoice_header-xreversing = ls_bkpf-IsReversal.
+
+**--
+      ls_einvoice_header-usertype       = lv_usertype.
+      ls_einvoice_header-currencytype   = lv_currencytype.
+      ls_einvoice_header-typeofdate     = lv_typeofdate.
+
+**--Time CREATE
+      lo_einvoice_data->getdate_einvoice(
+        EXPORTING
+          i_document = ls_einvoice_header
+        IMPORTING
+          e_document = ls_einvoice_header
+      ).
+
+      lv_fiscalyear = ls_einvoice_header-einvoicedatecreate+0(4).
+
+***" Get Form-Serial SInvoice
+      IF lv_einvoicetype IS NOT INITIAL.
+        SELECT SINGLE * FROM zjp_hd_serial
+        WHERE companycode   IN @ir_companycode
+          AND einvoicetype  EQ @lv_einvoicetype
+          AND fiscalyear    EQ @lv_FiscalYear
+          INTO @DATA(ls_hd_serial)
+          .
+        IF sy-subrc NE 0.
+          "MESSAGE Error!
+          ls_returns-type = 'E'.
+          ls_returns-message = TEXT-002.
+          APPEND ls_returns TO it_returns.
+          CLEAR: ls_returns.
+        ELSE.
+          ls_einvoice_header-einvoiceform   = ls_hd_serial-einvoiceform.
+          ls_einvoice_header-einvoiceserial = ls_hd_serial-einvoiceserial.
+          ls_einvoice_header-einvoicetype   = ls_hd_serial-einvoicetype.
+        ENDIF.
+      ENDIF.
+
       READ TABLE lt_bseg TRANSPORTING NO FIELDS
       WITH KEY companycode        = ls_bkpf-CompanyCode
                accountingdocument = ls_bkpf-AccountingDocument
@@ -497,7 +540,7 @@ CLASS ZCL_EINVOICE_DATA IMPLEMENTATION.
             "Message Error!
             ls_returns-type = 'E'.
             ls_returns-message = TEXT-003.
-            APPEND ls_returns TO it_returns.
+*            APPEND ls_returns TO it_returns.
             CLEAR: ls_returns.
           ENDIF.
 
@@ -578,37 +621,30 @@ CLASS ZCL_EINVOICE_DATA IMPLEMENTATION.
             ls_einvoice_header-taxcode = lv_taxcode.
           ENDIF.
 
+          ls_einvoice_item-taxcode = ls_bseg-TaxCode.
+
 **--Profit Center
           IF ls_einvoice_header-profitcenter IS INITIAL.
             ls_einvoice_header-profitcenter = ls_bseg-ProfitCenter.
           ENDIF.
+
+          ls_einvoice_item-currencytype = lv_currencytype.
+          ls_einvoice_item-usertype     = lv_usertype.
+          ls_einvoice_item-typeofdate   = lv_typeofdate.
+
+          ls_einvoice_item-einvoicetype = lv_einvoicetype.
+          ls_einvoice_item-einvoiceform = ls_hd_serial-einvoiceform.
+          ls_einvoice_item-einvoiceserial = ls_hd_serial-einvoiceserial.
 **--------------------------------------------------------------------------------------------**
           APPEND ls_einvoice_item TO lt_einvoice_item.
           CLEAR: ls_einvoice_item.
 
         ENDLOOP.
+      ELSE.
+
+        CONTINUE.
+
       ENDIF.
-
-**--TestRun Flag
-      IF lv_testrun IS NOT INITIAL.
-        ls_einvoice_header-testrun = lv_testrun.
-      ENDIF.
-
-**--Process Data HDDT Header
-      ls_einvoice_header-companycode        = ls_bkpf-CompanyCode.
-      ls_einvoice_header-accountingdocument = ls_bkpf-AccountingDocument.
-      ls_einvoice_header-fiscalyear         = ls_bkpf-FiscalYear.
-      ls_einvoice_header-fiscalperiod       = ls_bkpf-FiscalPeriod.
-
-      ls_einvoice_header-postingdate        = ls_bkpf-PostingDate.
-      ls_einvoice_header-documentdate       = ls_bkpf-DocumentDate.
-
-      ls_einvoice_header-accountingdocumenttype         = ls_bkpf-AccountingDocumentType.
-      ls_einvoice_header-accountingdocumentcreationdate = ls_bkpf-AccountingDocumentCreationDate.
-      ls_einvoice_header-accountingdocumentheadertext   = ls_bkpf-AccountingDocumentCreationDate.
-
-      ls_einvoice_header-xreversed  = ls_bkpf-IsReversed.
-      ls_einvoice_header-xreversing = ls_bkpf-IsReversal.
 
 **--Payment Method Text
       SELECT SINGLE paymtext FROM zjp_hd_payment WHERE zlsch       = @lv_paymentmethod
@@ -618,7 +654,7 @@ CLASS ZCL_EINVOICE_DATA IMPLEMENTATION.
         "Message Error!
         ls_returns-type = 'E'.
         ls_returns-message = TEXT-004.
-        APPEND ls_returns TO it_returns.
+*        APPEND ls_returns TO it_returns.
         CLEAR: ls_returns.
       ENDIF.
 
@@ -639,41 +675,8 @@ CLASS ZCL_EINVOICE_DATA IMPLEMENTATION.
 **--SID Code
       ls_einvoice_header-sid = |{ sy-sysid }{ sy-mandt }{ ls_bkpf-CompanyCode }{ ls_bkpf-AccountingDocument }{ ls_bkpf-FiscalYear }|.
 
-**--
-      ls_einvoice_header-usertype       = lv_usertype.
-      ls_einvoice_header-currencytype   = lv_currencytype.
-      ls_einvoice_header-typeofdate     = lv_typeofdate.
 
-**--Time CREATE
-      lo_einvoice_data->getdate_einvoice(
-          EXPORTING
-          i_document = ls_einvoice_header
-          IMPORTING
-          e_document = ls_einvoice_header
-      ).
-
-      lv_fiscalyear = ls_einvoice_header-einvoicedatecreate+0(4).
-
-      IF lv_einvoicetype IS NOT INITIAL.
-        SELECT SINGLE * FROM zjp_hd_serial
-        WHERE companycode   IN @ir_companycode
-          AND einvoicetype  EQ @lv_einvoicetype
-          AND fiscalyear    EQ @lv_FiscalYear
-          INTO @DATA(ls_hd_serial)
-          .
-        IF sy-subrc NE 0.
-          "MESSAGE Error!
-          ls_returns-type = 'E'.
-          ls_returns-message = TEXT-002.
-          APPEND ls_returns TO it_returns.
-          CLEAR: ls_returns.
-        ELSE.
-          ls_einvoice_header-einvoiceform   = ls_hd_serial-einvoiceform.
-          ls_einvoice_header-einvoiceserial = ls_hd_serial-einvoiceserial.
-          ls_einvoice_header-einvoicetype   = ls_hd_serial-einvoicetype.
-        ENDIF.
-      ENDIF.
-
+**--SID system
       ls_einvoice_header-idsys = 'VIETTEL'.
 
 **--Get Customer Information
@@ -687,9 +690,9 @@ CLASS ZCL_EINVOICE_DATA IMPLEMENTATION.
 
       IF ls_bkpf-Customer IS NOT INITIAL.
         go_jp_common_core->get_customer_details(
-            EXPORTING
-            wa_document = wa_document
-            IMPORTING
+          EXPORTING
+            wa_document         = wa_document
+          IMPORTING
             wa_customer_details = wa_customer_details
         ).
         "--Customer Name
@@ -704,11 +707,81 @@ CLASS ZCL_EINVOICE_DATA IMPLEMENTATION.
         ls_einvoice_header-telephonenumber       = wa_customer_details-telephonenumber.
       ENDIF.
 
+*** Get log
+      READ TABLE lt_a_hddt_h INTO ls_a_hddt_h
+      WITH KEY companycode        = ls_bkpf-CompanyCode
+               accountingdocument = ls_bkpf-AccountingDocument
+               fiscalyear         = ls_bkpf-FiscalYear BINARY SEARCH.
+      IF sy-subrc EQ 0.
+        IF ls_a_hddt_h-messagetype = 'S'.
+**---Trường hợp Document Phát hành thành công -> Lấy data từ bảng log hddt
+
+**--TestRun Flag
+          IF lv_testrun IS INITIAL.
+
+            ls_einvoice_header-typeofdate               = ls_a_hddt_h-typeofdate.
+            ls_einvoice_header-usertype                 = ls_a_hddt_h-usertype.
+            ls_einvoice_header-currencytype             = ls_a_hddt_h-currencytype.
+
+            ls_einvoice_header-einvoicenumber           = ls_a_hddt_h-einvoicenumber.
+*            ls_einvoice_header-einvoiceform             = ls_a_hddt_h-einvoiceform.
+*            ls_einvoice_header-einvoiceserial           = ls_a_hddt_h-einvoiceserial.
+*            ls_einvoice_header-einvoicetype             = ls_a_hddt_h-einvoicetype.
+
+            ls_einvoice_header-einvoicedatecreate       = ls_a_hddt_h-einvoicedatecreate.
+            ls_einvoice_header-einvoicetimecreate       = ls_a_hddt_h-einvoicetimecreate.
+
+            ls_einvoice_header-accountingdocumentsource = ls_a_hddt_h-accountingdocumentsource.
+            ls_einvoice_header-fiscalyearsource         = ls_a_hddt_h-fiscalyearsource.
+            ls_einvoice_header-adjusttype               = ls_a_hddt_h-adjusttype.
+
+            ls_einvoice_header-mscqt                    = ls_a_hddt_h-mscqt.
+            ls_einvoice_header-invdat                   = ls_a_hddt_h-invdat.
+            ls_einvoice_header-reservationcode          = ls_a_hddt_h-reservationcode.
+
+            ls_einvoice_header-statussap                = ls_a_hddt_h-statussap.
+            ls_einvoice_header-statusinvres             = ls_a_hddt_h-statusinvres.
+            ls_einvoice_header-statuscqtres             = ls_a_hddt_h-statuscqtres.
+
+            ls_einvoice_header-messagetype              = ls_a_hddt_h-messagetype.
+            ls_einvoice_header-messagetext              = ls_a_hddt_h-messagetext.
+
+          ENDIF.
+
+*          APPEND ls_a_hddt_h TO lt_einvoice_header.
+
+*          CLEAR: ls_a_hddt_h.
+
+*          READ TABLE lt_a_hddt_i TRANSPORTING NO FIELDS
+*          WITH KEY companycode        = ls_bkpf-CompanyCode
+*                   accountingdocument = ls_bkpf-AccountingDocument
+*                   fiscalyear         = ls_bkpf-FiscalYear BINARY SEARCH.
+*          IF sy-subrc EQ 0.
+*            lv_index = sy-tabix.
+*            LOOP AT lt_a_hddt_i INTO DATA(ls_a_hddt_i) FROM lv_index.
+*              IF NOT ( ls_a_hddt_i-companycode        EQ ls_bkpf-CompanyCode AND
+*                       ls_a_hddt_i-accountingdocument EQ ls_bkpf-AccountingDocument AND
+*                       ls_a_hddt_i-fiscalyear         EQ ls_bkpf-FiscalYear ).
+*                EXIT.
+*              ENDIF.
+*
+*              APPEND ls_a_hddt_i TO lt_einvoice_item.
+*              CLEAR: ls_a_hddt_i.
+*            ENDLOOP.
+*          ENDIF.
+*
+*          CONTINUE.
+**-----------------------------------------------------------------------**
+        ELSE.
+          ls_einvoice_header-accountingdocumentsource = ls_a_hddt_h-accountingdocumentsource.
+          ls_einvoice_header-fiscalyearsource         = ls_a_hddt_h-fiscalyearsource.
+          ls_einvoice_header-adjusttype               = ls_a_hddt_h-adjusttype.
+        ENDIF.
+      ENDIF.
+
       APPEND ls_einvoice_header TO lt_einvoice_header.
 **-----------------------------------------------------------------------**
-      CLEAR: ls_einvoice_header.
-      CLEAR: ls_a_hddt_h.
-      CLEAR: lv_PaymentMethod.
+
 **-----------------------------------------------------------------------**
     ENDLOOP.
 
@@ -720,7 +793,7 @@ CLASS ZCL_EINVOICE_DATA IMPLEMENTATION.
       IF ls_SumVAT-transactioncurrency = 'USD' OR ls_SumVAT-transactioncurrency = 'EUR'
       OR ls_SumVAT-transactioncurrency = 'GBP'.
 
-        ls_SumVAT-sumvatamountintransaction = ls_SumVAT-sumvatamountintransaction * ( -1 ) .
+        ls_SumVAT-sumvatamountintransaction = ls_SumVAT-sumvatamountintransaction * ( -1 ).
       ELSE.
         ls_SumVAT-sumvatamountintransaction = ls_SumVAT-sumvatamountintransaction * ( -1 ) * 100.
       ENDIF.
@@ -883,28 +956,26 @@ CLASS ZCL_EINVOICE_DATA IMPLEMENTATION.
         DATA(lo_common_app) = zcl_jp_common_core=>get_instance( ).
 
         lo_common_app->get_fillter_app(
-            EXPORTING
-                io_request  = io_request
-                io_response = io_response
-            IMPORTING
-                ir_companycode        = ir_companycode
-                ir_accountingdocument = ir_accountingdocument
-                ir_fiscalyear         = ir_fiscalyear
-*                ir_glaccount          = ir_glaccount
-                ir_postingdate        = ir_postingdate
-                ir_documentdate       = ir_documentdate
-
-                ir_statussap          = ir_statussap
-                ir_einvoicenumber     = ir_einvoicenumber
-                ir_einvoicetype       = ir_einvoicetype
-                ir_currencytype       = ir_currencytype
-                ir_usertype           = ir_usertype
-                ir_typeofdate         = ir_typeofdate
-                ir_createdbyuser      = ir_createdbyuser
-                ir_enduser            = ir_enduser
-                ir_testrun            = ir_testrun
-
-                wa_page_info          = ls_page_info
+          EXPORTING
+            io_request            = io_request
+            io_response           = io_response
+          IMPORTING
+            ir_companycode        = ir_companycode
+            ir_accountingdocument = ir_accountingdocument
+            ir_fiscalyear         = ir_fiscalyear
+*           ir_glaccount          = ir_glaccount
+            ir_postingdate        = ir_postingdate
+            ir_documentdate       = ir_documentdate
+            ir_statussap          = ir_statussap
+            ir_einvoicenumber     = ir_einvoicenumber
+            ir_einvoicetype       = ir_einvoicetype
+            ir_currencytype       = ir_currencytype
+            ir_usertype           = ir_usertype
+            ir_typeofdate         = ir_typeofdate
+            ir_createdbyuser      = ir_createdbyuser
+            ir_enduser            = ir_enduser
+            ir_testrun            = ir_testrun
+            wa_page_info          = ls_page_info
         ).
 
 *        AUTHORITY-CHECK OBJECT 'ZOBJECT***'
@@ -915,27 +986,25 @@ CLASS ZCL_EINVOICE_DATA IMPLEMENTATION.
 *        ENDIF.
 
         go_einvoice_data->get_einvoice_data(
-            EXPORTING
-                ir_companycode        = ir_companycode
-                ir_accountingdocument = ir_accountingdocument
-                ir_fiscalyear         = ir_fiscalyear
-                ir_postingdate        = ir_postingdate
-                ir_documentdate       = ir_documentdate
-
-                ir_statussap          = ir_statussap
-                ir_einvoicenumber     = ir_einvoicenumber
-                ir_einvoicetype       = ir_einvoicetype
-                ir_currencytype       = ir_currencytype
-                ir_usertype           = ir_usertype
-                ir_typeofdate         = ir_typeofdate
-                ir_createdbyuser      = ir_createdbyuser
-                ir_enduser            = ir_enduser
-                ir_testrun            = ir_testrun
-
-            IMPORTING
-                it_einvoice_header    = gt_einvoice_headers
-                it_einvoice_item      = gt_einvoice_items
-                it_returns            = lt_returns
+          EXPORTING
+            ir_companycode        = ir_companycode
+            ir_accountingdocument = ir_accountingdocument
+            ir_fiscalyear         = ir_fiscalyear
+            ir_postingdate        = ir_postingdate
+            ir_documentdate       = ir_documentdate
+            ir_statussap          = ir_statussap
+            ir_einvoicenumber     = ir_einvoicenumber
+            ir_einvoicetype       = ir_einvoicetype
+            ir_currencytype       = ir_currencytype
+            ir_usertype           = ir_usertype
+            ir_typeofdate         = ir_typeofdate
+            ir_createdbyuser      = ir_createdbyuser
+            ir_enduser            = ir_enduser
+            ir_testrun            = ir_testrun
+          IMPORTING
+            it_einvoice_header    = gt_einvoice_headers
+            it_einvoice_item      = gt_einvoice_items
+            it_returns            = lt_returns
         ).
 
         IF lt_returns IS NOT INITIAL.

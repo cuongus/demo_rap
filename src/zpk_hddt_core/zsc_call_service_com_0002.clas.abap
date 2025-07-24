@@ -50,8 +50,8 @@ CLASS ZSC_CALL_SERVICE_COM_0002 IMPLEMENTATION.
           lv_gjahr   TYPE gjahr,
           lv_date    TYPE string,
           lv_id      TYPE string,
-          lv_date_ph TYPE char20,
-          lv_buzei   TYPE char3.
+          lv_date_ph TYPE zde_char20,
+          lv_buzei   TYPE zde_char3.
 
     DATA(system_uuid) = cl_system_uuid=>create_uuid_c36_static( ).
 
@@ -129,7 +129,8 @@ CLASS ZSC_CALL_SERVICE_COM_0002 IMPLEMENTATION.
 
           "create http destination by url; API endpoint for API sandbox
           DATA(lo_http_destination) =
-               cl_http_destination_provider=>create_by_url( i_url = lv_url  ).
+            cl_http_destination_provider=>create_by_url(
+            i_url = lv_url ).
 
           DATA(lo_http_client) = cl_web_http_client_manager=>create_by_http_destination( i_destination = lo_http_destination ).
 
@@ -137,12 +138,12 @@ CLASS ZSC_CALL_SERVICE_COM_0002 IMPLEMENTATION.
 
           lo_http_client->get_http_request( )->set_header_fields( VALUE #(
               ( name = |Accept-Encoding| value = |gzip,deflate| )
-              ( name = |Content-Type| value = |text/xml;charset=UTF-8| )
-              ( name = |SOAPAction| value = |http://sap.com/xi/SAPSCORE/SFIN/JournalEntryBulkChangeRequest_In/JournalEntryBulkChangeRequest_InRequest| )
-              ( name = |Host| value = |my403229-api.s4hana.cloud.sap| )
-              ( name = |Connection| value = |Keep-Alive| )
-              ( name = |User-Agent| value = |Apache-HttpClient/4.5.5 (Java/16.0.2)| )
-              ) ).
+              ( name = |Content-Type|    value = |text/xml;charset=UTF-8| )
+              ( name = |SOAPAction|      value = |http://sap.com/xi/SAPSCORE/SFIN/JournalEntryBulkChangeRequest_In/JournalEntryBulkChangeRequest_InRequest| )
+              ( name = |Host|            value = |my403229-api.s4hana.cloud.sap| )
+              ( name = |Connection|      value = |Keep-Alive| )
+              ( name = |User-Agent|      value = |Apache-HttpClient/4.5.5 (Java/16.0.2)| )
+          ) ).
 
           DATA: lv_username TYPE string,
                 lv_password TYPE string.
@@ -162,7 +163,7 @@ CLASS ZSC_CALL_SERVICE_COM_0002 IMPLEMENTATION.
           lo_http_client->get_http_request( )->set_text( i_xml ).
 **-- POST
           lo_http_client->execute( i_method = if_web_http_client=>post
-                                 ).
+                                   ).
 *-- Response ->
           DATA(lo_response) = lo_http_client->execute( i_method = if_web_http_client=>post
                                                        ).

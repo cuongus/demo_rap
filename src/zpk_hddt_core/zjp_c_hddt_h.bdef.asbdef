@@ -1,23 +1,42 @@
 unmanaged implementation in class zbp_jp_c_hddt_h unique;
-//strict ( 2 ); //Uncomment this line in order to enable strict mode 2. The strict mode has two variants (strict(1), strict(2)) and is prerequisite to be future proof regarding syntax and to be able to release your BO.
+strict ( 2 ); //Uncomment this line in order to enable strict mode 2. The strict mode has two variants (strict(1), strict(2)) and is prerequisite to be future proof regarding syntax and to be able to release your BO.
 
 define behavior for ZJP_C_HDDT_H alias hddt_headers
 //late numbering
 lock master
 authorization master ( instance )
-//etag master <field_name>
+//etag master ChangedByUser
 {
   create;
   update;
   delete;
-  field ( readonly ) CompanyCode, AccountingDocument, FiscalYear;
+
+  field ( readonly ) CompanyCode, AccountingDocument, FiscalYear,
+
+  AdjustType,
+  AccountingDocumentSource,
+  FiscalYearSource,
+
+  CurrencyType,
+  Usertype,
+  TypeOfDate,
+
+  EinvoiceForm,
+  EinvoiceSerial,
+  EinvoiceType,
+  EinvoiceNumber,
+
+  testrun;
+
   association _EInvoiceItems { create; }
 
-  action ( features : instance ) Integr result [1] $self;
-  action ( features : instance ) Cancel parameter zpr_cancel_einvoice result [1] $self;
+  //  association _EInvoiceItems;
+
+  action ( features : instance ) Integration result [1] $self;
+  //  action ( features : instance ) Cancel parameter zpr_cancel_einvoice result [1] $self;
   action ( features : instance ) Search result [1] $self;
   action ( features : instance ) Adjust parameter zpr_adjust_einvoice result [1] $self;
-  action ( features : instance ) Replace parameter zpr_replace_einvoice result [1] $self;
+  //  action ( features : instance ) Replace parameter zpr_replace_einvoice result [1] $self;
 
   mapping for zjp_a_hddt_h
     {
@@ -90,7 +109,23 @@ authorization dependent by _EInvoicesHeaders
 {
   update;
   delete;
-  field ( readonly ) CompanyCode, AccountingDocument, FiscalYear, AccountingDocumentItem;
+
+  field ( readonly ) CompanyCode, AccountingDocument, FiscalYear, AccountingDocumentItem,
+  AdjustType,
+  AccountingDocumentSource,
+  FiscalYearSource,
+
+  CurrencyType,
+  Usertype,
+  TypeOfDate,
+
+  EinvoiceForm,
+  EinvoiceSerial,
+  EinvoiceType,
+  EinvoiceNumber,
+
+  testrun;
+
   association _EInvoicesHeaders;
 
   mapping for zjp_a_hddt_i
@@ -98,6 +133,17 @@ authorization dependent by _EInvoicesHeaders
       CompanyCode              = companycode;
       AccountingDocument       = accountingdocument;
       FiscalYear               = fiscalyear;
+      AdjustType               = adjusttype;
+      AccountingDocumentSource = accountingdocumentsource;
+      FiscalYearSource         = fiscalyearsource;
+      CurrencyType             = currencytype;
+      Usertype                 = usertype;
+      TypeOfDate               = typeofdate;
+      EinvoiceForm             = einvoiceform;
+      EinvoiceSerial           = einvoiceserial;
+      EinvoiceType             = einvoicetype;
+      EinvoiceNumber           = einvoicenumber;
+      testrun                  = testrun;
       AccountingDocumentItem   = accountingdocumentitem;
       TaxCode                  = taxcode;
       TaxPercentage            = taxpercentage;
